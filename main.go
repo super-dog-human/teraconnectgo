@@ -30,9 +30,9 @@ func Main() {
 	auth.POST("/lessons", interface.CreateLesson)
 	auth.PATCH("/lessons/:id", interface.UpdateLesson)
 	auth.DELETE("/lessons/:id", interface.DestroyLesson)
-	auth.GET("/lessons/:id/materials", interface.GetLessonMaterials)
-	auth.POST("/lessons/:id/materials", interface.PutLessonMaterial)
-	auth.PUT("/lessons/:id/materials", interface.PutLessonMaterial) // same function as POST
+	auth.GET("/lessons/:id/materials", interface.GetMaterials)
+	auth.POST("/lessons/:id/materials", interface.PutMaterial)
+	auth.PUT("/lessons/:id/materials", interface.PutMaterial) // same function as POST
 	auth.GET("/lessons/:id/voice_texts", interface.GetVoiceTexts)
 	auth.PUT("/lessons/:id/packs", interface.UpdateLessonPack)
 	auth.GET("/storage_objects", interface.GetStorageObjects)
