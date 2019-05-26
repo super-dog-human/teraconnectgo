@@ -47,7 +47,7 @@ func allowOrigin(appEnv string) (string) {
 			return "https://teraconnect-authoring-development-dot-teraconnect-209509.appspot.com"
 		case "development":
 			return "http://localhost:1234"
-    default:
+		default:
 			return "http://localhost:1234"
     }
 }
