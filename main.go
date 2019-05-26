@@ -5,7 +5,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/SuperDogHuman/teraconnectgo/interface"
+	"github.com/SuperDogHuman/teraconnectgo/interface/handler"
 	"google.golang.org/appengine"
 )
 
@@ -17,23 +17,23 @@ func Main(appEnv string) {
 		AllowOrigins: []string{allowOrigin(appEnv)},
 	}))
 
-	e.GET("/lessons", interface.GetLessons)
-	e.GET("/lessons/:id", interface.GetLesson)
+	e.GET("/lessons", handler.GetLessons)
+	e.GET("/lessons/:id", handler.GetLesson)
 
 	auth := e.Group("", middleware.JWT([]byte("secret")))
-	auth.GET("/avatars", interface.GetAvatars)
-	auth.GET("/graphics", interface.GetGraphics)
-	auth.POST("/lessons", interface.CreateLesson)
-	auth.PATCH("/lessons/:id", interface.UpdateLesson)
-	auth.DELETE("/lessons/:id", interface.DestroyLesson)
-	auth.GET("/lessons/:id/materials", interface.GetMaterials)
-	auth.POST("/lessons/:id/materials", interface.PutMaterial)
-	auth.PUT("/lessons/:id/materials", interface.PutMaterial) // same function as POST
-	auth.GET("/lessons/:id/voice_texts", interface.GetVoiceTexts)
-	auth.PUT("/lessons/:id/packs", interface.UpdateLessonPack)
-	auth.GET("/storage_objects", interface.GetStorageObjects)
-	auth.POST("/storage_objects", interface.PostStorageObjects)
-	auth.POST("/raw_voices", interface.PostRawVoices)
+	auth.GET("/avatars", handler.GetAvatars)
+	auth.GET("/graphics", handler.GetGraphics)
+	auth.POST("/lessons", handler.CreateLesson)
+	auth.PATCH("/lessons/:id", handler.UpdateLesson)
+	auth.DELETE("/lessons/:id", handler.DestroyLesson)
+	auth.GET("/lessons/:id/materials", handler.GetMaterials)
+	auth.POST("/lessons/:id/materials", handler.PutMaterial)
+	auth.PUT("/lessons/:id/materials", handler.PutMaterial) // same function as POST
+	auth.GET("/lessons/:id/voice_texts", handler.GetVoiceTexts)
+	auth.PUT("/lessons/:id/packs", handler.UpdateLessonPack)
+	auth.GET("/storage_objects", handler.GetStorageObjects)
+	auth.POST("/storage_objects", handler.PostStorageObjects)
+	auth.POST("/raw_voices", handler.PostRawVoice)
 
 	http.Handle("/", e)
 	appengine.Main()
@@ -41,13 +41,13 @@ func Main(appEnv string) {
 
 func allowOrigin(appEnv string) (string) {
 	switch appEnv {
-    case "development":
-		return "http://localhost:1234"
-    case "staging":
-		return "https://teraconnect-authoring-development-dot-teraconnect-209509.appspot.com"
-    case "production";
-		return "https://authoring.teraconnect.org"
+		case "production":
+			return "https://authoring.teraconnect.org"
+		case "staging":
+			return "https://teraconnect-authoring-development-dot-teraconnect-209509.appspot.com"
+		case "development":
+			return "http://localhost:1234"
     default:
-		return "http://localhost:1234"
+			return "http://localhost:1234"
     }
 }

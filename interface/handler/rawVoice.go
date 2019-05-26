@@ -1,9 +1,9 @@
-package interface
+package handler
 
 import (
 	"net/http"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
 	"github.com/SuperDogHuman/teraconnectgo/infrastructure"
 	"github.com/rs/xid"
@@ -17,7 +17,7 @@ const contentType = "audio/wav"
 func PostRawVoice(c echo.Context) error {
 	ctx := appengine.NewContext(c.Request())
 
-	request := new(postRequest)
+	request := new(postRawVoiceRequest)
 	if err := c.Bind(request); err != nil {
 		log.Errorf(ctx, "%+v\n", errors.WithStack(err))
 		return c.JSON(http.StatusInternalServerError, err.Error())
@@ -49,11 +49,6 @@ func PostRawVoice(c echo.Context) error {
 	return c.JSON(http.StatusOK, signedURL{FileID: fileID, SignedURL: url})
 }
 
-type postRequest struct {
+type postRawVoiceRequest struct {
 	LessonID string `json:"lesson_id"`
-}
-
-type signedURL struct {
-	FileID    string `json:"file_id"`
-	SignedURL string `json:"signed_url"`
 }

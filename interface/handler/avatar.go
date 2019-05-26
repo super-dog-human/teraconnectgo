@@ -1,4 +1,4 @@
-package interface
+package handler
 
 import (
 	"net/http"
@@ -13,7 +13,7 @@ import (
 	"google.golang.org/appengine/log"
 )
 
-const thumbnailURL = "https://storage.googleapis.com/teraconn_thumbnail/avatar/{id}.png"
+const avatarThumbnailURL = "https://storage.googleapis.com/teraconn_thumbnail/avatar/{id}.png"
 
 // GetAvatars is get lesson avatar.
 func GetAvatars(c echo.Context) error {
@@ -41,7 +41,7 @@ func GetAvatars(c echo.Context) error {
 	for i, key := range keys {
 		id := key.StringID()
 		avatars[i].ID = id
-		avatars[i].ThumbnailURL = strings.Replace(thumbnailURL, "{id}", id, 1)
+		avatars[i].ThumbnailURL = strings.Replace(avatarThumbnailURL, "{id}", id, 1)
 	}
 
 	return c.JSON(http.StatusOK, avatars)

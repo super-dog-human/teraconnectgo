@@ -1,4 +1,4 @@
-package interface
+package handler
 
 import (
 	"net/http"
@@ -13,7 +13,7 @@ import (
 	"google.golang.org/appengine/log"
 )
 
-const thumbnailURL = "https://storage.googleapis.com/teraconn_thumbnail/graphic/{id}.{fileType}"
+const graphicThumbnailURL = "https://storage.googleapis.com/teraconn_thumbnail/graphic/{id}.{fileType}"
 
 // GeGetGraphicsts is get lesson graphic.
 func GetGraphics(c echo.Context) error {
@@ -39,7 +39,7 @@ func GetGraphics(c echo.Context) error {
 		filePath := "graphic/" + id + "." + graphic.FileType
 		fileType := "" // this is unnecessary when GET request
 		bucketName := infrastructure.MaterialBucketName(ctx)
-		url, err := cloudHelper.GetGCSSignedURL(ctx, bucketName, filePath, "GET", fileType)
+		url, err := infrastructure.GetGCSSignedURL(ctx, bucketName, filePath, "GET", fileType)
 
 		if err != nil {
 			log.Errorf(ctx, "%+v\n", errors.WithStack(err))
@@ -49,7 +49,7 @@ func GetGraphics(c echo.Context) error {
 		graphics[i].ID = id
 		graphics[i].URL = url
 
-		replacedURL := strings.Replace(thumbnailURL, "{id}", id, 1)
+		replacedURL := strings.Replace(graphicThumbnailURL, "{id}", id, 1)
 		graphics[i].ThumbnailURL = strings.Replace(replacedURL, "{fileType}", graphic.FileType, 1)
 	}
 

@@ -1,8 +1,7 @@
-package interface
+package handler
 
 import (
 	"context"
-	"lessonType"
 	"net/http"
 
 	"github.com/labstack/echo/v4"

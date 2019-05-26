@@ -1,4 +1,4 @@
-package interface
+package handler
 
 import (
 	"cloud.google.com/go/storage"

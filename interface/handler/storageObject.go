@@ -1,4 +1,4 @@
-package interface
+package handler
 
 import (
 	"encoding/json"
@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
 	"github.com/rs/xid"
 	"github.com/SuperDogHuman/teraconnectgo/domain"
@@ -36,7 +36,7 @@ func GetStorageObjects(c echo.Context) error {
 
 		filePath := filePath(request.Entity, request.ID, request.Extension)
 		bucketName := infrastructure.MaterialBucketName(ctx)
-		url, err := .GetGCSSignedURL(ctx, bucketName, filePath, "GET", "")
+		url, err := infrastructure.GetGCSSignedURL(ctx, bucketName, filePath, "GET", "")
 		if err != nil {
 			log.Errorf(ctx, "%+v\n", errors.WithStack(err))
 			return c.JSON(http.StatusInternalServerError, err.Error())
@@ -51,7 +51,7 @@ func GetStorageObjects(c echo.Context) error {
 func PostStorageObjects(c echo.Context) error {
 	ctx := appengine.NewContext(c.Request())
 
-	request := new(postRequest)
+	request := new(postStorageObjectRequest)
 	if err := c.Bind(request); err != nil {
 		log.Errorf(ctx, "%+v\n", errors.WithStack(err))
 		return c.JSON(http.StatusInternalServerError, err.Error())
@@ -106,7 +106,7 @@ func filePath(entity string, id string, extension string) string {
 	return strings.ToLower(entity) + "/" + id + "." + extension
 }
 
-type postRequest struct {
+type postStorageObjectRequest struct {
 	FileRequests []fileRequest `json:"fileRequests"`
 }
 

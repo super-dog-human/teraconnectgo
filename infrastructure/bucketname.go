@@ -2,7 +2,6 @@ package infrastructure
 
 import (
 	"context"
-	"regexp"
 
 	"google.golang.org/appengine"
 )

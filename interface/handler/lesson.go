@@ -1,4 +1,4 @@
-package interface
+package handler
 
 import (
 	"context"
@@ -41,7 +41,7 @@ func GetLesson(c echo.Context) error {
 
 	var err error
 
-	lesson := new(domain.lessonType.Lesson)
+	lesson := new(domain.Lesson)
 	lessonKey := datastore.NewKey(ctx, "Lesson", id, 0, nil)
 	if err = datastore.Get(ctx, lessonKey, lesson); err != nil {
 		if err == datastore.ErrNoSuchEntity {
@@ -59,7 +59,7 @@ func GetLesson(c echo.Context) error {
 
 	lesson.ID = id // for json field
 
-	avatar := new(domain.lessonType.Avatar)
+	avatar := new(domain.Avatar)
 	avatarKey := datastore.NewKey(ctx, "Avatar", lesson.AvatarID, 0, nil)
 	if err = datastore.Get(ctx, avatarKey, avatar); err != nil {
 		if err == datastore.ErrNoSuchEntity {
@@ -76,7 +76,7 @@ func GetLesson(c echo.Context) error {
 	for _, id := range lesson.GraphicIDs {
 		graphicKeys = append(graphicKeys, datastore.NewKey(ctx, "Graphic", id, 0, nil))
 	}
-	graphics := make([]domain.lessonType.Graphic, len(lesson.GraphicIDs))
+	graphics := make([]domain.Graphic, len(lesson.GraphicIDs))
 	if err = datastore.GetMulti(ctx, graphicKeys, graphics); err != nil {
 		log.Errorf(ctx, "%+v\n", errors.WithStack(err))
 		return c.JSON(http.StatusInternalServerError, err.Error())
@@ -94,7 +94,7 @@ func GetLesson(c echo.Context) error {
 // CreateLesson is create lesson function.
 func CreateLesson(c echo.Context) error {
 	id := xid.New().String()
-	lesson := new(domain.lessonType.Lesson)
+	lesson := new(domain.Lesson)
 	lesson.Created = time.Now()
 
 	var err error
@@ -135,7 +135,7 @@ func UpdateLesson(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	lesson := new(domain.lessonType.Lesson)
+	lesson := new(domain.Lesson)
 	lesson.Updated = time.Now()
 	lessonKey := datastore.NewKey(ctx, "Lesson", id, 0, nil)
 	err := datastore.RunInTransaction(ctx, func(ctx context.Context) error {
@@ -206,7 +206,7 @@ func DestroyLesson(c echo.Context) error {
 
 	var err error
 
-	lesson := new(domain.lessonType.Lesson)
+	lesson := new(domain.Lesson)
 	lessonKey := datastore.NewKey(ctx, "Lesson", id, 0, nil)
 	if err = datastore.Get(ctx, lessonKey, lesson); err != nil {
 		if err == datastore.ErrNoSuchEntity {
