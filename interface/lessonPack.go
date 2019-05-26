@@ -1,22 +1,21 @@
 package interface
 
 import (
+	"archive/zip"
+	"bytes"
 	"context"
+	"io"
+	"net/http"
 
 	"cloud.google.com/go/storage"
 	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
+	"github.com/SuperDogHuman/teraconnectgo/domain"
+	"github.com/SuperDogHuman/teraconnectgo/infrastructure"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/log"
 
-	"archive/zip"
-	"bytes"
-	"cloudHelper"
-	"io"
-	"lessonType"
-	"net/http"
-	"utility"
 )
 
 // UpdateLessonPack is update lesson function.
@@ -25,7 +24,7 @@ func UpdateLessonPack(c echo.Context) error {
 	id := c.Param("id")
 
 	ids := []string{id}
-	if !utility.IsValidXIDs(ids) {
+	if !IsValidXIDs(ids) {
 		errMessage := "Invalid ID(s) error"
 		log.Warningf(ctx, errMessage)
 		return c.JSON(http.StatusBadRequest, errMessage)
@@ -36,7 +35,7 @@ func UpdateLessonPack(c echo.Context) error {
 
 	var err error
 
-	lesson := new(lessonType.Lesson)
+	lesson := new(domain.Lesson)
 	lesson.ID = id
 	key := datastore.NewKey(ctx, "Lesson", id, 0, nil)
 	if err = datastore.Get(ctx, key, lesson); err != nil && err != datastore.ErrNoSuchEntity {
@@ -60,7 +59,7 @@ func UpdateLessonPack(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	var lessonVoiceTexts []lessonType.LessonVoiceText
+	var lessonVoiceTexts []domain.LessonVoiceText
 	query := datastore.NewQuery("LessonVoiceText").Filter("LessonID =", id)
 	if _, err = query.GetAll(ctx, &lessonVoiceTexts); err != nil {
 		log.Errorf(ctx, "%+v\n", errors.WithStack(err))
@@ -91,8 +90,8 @@ func UpdateLessonPack(c echo.Context) error {
 
 	zipFilePath := "lesson/" + id + ".zip"
 	contentType := "application/zip"
-	bucketName := utility.MaterialBucketName(ctx)
-	if err := cloudHelper.CreateObjectToGCS(ctx, bucketName, zipFilePath, contentType, zipBuffer.Bytes()); err != nil {
+	bucketName := infrastructure.MaterialBucketName(ctx)
+	if err := infrastructure.CreateObjectToGCS(ctx, bucketName, zipFilePath, contentType, zipBuffer.Bytes()); err != nil {
 		log.Errorf(ctx, "%+v\n", errors.WithStack(err))
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -104,9 +103,9 @@ func importGraphicsToZip(ctx context.Context, usedGraphicIDs []string, graphicFi
 	for _, graphicID := range usedGraphicIDs {
 		fileType := graphicFileTypes[graphicID]
 		filePathInGCS := "graphic/" + graphicID + "." + fileType
-		bucketName := utility.MaterialBucketName(ctx)
+		bucketName := infrastructure.MaterialBucketName(ctx)
 
-		objectBytes, err := cloudHelper.GetObjectFromGCS(ctx, bucketName, filePathInGCS)
+		objectBytes, err := infrastructure.GetObjectFromGCS(ctx, bucketName, filePathInGCS)
 		if err != nil {
 			return err
 		}
@@ -126,12 +125,12 @@ func importGraphicsToZip(ctx context.Context, usedGraphicIDs []string, graphicFi
 	return nil
 }
 
-func importVoiceToZip(ctx context.Context, voiceTexts []lessonType.LessonVoiceText, id string, zipWriter *zip.Writer) error {
+func importVoiceToZip(ctx context.Context, voiceTexts []domain.LessonVoiceText, id string, zipWriter *zip.Writer) error {
 	for _, voiceText := range voiceTexts {
 		filePathInGCS := "voice/" + id + "/" + voiceText.FileID + ".ogg"
-		bucketName := utility.MaterialBucketName(ctx)
+		bucketName := infrastructure.MaterialBucketName(ctx)
 
-		objectBytes, err := cloudHelper.GetObjectFromGCS(ctx, bucketName, filePathInGCS)
+		objectBytes, err := infrastructure.GetObjectFromGCS(ctx, bucketName, filePathInGCS)
 		if err != nil {
 			return err
 		}
@@ -153,8 +152,8 @@ func importVoiceToZip(ctx context.Context, voiceTexts []lessonType.LessonVoiceTe
 
 func importLessonJsonToZip(ctx context.Context, id string, zipWriter *zip.Writer) error {
 	filePathInGCS := "lesson/" + id + ".json"
-	bucketName := utility.MaterialBucketName(ctx)
-	jsonBytes, err := cloudHelper.GetObjectFromGCS(ctx, bucketName, filePathInGCS)
+	bucketName := infrastructure.MaterialBucketName(ctx)
+	jsonBytes, err := infrastructure.GetObjectFromGCS(ctx, bucketName, filePathInGCS)
 	if err != nil {
 		return err
 	}
@@ -180,7 +179,7 @@ func fetchGraphicFileTypesFromGCD(ctx context.Context, graphicIDs []string) (map
 	}
 
 	graphicFileTypes := map[string]string{}
-	graphics := make([]lessonType.Graphic, len(graphicIDs))
+	graphics := make([]domain.Graphic, len(graphicIDs))
 	if err := datastore.GetMulti(ctx, keys, graphics); err != nil {
 		return nil, err
 	} else {
@@ -193,20 +192,20 @@ func fetchGraphicFileTypesFromGCD(ctx context.Context, graphicIDs []string) (map
 	return graphicFileTypes, nil
 }
 
-func removeUsedFilesInGCS(ctx context.Context, id string, voiceTexts []lessonType.LessonVoiceText) error {
+func removeUsedFilesInGCS(ctx context.Context, id string, voiceTexts []domain.LessonVoiceText) error {
 	var err error
 
-	rawVoiceBucketName := utility.RawVoiceBucketName(ctx)
-	voiceForTranscriptionBucketName := utility.VoiceForTranscriptionBucketName(ctx)
+	rawVoiceBucketName := infrastructure.RawVoiceBucketName(ctx)
+	voiceForTranscriptionBucketName := infrastructure.VoiceForTranscriptionBucketName(ctx)
 	for _, voiceText := range voiceTexts {
 		filePathInGCS := id + "-" + voiceText.FileID + ".wav"
 
-		err = cloudHelper.DeleteObjectsFromGCS(ctx, rawVoiceBucketName, filePathInGCS)
+		err = infrastructure.DeleteObjectsFromGCS(ctx, rawVoiceBucketName, filePathInGCS)
 		if err != nil && err != storage.ErrObjectNotExist {
 			return err
 		}
 
-		err = cloudHelper.DeleteObjectsFromGCS(ctx, voiceForTranscriptionBucketName, filePathInGCS)
+		err = infrastructure.DeleteObjectsFromGCS(ctx, voiceForTranscriptionBucketName, filePathInGCS)
 		if err != nil && err != storage.ErrObjectNotExist {
 			return err
 		}
@@ -217,7 +216,7 @@ func removeUsedFilesInGCS(ctx context.Context, id string, voiceTexts []lessonTyp
 
 func updateLessonAfterPacked(ctx context.Context, id string) error {
 	key := datastore.NewKey(ctx, "Lesson", id, 0, nil)
-	lesson := new(lessonType.Lesson)
+	lesson := new(domain.Lesson)
 	lesson.ID = id
 
 	var err error

@@ -4,14 +4,13 @@ import (
 	"cloud.google.com/go/storage"
 	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
+	"github.com/SuperDogHuman/teraconnectgo/infrastructure"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/log"
 
 	//"google.golang.org/appengine/memcache"
-	"cloudHelper"
 	"encoding/json"
 	"net/http"
-	"utility"
 )
 
 // GetMaterials is get material of the lesson function.
@@ -24,16 +23,16 @@ func GetMaterials(c echo.Context) error {
 	ctx := appengine.NewContext(c.Request())
 
 	ids := []string{lessonID}
-	if !utility.IsValidXIDs(ids) {
+	if !IsValidXIDs(ids) {
 		errMessage := "Invalid ID(s) error"
 		log.Warningf(ctx, errMessage)
 		return c.JSON(http.StatusBadRequest, errMessage)
 	}
 
 	filePath := "lesson/" + lessonID + ".json"
-	bucketName := utility.MaterialBucketName(ctx)
+	bucketName := infrastructure.MaterialBucketName(ctx)
 
-	bytes, err := cloudHelper.GetObjectFromGCS(ctx, bucketName, filePath)
+	bytes, err := infrastructure.GetObjectFromGCS(ctx, bucketName, filePath)
 	if err != nil {
 		if err == storage.ErrObjectNotExist {
 			log.Warningf(ctx, "%+v\n", errors.WithStack(err))
@@ -58,7 +57,7 @@ func PutMaterial(c echo.Context) error {
 	ctx := appengine.NewContext(c.Request())
 
 	ids := []string{lessonID}
-	if !utility.IsValidXIDs(ids) {
+	if !IsValidXIDs(ids) {
 		errMessage := "Invalid ID(s) error"
 		log.Warningf(ctx, errMessage)
 		return c.JSON(http.StatusBadRequest, errMessage)
@@ -79,9 +78,9 @@ func PutMaterial(c echo.Context) error {
 
 	filePath := "lesson/" + lessonID + ".json"
 	contentType := "application/json"
-	bucketName := utility.MaterialBucketName(ctx)
+	bucketName := infrastructure.MaterialBucketName(ctx)
 
-	if err := cloudHelper.CreateObjectToGCS(ctx, bucketName, filePath, contentType, contents); err != nil {
+	if err := infrastructure.CreateObjectToGCS(ctx, bucketName, filePath, contentType, contents); err != nil {
 		log.Errorf(ctx, "%+v\n", errors.WithStack(err))
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}

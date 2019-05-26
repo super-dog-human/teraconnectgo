@@ -1,12 +1,11 @@
 package interface
 
 import (
-	"cloudHelper"
 	"net/http"
-	"utility"
 
 	"github.com/labstack/echo"
 	"github.com/pkg/errors"
+	"github.com/SuperDogHuman/teraconnectgo/infrastructure"
 	"github.com/rs/xid"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/log"
@@ -26,7 +25,7 @@ func PostRawVoice(c echo.Context) error {
 
 	lessonID := request.LessonID
 	ids := []string{lessonID}
-	if !utility.IsValidXIDs(ids) {
+	if !IsValidXIDs(ids) {
 		errMessage := "Invalid ID(s) error"
 		log.Warningf(ctx, errMessage)
 		return c.JSON(http.StatusBadRequest, errMessage)
@@ -34,14 +33,14 @@ func PostRawVoice(c echo.Context) error {
 
 	fileID := xid.New().String()
 	filePath := lessonID + "-" + fileID + ".wav"
-	bucketName := utility.RawVoiceBucketName(ctx)
+	bucketName := infrastructure.RawVoiceBucketName(ctx)
 
-	if err := cloudHelper.CreateObjectToGCS(ctx, bucketName, filePath, contentType, nil); err != nil {
+	if err := infrastructure.CreateObjectToGCS(ctx, bucketName, filePath, contentType, nil); err != nil {
 		log.Errorf(ctx, "%+v\n", errors.WithStack(err))
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	url, err := cloudHelper.GetGCSSignedURL(ctx, bucketName, filePath, "PUT", contentType)
+	url, err := infrastructure.GetGCSSignedURL(ctx, bucketName, filePath, "PUT", contentType)
 	if err != nil {
 		log.Errorf(ctx, "%+v\n", errors.WithStack(err))
 		return c.JSON(http.StatusInternalServerError, err.Error())

@@ -1,4 +1,4 @@
-package controller
+package interface
 
 import (
 	"context"
@@ -8,8 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
 	"github.com/rs/xid"
-	"github.com/SuperDogHuman/teraconnectgo/lessonType"
-	"github.com/SuperDogHuman/teraconnectgo/utility"
+	"github.com/SuperDogHuman/teraconnectgo/domain"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/log"
@@ -34,7 +33,7 @@ func GetLesson(c echo.Context) error {
 	id := c.Param("id")
 
 	ids := []string{id}
-	if !utility.IsValidXIDs(ids) {
+	if !IsValidXIDs(ids) {
 		errMessage := "Invalid ID(s) error"
 		log.Warningf(ctx, errMessage)
 		return c.JSON(http.StatusBadRequest, errMessage)
@@ -42,7 +41,7 @@ func GetLesson(c echo.Context) error {
 
 	var err error
 
-	lesson := new(lessonType.Lesson)
+	lesson := new(domain.lessonType.Lesson)
 	lessonKey := datastore.NewKey(ctx, "Lesson", id, 0, nil)
 	if err = datastore.Get(ctx, lessonKey, lesson); err != nil {
 		if err == datastore.ErrNoSuchEntity {
@@ -60,7 +59,7 @@ func GetLesson(c echo.Context) error {
 
 	lesson.ID = id // for json field
 
-	avatar := new(lessonType.Avatar)
+	avatar := new(domain.lessonType.Avatar)
 	avatarKey := datastore.NewKey(ctx, "Avatar", lesson.AvatarID, 0, nil)
 	if err = datastore.Get(ctx, avatarKey, avatar); err != nil {
 		if err == datastore.ErrNoSuchEntity {
@@ -77,7 +76,7 @@ func GetLesson(c echo.Context) error {
 	for _, id := range lesson.GraphicIDs {
 		graphicKeys = append(graphicKeys, datastore.NewKey(ctx, "Graphic", id, 0, nil))
 	}
-	graphics := make([]lessonType.Graphic, len(lesson.GraphicIDs))
+	graphics := make([]domain.lessonType.Graphic, len(lesson.GraphicIDs))
 	if err = datastore.GetMulti(ctx, graphicKeys, graphics); err != nil {
 		log.Errorf(ctx, "%+v\n", errors.WithStack(err))
 		return c.JSON(http.StatusInternalServerError, err.Error())
@@ -95,7 +94,7 @@ func GetLesson(c echo.Context) error {
 // CreateLesson is create lesson function.
 func CreateLesson(c echo.Context) error {
 	id := xid.New().String()
-	lesson := new(lessonType.Lesson)
+	lesson := new(domain.lessonType.Lesson)
 	lesson.Created = time.Now()
 
 	var err error
@@ -122,7 +121,7 @@ func UpdateLesson(c echo.Context) error {
 	id := c.Param("id")
 
 	ids := []string{id}
-	if !utility.IsValidXIDs(ids) {
+	if !IsValidXIDs(ids) {
 		errMessage := "Invalid ID(s) error"
 		log.Warningf(ctx, errMessage)
 		return c.JSON(http.StatusBadRequest, errMessage)
@@ -136,7 +135,7 @@ func UpdateLesson(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	lesson := new(lessonType.Lesson)
+	lesson := new(domain.lessonType.Lesson)
 	lesson.Updated = time.Now()
 	lessonKey := datastore.NewKey(ctx, "Lesson", id, 0, nil)
 	err := datastore.RunInTransaction(ctx, func(ctx context.Context) error {
@@ -183,7 +182,7 @@ func UpdateLesson(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	if !utility.IsValidXIDs(lesson.GraphicIDs) {
+	if !IsValidXIDs(lesson.GraphicIDs) {
 		errMessage := "Invalid ID(s) error"
 		log.Warningf(ctx, errMessage)
 		return c.JSON(http.StatusBadRequest, errMessage)
@@ -199,7 +198,7 @@ func DestroyLesson(c echo.Context) error {
 	id := c.Param("id")
 
 	ids := []string{id}
-	if !utility.IsValidXIDs(ids) {
+	if !IsValidXIDs(ids) {
 		errMessage := "Invalid ID(s) error"
 		log.Warningf(ctx, errMessage)
 		return c.JSON(http.StatusBadRequest, errMessage)
@@ -207,7 +206,7 @@ func DestroyLesson(c echo.Context) error {
 
 	var err error
 
-	lesson := new(lessonType.Lesson)
+	lesson := new(domain.lessonType.Lesson)
 	lessonKey := datastore.NewKey(ctx, "Lesson", id, 0, nil)
 	if err = datastore.Get(ctx, lessonKey, lesson); err != nil {
 		if err == datastore.ErrNoSuchEntity {

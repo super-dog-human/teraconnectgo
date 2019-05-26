@@ -1,13 +1,13 @@
 package interface
 
 import (
-	"github.com/SuperDogHuman/teraconnectgo/domain"
 	"net/http"
 	"strings"
-	"utility"
 
 	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
+	"github.com/SuperDogHuman/teraconnectgo/domain"
+	"github.com/SuperDogHuman/teraconnectgo/infrastructure"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/log"
@@ -20,7 +20,7 @@ func GetGraphics(c echo.Context) error {
 	// TODO pagination.
 	ctx := appengine.NewContext(c.Request())
 
-	var graphics []lessonType.Graphic
+	var graphics []domain.Graphic
 	query := datastore.NewQuery("Graphic").Filter("IsPublic =", true)
 	keys, err := query.GetAll(ctx, &graphics)
 	if err != nil {
@@ -38,7 +38,7 @@ func GetGraphics(c echo.Context) error {
 		id := keys[i].StringID()
 		filePath := "graphic/" + id + "." + graphic.FileType
 		fileType := "" // this is unnecessary when GET request
-		bucketName := utility.MaterialBucketName(ctx)
+		bucketName := infrastructure.MaterialBucketName(ctx)
 		url, err := cloudHelper.GetGCSSignedURL(ctx, bucketName, filePath, "GET", fileType)
 
 		if err != nil {

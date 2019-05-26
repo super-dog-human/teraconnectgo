@@ -7,6 +7,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
+	"github.com/SuperDogHuman/teraconnectgo/domain"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/log"
@@ -28,10 +29,10 @@ func GetVoiceTexts(c echo.Context) error {
 	}
 }
 
-func fetchVoiceTextsFromGCD(ctx context.Context, lessonID string) ([]lessonType.LessonVoiceText, error) {
+func fetchVoiceTextsFromGCD(ctx context.Context, lessonID string) ([]domain.LessonVoiceText, error) {
 	query := datastore.NewQuery("LessonVoiceText").Filter("LessonID =", lessonID).Order("FileID")
 
-	var voiceTexts []lessonType.LessonVoiceText
+	var voiceTexts []domain.LessonVoiceText
 	if _, err := query.GetAll(ctx, &voiceTexts); err != nil {
 		return voiceTexts, err
 	}

@@ -10,15 +10,11 @@ import (
 )
 
 // Main serve Teraconnect API
-func Main() {
+func Main(appEnv string) {
 	e := echo.New()
 	e.Pre(middleware.RemoveTrailingSlash())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{
-			//"https://authoring.teraconnect.org",
-			//"https://teraconnect-authoring-development-dot-teraconnect-209509.appspot.com",
-			"http://localhost:1234",
-		},
+		AllowOrigins: []string{allowOrigin(appEnv)},
 	}))
 
 	e.GET("/lessons", interface.GetLessons)
@@ -41,4 +37,17 @@ func Main() {
 
 	http.Handle("/", e)
 	appengine.Main()
+}
+
+func allowOrigin(appEnv string) (string) {
+	switch appEnv {
+    case "development":
+		return "http://localhost:1234"
+    case "staging":
+		return "https://teraconnect-authoring-development-dot-teraconnect-209509.appspot.com"
+    case "production";
+		return "https://authoring.teraconnect.org"
+    default:
+		return "http://localhost:1234"
+    }
 }

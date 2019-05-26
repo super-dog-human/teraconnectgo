@@ -1,17 +1,16 @@
 package interface
 
 import (
-	"cloudHelper"
 	"encoding/json"
-	"lessonType"
 	"net/http"
 	"strings"
 	"time"
-	"utility"
 
 	"github.com/labstack/echo"
 	"github.com/pkg/errors"
 	"github.com/rs/xid"
+	"github.com/SuperDogHuman/teraconnectgo/domain"
+	"github.com/SuperDogHuman/teraconnectgo/infrastructure"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/log"
@@ -36,8 +35,8 @@ func GetStorageObjects(c echo.Context) error {
 		// TODO check file exists
 
 		filePath := filePath(request.Entity, request.ID, request.Extension)
-		bucketName := utility.MaterialBucketName(ctx)
-		url, err := cloudHelper.GetGCSSignedURL(ctx, bucketName, filePath, "GET", "")
+		bucketName := infrastructure.MaterialBucketName(ctx)
+		url, err := .GetGCSSignedURL(ctx, bucketName, filePath, "GET", "")
 		if err != nil {
 			log.Errorf(ctx, "%+v\n", errors.WithStack(err))
 			return c.JSON(http.StatusInternalServerError, err.Error())
@@ -58,26 +57,26 @@ func PostStorageObjects(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	bucketName := utility.MaterialBucketName(ctx)
+	bucketName := infrastructure.MaterialBucketName(ctx)
 	urls := make([]signedURL, len(request.FileRequests))
 
 	for i, fileRequest := range request.FileRequests {
 		fileID := xid.New().String()
 		filePath := filePath(fileRequest.Entity, fileID, fileRequest.Extension)
 
-		if err := cloudHelper.CreateObjectToGCS(ctx, bucketName, filePath, fileRequest.ContentType, nil); err != nil {
+		if err := infrastructure.CreateObjectToGCS(ctx, bucketName, filePath, fileRequest.ContentType, nil); err != nil {
 			log.Errorf(ctx, "%+v\n", errors.WithStack(err))
 			return c.JSON(http.StatusInternalServerError, err.Error())
 		}
 
-		url, err := cloudHelper.GetGCSSignedURL(ctx, bucketName, filePath, "PUT", fileRequest.ContentType)
+		url, err := infrastructure.GetGCSSignedURL(ctx, bucketName, filePath, "PUT", fileRequest.ContentType)
 		if err != nil {
 			log.Errorf(ctx, "%+v\n", errors.WithStack(err))
 			return c.JSON(http.StatusInternalServerError, err.Error())
 		}
 
 		if fileRequest.Entity == "graphic" {
-			graphic := new(lessonType.Graphic)
+			graphic := new(domain.Graphic)
 			graphic.Created = time.Now()
 			graphic.FileType = fileRequest.Extension
 			// graphic.UserID  = "foo"	// TODO
@@ -87,7 +86,7 @@ func PostStorageObjects(c echo.Context) error {
 				return c.JSON(http.StatusInternalServerError, err.Error())
 			}
 		} else if fileRequest.Entity == "avatar" {
-			avatar := new(lessonType.Avatar)
+			avatar := new(domain.Avatar)
 			avatar.Created = time.Now()
 			// avatar.UserID  = "foo"	// TODO
 			key := datastore.NewKey(ctx, "Avatar", fileID, 0, nil)
