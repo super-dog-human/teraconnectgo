@@ -1,8 +1,10 @@
 package teraconnectgo
 
 import (
+	"io/ioutil"
 	"net/http"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/SuperDogHuman/teraconnectgo/interface/handler"
@@ -20,7 +22,13 @@ func Main(appEnv string) {
 	e.GET("/lessons", handler.GetLessons)
 	e.GET("/lessons/:id", handler.GetLesson)
 
-	auth := e.Group("", middleware.JWT([]byte("secret")))
+	keyData, _ := ioutil.ReadFile("teraconnect.pub")
+	key, _ := jwt.ParseRSAPublicKeyFromPEM(keyData)
+	config := middleware.JWTConfig{
+		SigningKey: key,
+		SigningMethod: "RS256",
+	}
+	auth := e.Group("", middleware.JWT(config))
 	auth.GET("/avatars", handler.GetAvatars)
 	auth.GET("/graphics", handler.GetGraphics)
 	auth.POST("/lessons", handler.CreateLesson)

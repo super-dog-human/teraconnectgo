@@ -3,6 +3,7 @@ module teraconnectgo
 require (
 	cloud.google.com/go v0.38.0
 	github.com/SuperDogHuman/teraconnectgo v0.0.0-20190506131655-a0255b4db829
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/golang/protobuf v1.3.1 // indirect
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/labstack/echo/v4 v4.1.5
