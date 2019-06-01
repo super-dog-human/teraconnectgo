@@ -22,13 +22,15 @@ func Main(appEnv string) {
 	e.GET("/lessons", handler.GetLessons)
 	e.GET("/lessons/:id", handler.GetLesson)
 
-	keyData, _ := ioutil.ReadFile("teraconnect.pub")
-	key, _ := jwt.ParseRSAPublicKeyFromPEM(keyData)
-	config := middleware.JWTConfig{
-		SigningKey: key,
+	keyData, _ := ioutil.ReadFile("./teraconnect.pub")
+	publicKey, _ := jwt.ParseRSAPublicKeyFromPEM(keyData)
+
+	auth := e.Group("")
+	auth.Use(middleware.JWTWithConfig(middleware.JWTConfig{
+		SigningKey:    publicKey,
 		SigningMethod: "RS256",
-	}
-	auth := e.Group("", middleware.JWT(config))
+	}))
+
 	auth.GET("/avatars", handler.GetAvatars)
 	auth.GET("/graphics", handler.GetGraphics)
 	auth.POST("/lessons", handler.CreateLesson)

@@ -15,7 +15,7 @@ import (
 
 const graphicThumbnailURL = "https://storage.googleapis.com/teraconn_thumbnail/graphic/{id}.{fileType}"
 
-// GeGetGraphicsts is get lesson graphic.
+// GetGraphics is get lesson graphic.
 func GetGraphics(c echo.Context) error {
 	// TODO pagination.
 	ctx := appengine.NewContext(c.Request())

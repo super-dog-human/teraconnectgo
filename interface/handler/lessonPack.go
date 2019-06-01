@@ -71,7 +71,7 @@ func UpdateLessonPack(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	if err = importLessonJsonToZip(ctx, id, zipWriter); err != nil {
+	if err = importLessonJSONToZip(ctx, id, zipWriter); err != nil {
 		log.Errorf(ctx, "%+v\n", errors.WithStack(err))
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -150,7 +150,7 @@ func importVoiceToZip(ctx context.Context, voiceTexts []domain.LessonVoiceText, 
 	return nil
 }
 
-func importLessonJsonToZip(ctx context.Context, id string, zipWriter *zip.Writer) error {
+func importLessonJSONToZip(ctx context.Context, id string, zipWriter *zip.Writer) error {
 	filePathInGCS := "lesson/" + id + ".json"
 	bucketName := infrastructure.MaterialBucketName(ctx)
 	jsonBytes, err := infrastructure.GetObjectFromGCS(ctx, bucketName, filePathInGCS)
@@ -182,13 +182,12 @@ func fetchGraphicFileTypesFromGCD(ctx context.Context, graphicIDs []string) (map
 	graphics := make([]domain.Graphic, len(graphicIDs))
 	if err := datastore.GetMulti(ctx, keys, graphics); err != nil {
 		return nil, err
-	} else {
-		for i, g := range graphics {
-			id := graphicIDs[i]
-			graphicFileTypes[id] = g.FileType
-		}
 	}
 
+	for i, g := range graphics {
+		id := graphicIDs[i]
+		graphicFileTypes[id] = g.FileType
+	}
 	return graphicFileTypes, nil
 }
 

@@ -4,10 +4,9 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/SuperDogHuman/teraconnectgo/domain"
 	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
-	//	"github.com/dgrijalva/jwt-go"
-	"github.com/SuperDogHuman/teraconnectgo/domain"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/log"
@@ -19,10 +18,6 @@ const avatarThumbnailURL = "https://storage.googleapis.com/teraconn_thumbnail/av
 func GetAvatars(c echo.Context) error {
 	// TODO pagination.
 	ctx := appengine.NewContext(c.Request())
-
-	//	user := c.Get("user").(*jwt.Token)
-	//	claims := user.Claims.(jwt.MapClaims)
-	//	name := claims["name"].(string)
 
 	var avatars []domain.Avatar
 	query := datastore.NewQuery("Avatar").Filter("IsPublic =", true)
