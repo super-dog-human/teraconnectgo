@@ -12,8 +12,7 @@ import (
 	"google.golang.org/appengine/log"
 )
 
-// GetVoiceTexts is get texts from voice function.
-func GetVoiceTexts(c echo.Context) error {
+func getVoiceTexts(c echo.Context) error {
 	ctx := appengine.NewContext(c.Request())
 	id := c.Param("id")
 

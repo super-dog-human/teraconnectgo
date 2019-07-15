@@ -68,3 +68,8 @@ type LessonVoiceText struct {
 	IsTexted    bool    `json:"isTexted"`
 	IsConverted bool    `json:"isConverted"`
 }
+
+type User struct {
+	ID       string	`json:"id" datastore:"-"`
+	Auth0Sub string	`json:"-"`
+}

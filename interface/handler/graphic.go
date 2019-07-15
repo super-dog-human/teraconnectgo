@@ -4,10 +4,10 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/labstack/echo/v4"
-	"github.com/pkg/errors"
 	"github.com/SuperDogHuman/teraconnectgo/domain"
 	"github.com/SuperDogHuman/teraconnectgo/infrastructure"
+	"github.com/labstack/echo/v4"
+	"github.com/pkg/errors"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/log"
@@ -15,8 +15,7 @@ import (
 
 const graphicThumbnailURL = "https://storage.googleapis.com/teraconn_thumbnail/graphic/{id}.{fileType}"
 
-// GetGraphics is get lesson graphic.
-func GetGraphics(c echo.Context) error {
+func getGraphics(c echo.Context) error {
 	// TODO pagination.
 	ctx := appengine.NewContext(c.Request())
 

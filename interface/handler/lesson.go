@@ -20,14 +20,12 @@ import (
 	"time"
 )
 
-// GetLessons is get multiple lesson function.
-func GetLessons(c echo.Context) error {
+func getLessons(c echo.Context) error {
 	// TODO add pagination
 	return c.JSON(http.StatusOK, "")
 }
 
-// GetLesson is get lesson function.
-func GetLesson(c echo.Context) error {
+func getLesson(c echo.Context) error {
 	ctx := appengine.NewContext(c.Request())
 
 	id := c.Param("id")
@@ -91,8 +89,7 @@ func GetLesson(c echo.Context) error {
 	return c.JSON(http.StatusOK, lesson)
 }
 
-// CreateLesson is create lesson function.
-func CreateLesson(c echo.Context) error {
+func createLesson(c echo.Context) error {
 	id := xid.New().String()
 	lesson := new(domain.Lesson)
 	lesson.Created = time.Now()
@@ -115,8 +112,7 @@ func CreateLesson(c echo.Context) error {
 	return c.JSON(http.StatusCreated, lesson)
 }
 
-// UpdateLesson is update lesson function.
-func UpdateLesson(c echo.Context) error {
+func updateLesson(c echo.Context) error {
 	ctx := appengine.NewContext(c.Request())
 	id := c.Param("id")
 
@@ -191,8 +187,7 @@ func UpdateLesson(c echo.Context) error {
 	return c.JSON(http.StatusOK, lesson)
 }
 
-// DestroyLesson is update to true function of shouldDelete field in lesson.
-func DestroyLesson(c echo.Context) error {
+func destroyLesson(c echo.Context) error {
 	ctx := appengine.NewContext(c.Request())
 
 	id := c.Param("id")

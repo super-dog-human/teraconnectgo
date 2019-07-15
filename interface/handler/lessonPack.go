@@ -18,8 +18,7 @@ import (
 
 )
 
-// UpdateLessonPack is update lesson function.
-func UpdateLessonPack(c echo.Context) error {
+func updateLessonPack(c echo.Context) error {
 	ctx := appengine.NewContext(c.Request())
 	id := c.Param("id")
 

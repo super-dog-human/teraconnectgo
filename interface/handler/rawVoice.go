@@ -13,8 +13,7 @@ import (
 
 const contentType = "audio/wav"
 
-// PostRawVoice is create blank wav file to Cloud Storage for direct upload from client.
-func PostRawVoice(c echo.Context) error {
+func postRawVoice(c echo.Context) error {
 	ctx := appengine.NewContext(c.Request())
 
 	request := new(postRawVoiceRequest)

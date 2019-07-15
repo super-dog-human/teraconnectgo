@@ -13,8 +13,7 @@ import (
 	"net/http"
 )
 
-// GetMaterials is get material of the lesson function.
-func GetMaterials(c echo.Context) error {
+func getMaterials(c echo.Context) error {
 	// increment view cont in memorycache
 	// https://cloud.google.com/appengine/docs/standard/go/memcache/reference
 	// https://cloud.google.com/appengine/docs/standard/go/memcache/using?hl=ja
@@ -51,8 +50,7 @@ func GetMaterials(c echo.Context) error {
 	return c.JSON(http.StatusOK, lessonMaterial)
 }
 
-// PutMaterial is put material of the lesson function.
-func PutMaterial(c echo.Context) error {
+func putMaterial(c echo.Context) error {
 	lessonID := c.Param("id")
 	ctx := appengine.NewContext(c.Request())
 

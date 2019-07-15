@@ -1,10 +1,9 @@
 package handler
 
 import (
-	"io/ioutil"
 	"net/http"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/SuperDogHuman/teraconnectgo/domain"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -17,44 +16,41 @@ func Main(appEnv string) {
 		AllowOrigins: []string{allowOrigin(appEnv)},
 	}))
 
-	e.GET("/lessons", GetLessons)
-	e.GET("/lessons/:id", GetLesson)
-
-	keyData, _ := ioutil.ReadFile("./teraconnect.pub")
-	publicKey, _ := jwt.ParseRSAPublicKeyFromPEM(keyData)
+	e.GET("/lessons", getLessons)
+	e.GET("/lessons/:id", getLesson)
+	e.GET("/avatars", getAvatars)
+	e.GET("/graphics", getGraphics)
 
 	auth := e.Group("")
 	auth.Use(middleware.JWTWithConfig(middleware.JWTConfig{
-		SigningKey:    publicKey,
+		SigningKey:    domain.PublicKey(),
 		SigningMethod: "RS256",
 	}))
 
-	auth.GET("/avatars", GetAvatars)
-	auth.GET("/graphics", GetGraphics)
-	auth.POST("/lessons", CreateLesson)
-	auth.PATCH("/lessons/:id", UpdateLesson)
-	auth.DELETE("/lessons/:id", DestroyLesson)
-	auth.GET("/lessons/:id/materials", GetMaterials)
-	auth.POST("/lessons/:id/materials", PutMaterial)
-	auth.PUT("/lessons/:id/materials", PutMaterial) // same function as POST
-	auth.GET("/lessons/:id/voice_texts", GetVoiceTexts)
-	auth.PUT("/lessons/:id/packs", UpdateLessonPack)
-	auth.GET("/storage_objects", GetStorageObjects)
-	auth.POST("/storage_objects", PostStorageObjects)
-	auth.POST("/raw_voices", PostRawVoice)
+	auth.POST("/lessons", createLesson)
+	auth.PATCH("/lessons/:id", updateLesson)
+	auth.DELETE("/lessons/:id", destroyLesson)
+	auth.GET("/lessons/:id/materials", getMaterials)
+	auth.POST("/lessons/:id/materials", putMaterial)
+	auth.PUT("/lessons/:id/materials", putMaterial) // same function as POST
+	auth.GET("/lessons/:id/voice_texts", getVoiceTexts)
+	auth.PUT("/lessons/:id/packs", updateLessonPack)
+	auth.GET("/storage_objects", getStorageObjects)
+	auth.POST("/storage_objects", postStorageObjects)
+	auth.POST("/raw_voices", postRawVoice)
 
 	http.Handle("/", e)
 }
 
-func allowOrigin(appEnv string) (string) {
+func allowOrigin(appEnv string) string {
 	switch appEnv {
-		case "production":
-			return "https://authoring.teraconnect.org"
-		case "staging":
-			return "https://teraconnect-authoring-development-dot-teraconnect-209509.appspot.com"
-		case "development":
-			return "http://localhost:1234"
-		default:
-			return "http://localhost:1234"
-    }
+	case "production":
+		return "https://authoring.teraconnect.org"
+	case "staging":
+		return "https://teraconnect-authoring-development-dot-teraconnect-209509.appspot.com"
+	case "development":
+		return "http://localhost:1234"
+	default:
+		return "http://localhost:1234"
+	}
 }

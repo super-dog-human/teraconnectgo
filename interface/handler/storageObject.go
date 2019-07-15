@@ -16,8 +16,7 @@ import (
 	"google.golang.org/appengine/log"
 )
 
-// GetStorageObjects is get signed URLs of files.
-func GetStorageObjects(c echo.Context) error {
+func getStorageObjects(c echo.Context) error {
 	ctx := appengine.NewContext(c.Request())
 
 	jsonString := c.Request().Header.Get("X-Get-Params")
@@ -47,8 +46,7 @@ func GetStorageObjects(c echo.Context) error {
 	return c.JSON(http.StatusOK, urlResponses{SignedURLs: urls})
 }
 
-// PostStorageObjects is create blank object to Cloud Storage for direct upload from client.
-func PostStorageObjects(c echo.Context) error {
+func postStorageObjects(c echo.Context) error {
 	ctx := appengine.NewContext(c.Request())
 
 	request := new(postStorageObjectRequest)
