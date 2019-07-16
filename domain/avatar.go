@@ -47,7 +47,7 @@ func getCurrentUsersAvatars(ctx context.Context, userID string) ([]Avatar, error
 		return nil, err
 	}
 
-	storeThumbnailUrl(&avatars, keys)
+	storeAvatarThumbnailUrl(&avatars, keys)
 
 	return avatars, nil
 }
@@ -61,12 +61,12 @@ func getPublicAvatars(ctx context.Context) ([]Avatar, error){
 		return nil, err
 	}
 
-	storeThumbnailUrl(&avatars, keys)
+	storeAvatarThumbnailUrl(&avatars, keys)
 
 	return avatars, nil
 }
 
-func storeThumbnailUrl(avatars *[]Avatar, keys []*datastore.Key) {
+func storeAvatarThumbnailUrl(avatars *[]Avatar, keys []*datastore.Key) {
 	for i, key := range keys {
 		id := key.StringID()
 		(*avatars)[i].ID = id
