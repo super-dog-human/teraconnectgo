@@ -3,14 +3,11 @@ package domain
 import (
 	"context"
 	"net/http"
-	"strings"
 
+	"github.com/SuperDogHuman/teraconnectgo/infrastructure"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
 )
-
-// TODO move to infrastructure for at development settings.
-const avatarThumbnailURL = "https://storage.googleapis.com/teraconn_thumbnail/avatar/{id}.png"
 
 // GetAvailableAvatars for fetch avatar object from Cloud Datastore
 func GetAvailableAvatars(request *http.Request) ([]Avatar, error) {
@@ -47,7 +44,7 @@ func getCurrentUsersAvatars(ctx context.Context, userID string) ([]Avatar, error
 		return nil, err
 	}
 
-	storeAvatarThumbnailUrl(&avatars, keys)
+	storeAvatarThumbnailUrl(ctx, &avatars, keys)
 
 	return avatars, nil
 }
@@ -61,15 +58,15 @@ func getPublicAvatars(ctx context.Context) ([]Avatar, error){
 		return nil, err
 	}
 
-	storeAvatarThumbnailUrl(&avatars, keys)
+	storeAvatarThumbnailUrl(ctx, &avatars, keys)
 
 	return avatars, nil
 }
 
-func storeAvatarThumbnailUrl(avatars *[]Avatar, keys []*datastore.Key) {
+func storeAvatarThumbnailUrl(ctx context.Context, avatars *[]Avatar, keys []*datastore.Key) {
 	for i, key := range keys {
 		id := key.StringID()
 		(*avatars)[i].ID = id
-		(*avatars)[i].ThumbnailURL = strings.Replace(avatarThumbnailURL, "{id}", id, 1)
+		(*avatars)[i].ThumbnailURL = infrastructure.AvatarThumbnailURL(ctx, id)
 	}
 }

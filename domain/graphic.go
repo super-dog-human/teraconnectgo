@@ -3,15 +3,11 @@ package domain
 import (
 	"context"
 	"net/http"
-	"strings"
 
 	"github.com/SuperDogHuman/teraconnectgo/infrastructure"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
 )
-
-// TODO move to infrastructure for at development settings.
-const graphicThumbnailURL = "https://storage.googleapis.com/teraconn_thumbnail/graphic/{id}.{fileType}"
 
 // GetAvailableGraphics for fetch graphic object from Cloud Datastore
 func GetAvailableGraphics(request *http.Request) ([]Graphic, error) {
@@ -85,9 +81,7 @@ func storeGraphicThumbnailUrl(ctx context.Context, graphics *[]Graphic, keys []*
 
 		(*graphics)[i].ID = id
 		(*graphics)[i].URL = url
-
-		replacedURL := strings.Replace(graphicThumbnailURL, "{id}", id, 1)
-		(*graphics)[i].ThumbnailURL = strings.Replace(replacedURL, "{fileType}", (*graphics)[i].FileType, 1)
+		(*graphics)[i].ThumbnailURL = infrastructure.GraphicThumbnailURL(ctx, id, fileType)
 	}
 
 	return nil
