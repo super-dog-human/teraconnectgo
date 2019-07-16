@@ -18,8 +18,6 @@ func Main(appEnv string) {
 
 	e.GET("/lessons", getLessons)
 	e.GET("/lessons/:id", getLesson)
-	e.GET("/avatars", getAvatars)
-	e.GET("/graphics", getGraphics)
 
 	auth := e.Group("")
 	auth.Use(middleware.JWTWithConfig(middleware.JWTConfig{
@@ -27,6 +25,8 @@ func Main(appEnv string) {
 		SigningMethod: "RS256",
 	}))
 
+	auth.GET("/avatars", getAvatars)
+	auth.GET("/graphics", getGraphics)
 	auth.POST("/lessons", createLesson)
 	auth.PATCH("/lessons/:id", updateLesson)
 	auth.DELETE("/lessons/:id", destroyLesson)

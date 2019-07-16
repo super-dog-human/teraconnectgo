@@ -2,7 +2,6 @@ package domain
 
 import (
 	"crypto/rsa"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -11,6 +10,33 @@ import (
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
 )
+
+type AuthErrorCode uint
+
+const (
+    TokenNotFound           AuthErrorCode = 1
+	UnexpectedSigningMethod AuthErrorCode = 2
+    InvalidToken            AuthErrorCode = 3
+	FailedGettingUser       AuthErrorCode = 4
+	UserNotFound            AuthErrorCode = 5
+)
+
+func (e AuthErrorCode) Error() string {
+    switch e {
+    case TokenNotFound:
+        return "token not found in header"
+    case UnexpectedSigningMethod:
+        return "unexpected token signing"
+	case InvalidToken:
+		return "invalid token"
+	case FailedGettingUser:
+		return "failed getting user"
+	case UserNotFound:
+		return "user not found"
+    default:
+        return "unknown token error"
+    }
+}
 
 // PublicKey is return rsa key from pub file.
 func PublicKey() *rsa.PublicKey {
@@ -33,33 +59,38 @@ func GetCurrentUser(request *http.Request) (User, error) {
 	query := datastore.NewQuery("User").Filter("Auth0Sub =", userSubject).Limit(1)
 	_, err = query.GetAll(ctx, &users)
 	if err != nil {
-		return *user, err
+		return *user, FailedGettingUser
 	}
 
 	if len(users) == 0 {
-		return *user, nil
+		return *user, UserNotFound
 	}
 
 	return users[0], nil
 }
 
 func userSubject(r *http.Request) (string, error) {
+	raw_header := r.Header.Get("Authorization")
+	if raw_header == "" {
+		return "", TokenNotFound
+	}
+
 	token, err := request.ParseFromRequest(r, request.AuthorizationHeaderExtractor, func(token *jwt.Token) (interface{}, error) {
 		_, ok := token.Method.(*jwt.SigningMethodRSA)
 		if !ok {
-			return nil, fmt.Errorf("unexpected signing method")
+			return nil, UnexpectedSigningMethod
 		} else {
 			return PublicKey(), nil
 		}
 	})
 
 	if err != nil {
-		return "", err
+		return "", UnexpectedSigningMethod
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		return claims["sub"].(string), nil
 	} else {
-		return "", fmt.Errorf("token is invalid")
+		return "", InvalidToken
 	}
 }
