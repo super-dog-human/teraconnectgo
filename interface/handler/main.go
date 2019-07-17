@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/SuperDogHuman/teraconnectgo/domain"
+	"github.com/SuperDogHuman/teraconnectgo/infrastructure"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -13,7 +14,7 @@ func Main(appEnv string) {
 	e := echo.New()
 	e.Pre(middleware.RemoveTrailingSlash())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{allowOrigin(appEnv)},
+		AllowOrigins: []string{infrastructure.OriginUrl(appEnv)},
 	}))
 
 	e.GET("/lessons", getLessons)
@@ -25,11 +26,12 @@ func Main(appEnv string) {
 		SigningMethod: "RS256",
 	}))
 
+	auth.DELETE("/lessons/:id", destroyLesson)
 	auth.GET("/avatars", getAvatars)
 	auth.GET("/graphics", getGraphics)
-	auth.POST("/lessons", createLesson)
-	auth.PATCH("/lessons/:id", updateLesson)
-	auth.DELETE("/lessons/:id", destroyLesson)
+	auth.GET("/authoring_lessons/:id", getAuthoringLesson)
+	auth.POST("/authoring_lessons", createAuthoringLesson)
+	auth.PATCH("/authoring_lessons/:id", updateAuthoringLesson)
 	auth.GET("/lessons/:id/materials", getMaterials)
 	auth.POST("/lessons/:id/materials", putMaterial)
 	auth.PUT("/lessons/:id/materials", putMaterial) // same function as POST
@@ -40,17 +42,4 @@ func Main(appEnv string) {
 	auth.POST("/raw_voices", postRawVoice)
 
 	http.Handle("/", e)
-}
-
-func allowOrigin(appEnv string) string {
-	switch appEnv {
-	case "production":
-		return "https://authoring.teraconnect.org"
-	case "staging":
-		return "https://teraconnect-authoring-development-dot-teraconnect-209509.appspot.com"
-	case "development":
-		return "http://localhost:1234"
-	default:
-		return "http://localhost:1234"
-	}
 }

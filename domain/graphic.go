@@ -35,6 +35,25 @@ func GetAvailableGraphics(request *http.Request) ([]Graphic, error) {
 	return graphics, nil
 }
 
+func GetGraphicsByIds(ctx context.Context, ids []string) ([]Graphic, error) {
+	var graphicKeys []*datastore.Key
+
+	for _, id := range ids {
+		graphicKeys = append(graphicKeys, datastore.NewKey(ctx, "Graphic", id, 0, nil))
+	}
+
+	graphics := make([]Graphic, len(ids))
+	if err := datastore.GetMulti(ctx, graphicKeys, graphics); err != nil {
+		return nil, err
+	}
+
+	for i, id := range ids {
+		graphics[i].ID = id
+	}
+
+	return graphics, nil
+}
+
 func getCurrentUsersGraphics(ctx context.Context, userID string) ([]Graphic, error){
 	var graphics []Graphic
 
@@ -58,9 +77,7 @@ func getPublicGraphics(ctx context.Context) ([]Graphic, error){
 		return nil, err
 	}
 
-	err = storeGraphicThumbnailUrl(ctx, &graphics, keys)
-
-	if err != nil {
+	if err = storeGraphicThumbnailUrl(ctx, &graphics, keys); err != nil {
 		return nil, err
 	}
 
@@ -74,7 +91,6 @@ func storeGraphicThumbnailUrl(ctx context.Context, graphics *[]Graphic, keys []*
 		fileType := "" // this is unnecessary when GET request
 		bucketName := infrastructure.MaterialBucketName(ctx)
 		url, err := infrastructure.GetGCSSignedURL(ctx, bucketName, filePath, "GET", fileType)
-
 		if err != nil {
 			return err
 		}

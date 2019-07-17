@@ -35,6 +35,21 @@ func GetAvailableAvatars(request *http.Request) ([]Avatar, error) {
 	return avatars, nil
 }
 
+func GetAvatarByIds(ctx context.Context, avatarID string) (Avatar, error) {
+	avatar := new(Avatar)
+
+	avatarKey := datastore.NewKey(ctx, "Avatar", avatarID, 0, nil)
+	if err := datastore.Get(ctx, avatarKey, avatar); err != nil {
+		if err == datastore.ErrNoSuchEntity {
+			return *avatar, err
+		}
+		return *avatar, err
+	}
+
+	avatar.ID = avatarID
+	return *avatar, nil
+}
+
 func getCurrentUsersAvatars(ctx context.Context, userID string) ([]Avatar, error){
 	var avatars []Avatar
 

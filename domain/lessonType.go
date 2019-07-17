@@ -18,7 +18,6 @@ type Lesson struct {
 	IsPacked     bool      `json:"isPacked"`
 	IsPublic     bool      `json:"isPublic"`
 	UserID       string    `json:"userID"`
-	ShouldDelete bool      `json:"-"`
 	Created      time.Time `json:"created"`
 	Updated      time.Time `json:"updated"`
 }
@@ -63,12 +62,14 @@ type Graphic struct {
 type LessonVoiceText struct {
 	FileID      string  `json:"fileID"`
 	LessonID    string  `json:"lessonID"`
+	UserID      string  `json:"userID"`
 	DurationSec float64 `json:"durationSec"`
 	Text        string  `json:"text"`
 	IsTexted    bool    `json:"isTexted"`
 	IsConverted bool    `json:"isConverted"`
 }
 
+// User is application registrated user
 type User struct {
 	ID       string	`json:"id" datastore:"-"`
 	Auth0Sub string	`json:"-"`
