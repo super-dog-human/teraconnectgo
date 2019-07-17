@@ -85,7 +85,6 @@ func DestroyOwnLessonById(request *http.Request, id string) error {
 		return LessonNotAvailable
 	}
 
-
 	if err := domain.DestroyLessonAndRecources(ctx, lesson.ID); err != nil {
 		return err
 	}

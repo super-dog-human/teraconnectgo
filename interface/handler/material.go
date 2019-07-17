@@ -13,7 +13,7 @@ import (
 	"net/http"
 )
 
-func getMaterials(c echo.Context) error {
+func getAuthoringLessonMaterials(c echo.Context) error {
 	// increment view cont in memorycache
 	// https://cloud.google.com/appengine/docs/standard/go/memcache/reference
 	// https://cloud.google.com/appengine/docs/standard/go/memcache/using?hl=ja
@@ -50,7 +50,7 @@ func getMaterials(c echo.Context) error {
 	return c.JSON(http.StatusOK, lessonMaterial)
 }
 
-func putMaterial(c echo.Context) error {
+func putAuthoringLessonMaterial(c echo.Context) error {
 	lessonID := c.Param("id")
 	ctx := appengine.NewContext(c.Request())
 
