@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/SuperDogHuman/teraconnectgo/domain"
@@ -57,7 +56,6 @@ func GetAvailableLesson(request *http.Request, id string) (domain.Lesson, error)
 		return lesson, nil
 	}
 
-	fmt.Printf("currentUser ID %v+\n", currentUser.ID)
 	if currentUser.ID != "" && lesson.UserID == currentUser.ID {
 		return lesson, nil
 	}

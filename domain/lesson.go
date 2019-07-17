@@ -27,7 +27,7 @@ func CreateNewLesson(ctx context.Context, lesson Lesson) error {
 	return nil
 }
 
-func UpdateLessonById(ctx context.Context, lesson Lesson) error {
+func UpdateLesson(ctx context.Context, lesson Lesson) error {
 	key := datastore.NewKey(ctx, "Lesson", lesson.ID, 0, nil)
 	if _, err := datastore.Put(ctx, key, lesson); err != nil {
 		return err

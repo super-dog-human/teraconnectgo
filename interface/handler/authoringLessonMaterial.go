@@ -8,16 +8,11 @@ import (
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/log"
 
-	//"google.golang.org/appengine/memcache"
 	"encoding/json"
 	"net/http"
 )
 
 func getAuthoringLessonMaterials(c echo.Context) error {
-	// increment view cont in memorycache
-	// https://cloud.google.com/appengine/docs/standard/go/memcache/reference
-	// https://cloud.google.com/appengine/docs/standard/go/memcache/using?hl=ja
-
 	lessonID := c.Param("id")
 	ctx := appengine.NewContext(c.Request())
 
@@ -83,7 +78,7 @@ func putAuthoringLessonMaterial(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusCreated, "succeed")
+	return c.JSON(http.StatusCreated, "succeeded")
 }
 
 type LessonMaterial struct {

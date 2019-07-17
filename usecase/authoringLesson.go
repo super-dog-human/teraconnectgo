@@ -129,7 +129,7 @@ func UpdateAuthoringLesson(id string, request *http.Request) (domain.Lesson, err
 		}
 	}
 
-	if err = domain.UpdateLessonById(ctx, lesson); err != nil {
+	if err = domain.UpdateLesson(ctx, lesson); err != nil {
 		return lesson, err
 	}
 

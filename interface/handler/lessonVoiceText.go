@@ -12,7 +12,7 @@ import (
 	"google.golang.org/appengine/log"
 )
 
-func getVoiceTexts(c echo.Context) error {
+func getLessonVoiceTexts(c echo.Context) error {
 	ctx := appengine.NewContext(c.Request())
 	id := c.Param("id")
 

@@ -6,11 +6,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/SuperDogHuman/teraconnectgo/domain"
+	"github.com/SuperDogHuman/teraconnectgo/infrastructure"
 	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
 	"github.com/rs/xid"
-	"github.com/SuperDogHuman/teraconnectgo/domain"
-	"github.com/SuperDogHuman/teraconnectgo/infrastructure"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/log"

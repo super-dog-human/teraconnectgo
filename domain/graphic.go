@@ -56,6 +56,25 @@ func GetPublicGraphics(ctx context.Context) ([]Graphic, error){
 	return graphics, nil
 }
 
+func GetGraphicFileTypes(ctx context.Context, graphicIDs []string) (map[string]string, error) {
+	var keys []*datastore.Key
+	for _, id := range graphicIDs {
+		keys = append(keys, datastore.NewKey(ctx, "Graphic", id, 0, nil))
+	}
+
+	graphicFileTypes := map[string]string{}
+	graphics := make([]Graphic, len(graphicIDs))
+	if err := datastore.GetMulti(ctx, keys, graphics); err != nil {
+		return nil, err
+	}
+
+	for i, g := range graphics {
+		id := graphicIDs[i]
+		graphicFileTypes[id] = g.FileType
+	}
+	return graphicFileTypes, nil
+}
+
 func storeGraphicThumbnailUrl(ctx context.Context, graphics *[]Graphic, keys []*datastore.Key) error {
 	for i, key := range keys {
 		id := key.StringID()
