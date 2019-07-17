@@ -1,21 +1,22 @@
-package domain
+package usecase
 
 import (
 	"context"
 	"net/http"
 
+	"github.com/SuperDogHuman/teraconnectgo/domain"
 	"github.com/SuperDogHuman/teraconnectgo/infrastructure"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
 )
 
 // GetAvailableGraphics for fetch graphic object from Cloud Datastore
-func GetAvailableGraphics(request *http.Request) ([]Graphic, error) {
+func GetAvailableGraphics(request *http.Request) ([]domain.Graphic, error) {
 	ctx := appengine.NewContext(request)
 
-	var graphics []Graphic
+	var graphics []domain.Graphic
 
-	currentUser, err := GetCurrentUser(request)
+	currentUser, err := domain.GetCurrentUser(request)
 	if err != nil {
 		return nil, err
 	}
@@ -35,14 +36,14 @@ func GetAvailableGraphics(request *http.Request) ([]Graphic, error) {
 	return graphics, nil
 }
 
-func GetGraphicsByIds(ctx context.Context, ids []string) ([]Graphic, error) {
+func GetGraphicsByIds(ctx context.Context, ids []string) ([]domain.Graphic, error) {
 	var graphicKeys []*datastore.Key
 
 	for _, id := range ids {
 		graphicKeys = append(graphicKeys, datastore.NewKey(ctx, "Graphic", id, 0, nil))
 	}
 
-	graphics := make([]Graphic, len(ids))
+	graphics := make([]domain.Graphic, len(ids))
 	if err := datastore.GetMulti(ctx, graphicKeys, graphics); err != nil {
 		return nil, err
 	}
@@ -54,8 +55,8 @@ func GetGraphicsByIds(ctx context.Context, ids []string) ([]Graphic, error) {
 	return graphics, nil
 }
 
-func getCurrentUsersGraphics(ctx context.Context, userID string) ([]Graphic, error){
-	var graphics []Graphic
+func getCurrentUsersGraphics(ctx context.Context, userID string) ([]domain.Graphic, error){
+	var graphics []domain.Graphic
 
 	query := datastore.NewQuery("Graphic").Filter("UserId =", userID)
 	keys, err := query.GetAll(ctx, &graphics)
@@ -68,8 +69,8 @@ func getCurrentUsersGraphics(ctx context.Context, userID string) ([]Graphic, err
 	return graphics, nil
 }
 
-func getPublicGraphics(ctx context.Context) ([]Graphic, error){
-	var graphics []Graphic
+func getPublicGraphics(ctx context.Context) ([]domain.Graphic, error){
+	var graphics []domain.Graphic
 
 	query := datastore.NewQuery("Graphic").Filter("IsPublic =", true)
 	keys, err := query.GetAll(ctx, &graphics)
@@ -84,7 +85,7 @@ func getPublicGraphics(ctx context.Context) ([]Graphic, error){
 	return graphics, nil
 }
 
-func storeGraphicThumbnailUrl(ctx context.Context, graphics *[]Graphic, keys []*datastore.Key) error {
+func storeGraphicThumbnailUrl(ctx context.Context, graphics *[]domain.Graphic, keys []*datastore.Key) error {
 	for i, key := range keys {
 		id := key.StringID()
 		filePath := "graphic/" + id + "." + (*graphics)[i].FileType

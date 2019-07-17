@@ -4,11 +4,12 @@ import (
 	"net/http"
 
 	"github.com/SuperDogHuman/teraconnectgo/domain"
+	"github.com/SuperDogHuman/teraconnectgo/usecase"
 	"github.com/labstack/echo/v4"
 )
 
 func getAvatars(c echo.Context) error {
-	avatars, err := domain.GetAvailableAvatars(c.Request())
+	avatars, err := usecase.GetAvailableAvatars(c.Request())
 
 	if err != nil {
 		authErr, ok := err.(domain.AuthErrorCode)

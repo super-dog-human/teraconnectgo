@@ -1,4 +1,4 @@
-package domain
+package usecase
 
 import (
 	"bytes"
@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/SuperDogHuman/teraconnectgo/domain"
 	"github.com/rs/xid"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
@@ -34,12 +35,12 @@ func (e AuthoringLessonErrorCode) Error() string {
 }
 
 
-func GetAuthoringLesson(request *http.Request, id string) (Lesson, error) {
+func GetAuthoringLesson(request *http.Request, id string) (domain.Lesson, error) {
 	ctx := appengine.NewContext(request)
 
-	currentUser, err := GetCurrentUser(request)
+	currentUser, err := domain.GetCurrentUser(request)
 	if err != nil {
-		lesson := new(Lesson)
+		lesson := new(domain.Lesson)
 		return *lesson, err
 	}
 
@@ -57,10 +58,10 @@ func GetAuthoringLesson(request *http.Request, id string) (Lesson, error) {
 	return lesson, nil
 }
 
-func CreateAuthoringLesson(request *http.Request, lesson Lesson) (Lesson, error) {
+func CreateAuthoringLesson(request *http.Request, lesson domain.Lesson) (domain.Lesson, error) {
 	ctx := appengine.NewContext(request)
 
-	currentUser, err := GetCurrentUser(request)
+	currentUser, err := domain.GetCurrentUser(request)
 	if err != nil {
 		return lesson, err
 	}
@@ -77,12 +78,12 @@ func CreateAuthoringLesson(request *http.Request, lesson Lesson) (Lesson, error)
 	return lesson, nil
 }
 
-func UpdateAuthoringLesson(id string, request *http.Request) (Lesson, error){
+func UpdateAuthoringLesson(id string, request *http.Request) (domain.Lesson, error){
 	ctx := appengine.NewContext(request)
 
-	currentUser, err := GetCurrentUser(request)
+	currentUser, err := domain.GetCurrentUser(request)
 	if err != nil {
-		lesson := new(Lesson)
+		lesson := new(domain.Lesson)
 		return *lesson, err
 	}
 
@@ -135,7 +136,7 @@ func UpdateAuthoringLesson(id string, request *http.Request) (Lesson, error){
 	return lesson, nil
 }
 
-func getLessonByIdWithResources(ctx context.Context, id string) (Lesson, error) {
+func getLessonByIdWithResources(ctx context.Context, id string) (domain.Lesson, error) {
 	lesson, err := getLessonById(ctx, id)
 
 	if err != nil {

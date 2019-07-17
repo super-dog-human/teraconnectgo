@@ -1,21 +1,22 @@
-package domain
+package usecase
 
 import (
 	"context"
 	"net/http"
 
+	"github.com/SuperDogHuman/teraconnectgo/domain"
 	"github.com/SuperDogHuman/teraconnectgo/infrastructure"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
 )
 
 // GetAvailableAvatars for fetch avatar object from Cloud Datastore
-func GetAvailableAvatars(request *http.Request) ([]Avatar, error) {
+func GetAvailableAvatars(request *http.Request) ([]domain.Avatar, error) {
 	ctx := appengine.NewContext(request)
 
-	var avatars []Avatar
+	var avatars []domain.Avatar
 
-	currentUser, err := GetCurrentUser(request)
+	currentUser, err := domain.GetCurrentUser(request)
 	if err != nil {
 		return nil, err
 	}
@@ -35,8 +36,8 @@ func GetAvailableAvatars(request *http.Request) ([]Avatar, error) {
 	return avatars, nil
 }
 
-func GetAvatarByIds(ctx context.Context, avatarID string) (Avatar, error) {
-	avatar := new(Avatar)
+func GetAvatarByIds(ctx context.Context, avatarID string) (domain.Avatar, error) {
+	avatar := new(domain.Avatar)
 
 	avatarKey := datastore.NewKey(ctx, "Avatar", avatarID, 0, nil)
 	if err := datastore.Get(ctx, avatarKey, avatar); err != nil {
@@ -50,8 +51,8 @@ func GetAvatarByIds(ctx context.Context, avatarID string) (Avatar, error) {
 	return *avatar, nil
 }
 
-func getCurrentUsersAvatars(ctx context.Context, userID string) ([]Avatar, error){
-	var avatars []Avatar
+func getCurrentUsersAvatars(ctx context.Context, userID string) ([]domain.Avatar, error){
+	var avatars []domain.Avatar
 
 	query := datastore.NewQuery("Avatar").Filter("UserId =", userID)
 	keys, err := query.GetAll(ctx, &avatars)
@@ -64,8 +65,8 @@ func getCurrentUsersAvatars(ctx context.Context, userID string) ([]Avatar, error
 	return avatars, nil
 }
 
-func getPublicAvatars(ctx context.Context) ([]Avatar, error){
-	var avatars []Avatar
+func getPublicAvatars(ctx context.Context) ([]domain.Avatar, error){
+	var avatars []domain.Avatar
 
 	query := datastore.NewQuery("Avatar").Filter("IsPublic =", true)
 	keys, err := query.GetAll(ctx, &avatars)
@@ -78,7 +79,7 @@ func getPublicAvatars(ctx context.Context) ([]Avatar, error){
 	return avatars, nil
 }
 
-func storeAvatarThumbnailUrl(ctx context.Context, avatars *[]Avatar, keys []*datastore.Key) {
+func storeAvatarThumbnailUrl(ctx context.Context, avatars *[]domain.Avatar, keys []*datastore.Key) {
 	for i, key := range keys {
 		id := key.StringID()
 		(*avatars)[i].ID = id

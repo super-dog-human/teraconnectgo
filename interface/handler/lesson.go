@@ -5,6 +5,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/SuperDogHuman/teraconnectgo/domain"
+	"github.com/SuperDogHuman/teraconnectgo/usecase"
 )
 
 func getLessons(c echo.Context) error {
@@ -22,12 +23,12 @@ func getLesson(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, errMessage)
 	}
 
-	lesson, err := domain.GetAvailableLesson(c.Request(), id)
+	lesson, err := usecase.GetAvailableLesson(c.Request(), id)
 	if err != nil {
-		lessonErr, ok := err.(domain.LessonErrorCode)
-		if ok && lessonErr == domain.LessonNotFound {
+		lessonErr, ok := err.(usecase.LessonErrorCode)
+		if ok && lessonErr == usecase.LessonNotFound {
 			return c.JSON(http.StatusNotFound, err.Error())
-		} else if ok && lessonErr == domain.LessonNotAvailable {
+		} else if ok && lessonErr == usecase.LessonNotAvailable {
 			warnLog(lessonErr)
 			return c.JSON(http.StatusForbidden, err.Error())
 		}
@@ -54,12 +55,12 @@ func destroyLesson(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, errMessage)
 	}
 
-	if err := domain.DestroyOwnLessonById(c.Request(), id); err != nil {
+	if err := usecase.DestroyOwnLessonById(c.Request(), id); err != nil {
 		fatalLog(err)
-		lessonErr, ok := err.(domain.LessonErrorCode)
-		if ok && lessonErr == domain.LessonNotFound {
+		lessonErr, ok := err.(usecase.LessonErrorCode)
+		if ok && lessonErr == usecase.LessonNotFound {
 			return c.JSON(http.StatusNotFound, err.Error())
-		} else if ok && lessonErr == domain.LessonNotAvailable {
+		} else if ok && lessonErr == usecase.LessonNotAvailable {
 			return c.JSON(http.StatusForbidden, err.Error())
 		}
 		return c.JSON(http.StatusInternalServerError, err.Error())

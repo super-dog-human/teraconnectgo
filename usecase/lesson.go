@@ -1,10 +1,11 @@
-package domain
+package usecase
 
 import (
 	"context"
-	"net/http"
 	"fmt"
+	"net/http"
 
+	"github.com/SuperDogHuman/teraconnectgo/domain"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
 )
@@ -28,21 +29,21 @@ func (e LessonErrorCode) Error() string {
 }
 
 // GetLessons for fetch lessons
-func GetLessons(request *http.Request) ([]Lesson, error) {
+func GetLessons(request *http.Request) ([]domain.Lesson, error) {
 	// 検索パラメータ
 	// SearchAPIが必須
 	return nil, nil
 }
 
 // GetLesson for fetch the lesson by id
-func GetAvailableLesson(request *http.Request, id string) (Lesson, error) {
+func GetAvailableLesson(request *http.Request, id string) (domain.Lesson, error) {
 	ctx := appengine.NewContext(request)
 
-	currentUser, err := GetCurrentUser(request)
-	authErr, ok := err.(AuthErrorCode)
-	if !ok || authErr != TokenNotFound {
+	currentUser, err := domain.GetCurrentUser(request)
+	authErr, ok := err.(domain.AuthErrorCode)
+	if !ok || authErr != domain.TokenNotFound {
 		// can get lesson without token, but can NOT get with invalid token.
-		lesson := new(Lesson)
+		lesson := new(domain.Lesson)
 		return *lesson, err
 	}
 
@@ -68,7 +69,7 @@ func GetAvailableLesson(request *http.Request, id string) (Lesson, error) {
 func DestroyOwnLessonById(request *http.Request, id string) error {
 	ctx := appengine.NewContext(request)
 
-	currentUser, err := GetCurrentUser(request)
+	currentUser, err := domain.GetCurrentUser(request)
 	if err != nil {
 		return err
 	}
@@ -93,8 +94,8 @@ func DestroyOwnLessonById(request *http.Request, id string) error {
 	return nil
 }
 
-func getLessonById(ctx context.Context, id string) (Lesson, error) {
-	lesson := new(Lesson)
+func getLessonById(ctx context.Context, id string) (domain.Lesson, error) {
+	lesson := new(domain.Lesson)
 
 	key := datastore.NewKey(ctx, "Lesson", id, 0, nil)
 	if err := datastore.Get(ctx, key, lesson); err != nil {
@@ -105,7 +106,7 @@ func getLessonById(ctx context.Context, id string) (Lesson, error) {
 	return *lesson, nil
 }
 
-func createNewLesson(ctx context.Context, lesson Lesson) error {
+func createNewLesson(ctx context.Context, lesson domain.Lesson) error {
 	key := datastore.NewKey(ctx, "Lesson", lesson.ID, 0, nil)
 	if _, err := datastore.Put(ctx, key, lesson); err != nil {
 		return err
@@ -114,7 +115,7 @@ func createNewLesson(ctx context.Context, lesson Lesson) error {
 	return nil
 }
 
-func updateLessonById(ctx context.Context, lesson Lesson) error {
+func updateLessonById(ctx context.Context, lesson domain.Lesson) error {
 	key := datastore.NewKey(ctx, "Lesson", lesson.ID, 0, nil)
 	if _, err := datastore.Put(ctx, key, lesson); err != nil {
 		return err

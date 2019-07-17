@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/SuperDogHuman/teraconnectgo/domain"
+	"github.com/SuperDogHuman/teraconnectgo/usecase"
 	"github.com/labstack/echo/v4"
 )
 
@@ -17,10 +18,10 @@ func getAuthoringLesson(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, errMessage)
 	}
 
-	lesson, err := domain.GetAuthoringLesson(c.Request(), id)
+	lesson, err := usecase.GetAuthoringLesson(c.Request(), id)
 	if err != nil {
-		lessonErr, ok := err.(domain.AuthoringLessonErrorCode)
-		if ok && lessonErr == domain.AuthoringLessonNotFound {
+		lessonErr, ok := err.(usecase.AuthoringLessonErrorCode)
+		if ok && lessonErr == usecase.AuthoringLessonNotFound {
 			return c.JSON(http.StatusNotFound, err.Error())
 		}
 		fatalLog(err)
@@ -37,12 +38,12 @@ func createAuthoringLesson(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 
-	lesson, err := domain.CreateAuthoringLesson(c.Request(), *postedLesson)
+	lesson, err := usecase.CreateAuthoringLesson(c.Request(), *postedLesson)
 	if err != nil {
 		fatalLog(err)
 
-		authoringLessonErr, ok := err.(domain.AuthoringLessonErrorCode)
-		if ok && authoringLessonErr == domain.InvalidAuthoringLessonParams {
+		authoringLessonErr, ok := err.(usecase.AuthoringLessonErrorCode)
+		if ok && authoringLessonErr == usecase.InvalidAuthoringLessonParams {
 			return c.JSON(http.StatusBadRequest, err.Error())
 		}
 		return c.JSON(http.StatusInternalServerError, err.Error())
@@ -62,14 +63,14 @@ func updateAuthoringLesson(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, errMessage)
 	}
 
-	lesson, err := domain.UpdateAuthoringLesson(id, c.Request())
+	lesson, err := usecase.UpdateAuthoringLesson(id, c.Request())
 	if err != nil {
 		fatalLog(err)
 
-		authoringLessonErr, ok := err.(domain.AuthoringLessonErrorCode)
-		if ok && authoringLessonErr == domain.AuthoringLessonNotFound {
+		authoringLessonErr, ok := err.(usecase.AuthoringLessonErrorCode)
+		if ok && authoringLessonErr == usecase.AuthoringLessonNotFound {
 			return c.JSON(http.StatusNotFound, err.Error())
-		} else if ok && authoringLessonErr == domain.InvalidAuthoringLessonParams {
+		} else if ok && authoringLessonErr == usecase.InvalidAuthoringLessonParams {
 			return c.JSON(http.StatusBadRequest, err.Error())
 		}
 		return c.JSON(http.StatusInternalServerError, err.Error())

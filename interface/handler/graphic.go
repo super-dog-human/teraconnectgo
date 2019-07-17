@@ -4,12 +4,13 @@ import (
 	"net/http"
 
 	"github.com/SuperDogHuman/teraconnectgo/domain"
+	"github.com/SuperDogHuman/teraconnectgo/usecase"
 	"github.com/labstack/echo/v4"
 )
 
 func getGraphics(c echo.Context) error {
 	// TODO pagination.
-	graphics, err := domain.GetAvailableGraphics(c.Request())
+	graphics, err := usecase.GetAvailableGraphics(c.Request())
 
 	if err != nil {
 		authErr, ok := err.(domain.AuthErrorCode)
