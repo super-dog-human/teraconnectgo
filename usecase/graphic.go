@@ -1,13 +1,10 @@
 package usecase
 
 import (
-	"context"
 	"net/http"
 
 	"github.com/SuperDogHuman/teraconnectgo/domain"
-	"github.com/SuperDogHuman/teraconnectgo/infrastructure"
 	"google.golang.org/appengine"
-	"google.golang.org/appengine/datastore"
 )
 
 // GetAvailableGraphics for fetch graphic object from Cloud Datastore
@@ -21,85 +18,17 @@ func GetAvailableGraphics(request *http.Request) ([]domain.Graphic, error) {
 		return nil, err
 	}
 
-	usersGraphics, err := getCurrentUsersGraphics(ctx, currentUser.ID)
+	usersGraphics, err := domain.GetCurrentUsersGraphics(ctx, currentUser.ID)
 	if err != nil {
 		return nil, err
 	}
 	graphics = append(graphics, usersGraphics...)
 
-	publicGraphics, err := getPublicGraphics(ctx)
+	publicGraphics, err := domain.GetPublicGraphics(ctx)
 	if err != nil {
 		return nil, err
 	}
 	graphics = append(graphics, publicGraphics...)
 
 	return graphics, nil
-}
-
-func GetGraphicsByIds(ctx context.Context, ids []string) ([]domain.Graphic, error) {
-	var graphicKeys []*datastore.Key
-
-	for _, id := range ids {
-		graphicKeys = append(graphicKeys, datastore.NewKey(ctx, "Graphic", id, 0, nil))
-	}
-
-	graphics := make([]domain.Graphic, len(ids))
-	if err := datastore.GetMulti(ctx, graphicKeys, graphics); err != nil {
-		return nil, err
-	}
-
-	for i, id := range ids {
-		graphics[i].ID = id
-	}
-
-	return graphics, nil
-}
-
-func getCurrentUsersGraphics(ctx context.Context, userID string) ([]domain.Graphic, error){
-	var graphics []domain.Graphic
-
-	query := datastore.NewQuery("Graphic").Filter("UserId =", userID)
-	keys, err := query.GetAll(ctx, &graphics)
-	if err != nil {
-		return nil, err
-	}
-
-	storeGraphicThumbnailUrl(ctx, &graphics, keys)
-
-	return graphics, nil
-}
-
-func getPublicGraphics(ctx context.Context) ([]domain.Graphic, error){
-	var graphics []domain.Graphic
-
-	query := datastore.NewQuery("Graphic").Filter("IsPublic =", true)
-	keys, err := query.GetAll(ctx, &graphics)
-	if err != nil {
-		return nil, err
-	}
-
-	if err = storeGraphicThumbnailUrl(ctx, &graphics, keys); err != nil {
-		return nil, err
-	}
-
-	return graphics, nil
-}
-
-func storeGraphicThumbnailUrl(ctx context.Context, graphics *[]domain.Graphic, keys []*datastore.Key) error {
-	for i, key := range keys {
-		id := key.StringID()
-		filePath := "graphic/" + id + "." + (*graphics)[i].FileType
-		fileType := "" // this is unnecessary when GET request
-		bucketName := infrastructure.MaterialBucketName(ctx)
-		url, err := infrastructure.GetGCSSignedURL(ctx, bucketName, filePath, "GET", fileType)
-		if err != nil {
-			return err
-		}
-
-		(*graphics)[i].ID = id
-		(*graphics)[i].URL = url
-		(*graphics)[i].ThumbnailURL = infrastructure.GraphicThumbnailURL(ctx, id, fileType)
-	}
-
-	return nil
 }

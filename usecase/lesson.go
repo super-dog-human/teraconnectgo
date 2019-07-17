@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 
@@ -47,7 +46,7 @@ func GetAvailableLesson(request *http.Request, id string) (domain.Lesson, error)
 		return *lesson, err
 	}
 
-	lesson, err := getLessonById(ctx, id)
+	lesson, err := domain.GetLessonById(ctx, id)
 	if err == datastore.ErrNoSuchEntity {
 		return lesson, LessonNotFound
 	} else {
@@ -74,7 +73,7 @@ func DestroyOwnLessonById(request *http.Request, id string) error {
 		return err
 	}
 
-	lesson, err := getLessonById(ctx, id)
+	lesson, err := domain.GetLessonById(ctx, id)
 	if err != nil{
 		if err == datastore.ErrNoSuchEntity {
 			return LessonNotFound
@@ -87,63 +86,7 @@ func DestroyOwnLessonById(request *http.Request, id string) error {
 	}
 
 
-	if err := destroyLessonAndRecources(ctx, lesson.ID); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func getLessonById(ctx context.Context, id string) (domain.Lesson, error) {
-	lesson := new(domain.Lesson)
-
-	key := datastore.NewKey(ctx, "Lesson", id, 0, nil)
-	if err := datastore.Get(ctx, key, lesson); err != nil {
-		return *lesson, err
-	}
-	lesson.ID = id
-
-	return *lesson, nil
-}
-
-func createNewLesson(ctx context.Context, lesson domain.Lesson) error {
-	key := datastore.NewKey(ctx, "Lesson", lesson.ID, 0, nil)
-	if _, err := datastore.Put(ctx, key, lesson); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func updateLessonById(ctx context.Context, lesson domain.Lesson) error {
-	key := datastore.NewKey(ctx, "Lesson", lesson.ID, 0, nil)
-	if _, err := datastore.Put(ctx, key, lesson); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func destroyLessonAndRecources(ctx context.Context, id string) error {
-	err := datastore.RunInTransaction(ctx, func(ctx context.Context) error {
-		if err := destroyLessonById(ctx, id); err != nil {
-			return err
-		}
-
-		// remove voicetexts
-		// remove voice files
-		// remove zip file
-
-//		_, err := datastore.Delete(ctx, lessonKey, lesson)
-		return nil
-	}, nil)
-
-	return err
-}
-
-func destroyLessonById(ctx context.Context, id string) error {
-	key := datastore.NewKey(ctx, "Lesson", id, 0, nil)
-	if err := datastore.Delete(ctx, key); err != nil {
+	if err := domain.DestroyLessonAndRecources(ctx, lesson.ID); err != nil {
 		return err
 	}
 

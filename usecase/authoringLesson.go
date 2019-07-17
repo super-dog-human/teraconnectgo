@@ -71,7 +71,7 @@ func CreateAuthoringLesson(request *http.Request, lesson domain.Lesson) (domain.
 	lesson.UserID = currentUser.ID
 	lesson.Created = time.Now()
 
-	if err = createNewLesson(ctx, lesson); err != nil {
+	if err = domain.CreateNewLesson(ctx, lesson); err != nil {
 		return lesson, err
 	}
 
@@ -87,7 +87,7 @@ func UpdateAuthoringLesson(id string, request *http.Request) (domain.Lesson, err
 		return *lesson, err
 	}
 
-	lesson, err := getLessonById(ctx, id)
+	lesson, err := domain.GetLessonById(ctx, id)
 	if err != nil {
 		if err == datastore.ErrNoSuchEntity {
 			return lesson, AuthoringLessonNotFound
@@ -129,7 +129,7 @@ func UpdateAuthoringLesson(id string, request *http.Request) (domain.Lesson, err
 		}
 	}
 
-	if err = updateLessonById(ctx, lesson); err != nil {
+	if err = domain.UpdateLessonById(ctx, lesson); err != nil {
 		return lesson, err
 	}
 
@@ -137,7 +137,7 @@ func UpdateAuthoringLesson(id string, request *http.Request) (domain.Lesson, err
 }
 
 func getLessonByIdWithResources(ctx context.Context, id string) (domain.Lesson, error) {
-	lesson, err := getLessonById(ctx, id)
+	lesson, err := domain.GetLessonById(ctx, id)
 
 	if err != nil {
 		if err == datastore.ErrNoSuchEntity {
@@ -146,13 +146,13 @@ func getLessonByIdWithResources(ctx context.Context, id string) (domain.Lesson, 
 		return lesson, err
 	}
 
-	avatar, err := GetAvatarByIds(ctx, lesson.AvatarID)
+	avatar, err := domain.GetAvatarByIds(ctx, lesson.AvatarID)
 	if err != nil {
 		return lesson, err
 	}
 	lesson.Avatar = avatar
 
-	graphics, err := GetGraphicsByIds(ctx, lesson.GraphicIDs)
+	graphics, err := domain.GetGraphicsByIds(ctx, lesson.GraphicIDs)
 	if err != nil {
 		return lesson, err
 	}
