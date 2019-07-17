@@ -15,7 +15,7 @@ func getAvatars(c echo.Context) error {
 		authErr, ok := err.(domain.AuthErrorCode)
 		if ok && authErr == domain.UserNotFound {
 			// when token is valid but user account not exists.
-			return c.JSON(http.StatusNotFound, authErr)
+			return c.JSON(http.StatusNotFound, err.Error())
 		} else {
 			return c.JSON(http.StatusInternalServerError, err.Error())
 		}
