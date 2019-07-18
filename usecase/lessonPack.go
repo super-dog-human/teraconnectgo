@@ -11,9 +11,18 @@ import (
 func PackLesson(request *http.Request, id string) error {
 	ctx := appengine.NewContext(request)
 
+	currentUser, err := domain.GetCurrentUser(request)
+	if err != nil {
+		return err
+	}
+
 	lesson, err := GetAvailableLesson(request, id)
 	if err != nil {
 		return err
+	}
+
+	if lesson.UserID != currentUser.ID {
+		return LessonNotAvailable
 	}
 
 	graphicFileTypes, err := domain.GetGraphicFileTypes(ctx, lesson.GraphicIDs)
