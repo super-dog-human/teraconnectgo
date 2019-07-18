@@ -30,7 +30,7 @@ func PackLesson(request *http.Request, id string) error {
 		return err
 	}
 
-	voiceTexts, err := domain.GetLessonVoiceTexts(ctx, id)
+	voiceTexts, err := domain.GetRawVoiceTexts(ctx, id)
 	if err != nil {
 		return err
 	}

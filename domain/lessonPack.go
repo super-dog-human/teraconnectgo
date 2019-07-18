@@ -10,7 +10,7 @@ import (
 	"github.com/SuperDogHuman/teraconnectgo/infrastructure"
 )
 
-func CreateLessonZip(ctx context.Context, lesson Lesson, graphicFileTypes map[string]string, voiceTexts []LessonVoiceText) (*bytes.Buffer, error) {
+func CreateLessonZip(ctx context.Context, lesson Lesson, graphicFileTypes map[string]string, voiceTexts []RawVoiceText) (*bytes.Buffer, error) {
 	zipBuffer := new(bytes.Buffer)
 	zipWriter := zip.NewWriter(zipBuffer)
 
@@ -43,7 +43,7 @@ func UploadLessonZipToGCS(ctx context.Context, lessonID string, zip *bytes.Buffe
 	return nil
 }
 
-func RemoveUsedFilesInGCS(ctx context.Context, id string, voiceTexts []LessonVoiceText) error {
+func RemoveUsedFilesInGCS(ctx context.Context, id string, voiceTexts []RawVoiceText) error {
 	var err error
 
 	rawVoiceBucketName := infrastructure.RawVoiceBucketName(ctx)
@@ -91,7 +91,7 @@ func addGraphicsToZip(ctx context.Context, usedGraphicIDs []string, graphicFileT
 	return nil
 }
 
-func addVoiceToZip(ctx context.Context, voiceTexts []LessonVoiceText, id string, zipWriter *zip.Writer) error {
+func addVoiceToZip(ctx context.Context, voiceTexts []RawVoiceText, id string, zipWriter *zip.Writer) error {
 	for _, voiceText := range voiceTexts {
 		filePathInGCS := "voice/" + id + "/" + voiceText.FileID + ".ogg"
 		bucketName := infrastructure.MaterialBucketName(ctx)

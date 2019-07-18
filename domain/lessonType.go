@@ -58,8 +58,8 @@ type Graphic struct {
 	Updated           time.Time `json:"updated"`
 }
 
-// LessonVoiceText is used for lesson.
-type LessonVoiceText struct {
+// RawVoiceText is used for lesson.
+type RawVoiceText struct {
 	FileID      string  `json:"fileID"`
 	LessonID    string  `json:"lessonID"`
 	UserID      string  `json:"userID"`

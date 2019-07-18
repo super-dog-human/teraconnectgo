@@ -35,7 +35,7 @@ func Main(appEnv string) {
 	auth.GET("/authoring_lessons/:id/materials", getAuthoringLessonMaterials)
 	auth.POST("/authoring_lessons/:id/materials", putAuthoringLessonMaterial)
 	auth.PUT("/authoring_lessons/:id/materials", putAuthoringLessonMaterial) // same function as POST
-	auth.GET("/lessons/:id/voice_texts", getLessonVoiceTexts)
+	auth.GET("/lessons/:id/raw_voice_texts", getRawVoiceTexts)
 	auth.PUT("/lessons/:id/packs", updateLessonPack)
 	auth.GET("/storage_objects", getStorageObjects)
 	auth.POST("/storage_objects", postStorageObjects)

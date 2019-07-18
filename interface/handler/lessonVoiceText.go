@@ -12,11 +12,11 @@ import (
 	"google.golang.org/appengine/log"
 )
 
-func getLessonVoiceTexts(c echo.Context) error {
+func getRawVoiceTexts(c echo.Context) error {
 	ctx := appengine.NewContext(c.Request())
 	id := c.Param("id")
 
-	if voiceTexts, err := fetchVoiceTextsFromGCD(ctx, id); err != nil {
+	if voiceTexts, err := fetchVoiceTexts(ctx, id); err != nil {
 		log.Errorf(ctx, "%+v\n", errors.WithStack(err))
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	} else if len(voiceTexts) == 0 {
@@ -27,10 +27,10 @@ func getLessonVoiceTexts(c echo.Context) error {
 	}
 }
 
-func fetchVoiceTextsFromGCD(ctx context.Context, lessonID string) ([]domain.LessonVoiceText, error) {
-	query := datastore.NewQuery("LessonVoiceText").Filter("LessonID =", lessonID).Order("FileID")
+func fetchVoiceTexts(ctx context.Context, lessonID string) ([]domain.RawVoiceText, error) {
+	query := datastore.NewQuery("RawVoiceText").Filter("LessonID =", lessonID).Order("FileID")
 
-	var voiceTexts []domain.LessonVoiceText
+	var voiceTexts []domain.RawVoiceText
 	if _, err := query.GetAll(ctx, &voiceTexts); err != nil {
 		return voiceTexts, err
 	}
