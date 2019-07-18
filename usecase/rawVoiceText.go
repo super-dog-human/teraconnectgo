@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/SuperDogHuman/teraconnectgo/domain"
@@ -11,7 +12,7 @@ import (
 func GetRawVoiceTexts(request *http.Request, lessonID string) ([]domain.RawVoiceText, error) {
 	ctx := appengine.NewContext(request)
 
-	if _, err := domain.GetCurrentUser(request); err != nil {
+	if err := currentUserAccessToLesson(ctx, request, lessonID); err != nil {
 		return nil, err
 	}
 

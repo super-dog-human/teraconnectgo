@@ -10,13 +10,20 @@ import (
 func getRawVoiceTexts(c echo.Context) error {
 	id := c.Param("id")
 
-	if voiceTexts, err := usecase.GetRawVoiceTexts(c.Request(), id); err != nil {
+	voiceTexts, err := usecase.GetRawVoiceTexts(c.Request(), id)
+	if err != nil {
 		fatalLog(err)
+		lessonErr, ok := err.(usecase.LessonErrorCode)
+		if ok && lessonErr == usecase.LessonNotAvailable {
+			return c.JSON(http.StatusForbidden, err.Error())
+		}
 		return c.JSON(http.StatusInternalServerError, err.Error())
-	} else if len(voiceTexts) == 0 {
+	}
+
+	if len(voiceTexts) == 0 {
 		warnLog(err)
 		return c.JSON(http.StatusNotFound, "raw voice texts not found.")
-	} else {
-		return c.JSON(http.StatusOK, voiceTexts)
 	}
+
+	return c.JSON(http.StatusOK, voiceTexts)
 }
