@@ -2,7 +2,9 @@ package domain
 
 import (
 	"context"
+	"time"
 
+	"github.com/rs/xid"
 	"google.golang.org/appengine/datastore"
 )
 
@@ -18,7 +20,11 @@ func GetLessonById(ctx context.Context, id string) (Lesson, error) {
 	return *lesson, nil
 }
 
-func CreateNewLesson(ctx context.Context, lesson Lesson) error {
+func CreateNewLesson(ctx context.Context, lesson Lesson, userID string) error {
+	lesson.ID = xid.New().String()
+	lesson.UserID = userID
+	lesson.Created = time.Now()
+
 	key := datastore.NewKey(ctx, "Lesson", lesson.ID, 0, nil)
 	if _, err := datastore.Put(ctx, key, lesson); err != nil {
 		return err

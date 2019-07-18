@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/SuperDogHuman/teraconnectgo/domain"
-	"github.com/rs/xid"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
 )
@@ -65,12 +64,7 @@ func CreateAuthoringLesson(request *http.Request, lesson domain.Lesson) (domain.
 		return lesson, err
 	}
 
-	id := xid.New().String()
-	lesson.ID = id
-	lesson.UserID = currentUser.ID
-	lesson.Created = time.Now()
-
-	if err = domain.CreateNewLesson(ctx, lesson); err != nil {
+	if err = domain.CreateNewLesson(ctx, lesson, currentUser.ID); err != nil {
 		return lesson, err
 	}
 
