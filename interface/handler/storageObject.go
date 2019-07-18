@@ -26,12 +26,15 @@ func getStorageObjects(c echo.Context) error {
 	}
 
 	urls, err := usecase.GetStorageObjectURLs(request, fileRequests)
-
 	if err != nil {
 		fatalLog(err)
 		authErr, ok := err.(domain.AuthErrorCode)
 		if ok && authErr == domain.UserNotFound {
 			return c.JSON(http.StatusNotFound, err.Error())
+		}
+		storageObjectErr, ok := err.(usecase.StorageObjectErrorCode)
+		if ok && storageObjectErr == usecase.ObjectNotAvailable {
+			return c.JSON(http.StatusForbidden, err.Error())
 		}
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}

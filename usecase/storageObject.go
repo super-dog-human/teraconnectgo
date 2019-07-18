@@ -74,7 +74,9 @@ func entityIDFromRequest(entityName string, rawID string) (string, string) {
 			return rawID, entityName
 		default:
 			// using Lesson when entity is "voice/:lessonID"
+			// checking count is enough once because voices belongs to one lesson.
 			separatorIndex := strings.Index(rawID, "/")
+			// 本当にちゃんととれる？
 			return rawID[separatorIndex:len(rawID)], "Lesson"
 	}
 }
