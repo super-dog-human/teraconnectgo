@@ -2,6 +2,12 @@ package domain
 
 import "time"
 
+// User is application registrated user
+type User struct {
+	ID       string	`json:"id" datastore:"-"`
+	Auth0Sub string	`json:"-"`
+}
+
 // Lesson is the lesson infomation type.
 type Lesson struct {
 	ID           string    `json:"id" datastore:"-"`
@@ -67,10 +73,4 @@ type RawVoiceText struct {
 	Text        string  `json:"text"`
 	IsTexted    bool    `json:"isTexted"`
 	IsConverted bool    `json:"isConverted"`
-}
-
-// User is application registrated user
-type User struct {
-	ID       string	`json:"id" datastore:"-"`
-	Auth0Sub string	`json:"-"`
 }
