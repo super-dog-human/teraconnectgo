@@ -68,7 +68,6 @@ type Graphic struct {
 type RawVoiceText struct {
 	FileID      string  `json:"fileID"`
 	LessonID    string  `json:"lessonID"`
-	UserID      string  `json:"userID"`
 	DurationSec float64 `json:"durationSec"`
 	Text        string  `json:"text"`
 	IsTexted    bool    `json:"isTexted"`

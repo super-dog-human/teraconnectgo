@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/SuperDogHuman/teraconnectgo/infrastructure"
+	"google.golang.org/appengine/datastore"
 )
 
 type SignedURL struct {
@@ -27,6 +28,10 @@ type FileRequest struct {
 	ContentType string `json:"contentType"`
 }
 
+type EntityBelongToFile struct {
+	UserID string
+}
+
 func CreateBlankFileToGCS(ctx context.Context, fileID string, fileEntity string, fileRequest FileRequest) (string, error) {
 	filePath := storageObjectFilePath(fileEntity, fileID, fileRequest.Extension)
 	bucketName := infrastructure.MaterialBucketName(ctx)
@@ -41,6 +46,16 @@ func CreateBlankFileToGCS(ctx context.Context, fileID string, fileEntity string,
 	}
 
 	return url, err
+}
+
+func EntityOfRequestedFile(ctx context.Context, entityID string, entityName string) (EntityBelongToFile, error) {
+	key := datastore.NewKey(ctx, entityName, entityID, 0, nil)
+	entity := new(EntityBelongToFile)
+	if err := datastore.Get(ctx, key, entity); err != nil {
+		return *entity, err
+	}
+
+	return *entity, nil
 }
 
 func GetSignedURL(ctx context.Context, request FileRequest) (string, error) {
