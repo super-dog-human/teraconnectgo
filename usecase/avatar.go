@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/SuperDogHuman/teraconnectgo/domain"
+	"github.com/rs/xid"
 	"google.golang.org/appengine"
 )
 
@@ -33,3 +34,32 @@ func GetAvailableAvatars(request *http.Request) ([]domain.Avatar, error) {
 	return avatars, nil
 }
 
+func CreateAvatarsAndBlankFile(request *http.Request, objectRequest domain.StorageObjectRequest) (domain.SignedURLs, error) {
+	ctx := appengine.NewContext(request)
+
+	var signedURLs domain.SignedURLs
+
+	currentUser, err := domain.GetCurrentUser(request)
+	if err != nil {
+		return signedURLs, err
+	}
+
+	urls := make([]domain.SignedURL, len(objectRequest.FileRequests))
+
+	for i, fileRequest := range objectRequest.FileRequests {
+		fileID := xid.New().String()
+
+		url, err := domain.CreateBlankFileToGCS(ctx, fileID, "avatar", fileRequest)
+		if err != nil {
+			return signedURLs, err
+		}
+		urls[i] = domain.SignedURL{fileID, url}
+
+		if err = domain.CreateAvatar(ctx, fileID, currentUser.ID); err != nil {
+			return signedURLs, err
+		}
+	}
+
+	signedURLs = domain.SignedURLs{SignedURLs: urls}
+	return signedURLs, nil
+}

@@ -16,7 +16,7 @@ func PackLesson(request *http.Request, id string) error {
 		return err
 	}
 
-	lesson, err := domain.GetLesson(request, id)
+	lesson, err := domain.GetLessonById(ctx, id)
 	if err != nil {
 		return err
 	}

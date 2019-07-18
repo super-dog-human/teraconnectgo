@@ -13,7 +13,7 @@ func currentUserAccessToLesson(ctx context.Context, request *http.Request, lesso
 		return err
 	}
 
-	lesson, err := domain.GetLessonById(ctx, lessonID, lessonID)
+	lesson, err := domain.GetLessonById(ctx, lessonID)
 	if err != nil {
 		return err
 	}

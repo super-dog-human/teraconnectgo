@@ -28,7 +28,9 @@ func Main(appEnv string) {
 
 	auth.DELETE("/lessons/:id", destroyLesson)
 	auth.GET("/avatars", getAvatars)
+	auth.POST("/avatars", createAvatars)
 	auth.GET("/graphics", getGraphics)
+	auth.POST("/graphics", createGraphics)
 	auth.GET("/authoring_lessons/:id", getAuthoringLesson)
 	auth.POST("/authoring_lessons", createAuthoringLesson)
 	auth.PATCH("/authoring_lessons/:id", updateAuthoringLesson)
@@ -38,8 +40,7 @@ func Main(appEnv string) {
 	auth.GET("/lessons/:id/raw_voice_texts", getRawVoiceTexts)
 	auth.PUT("/lessons/:id/packs", updateLessonPack)
 	auth.GET("/storage_objects", getStorageObjects)
-	auth.POST("/storage_objects", postStorageObjects)
-	auth.POST("/raw_voices", postRawVoice)
+	auth.POST("/blank_raw_voices", postBlankRawVoice)
 
 	http.Handle("/", e)
 }

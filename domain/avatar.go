@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"time"
 
 	"github.com/SuperDogHuman/teraconnectgo/infrastructure"
 	"google.golang.org/appengine/datastore"
@@ -48,6 +49,21 @@ func GetPublicAvatars(ctx context.Context) ([]Avatar, error){
 	storeAvatarThumbnailUrl(ctx, &avatars, keys)
 
 	return avatars, nil
+}
+
+func CreateAvatar(ctx context.Context, id string, userID string) error {
+	avatar := new(Avatar)
+
+	avatar.ID = id
+	avatar.UserID  = userID
+	avatar.Created = time.Now()
+
+	key := datastore.NewKey(ctx, "Avatar", avatar.ID, 0, nil)
+	if _, err := datastore.Put(ctx, key, avatar); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func storeAvatarThumbnailUrl(ctx context.Context, avatars *[]Avatar, keys []*datastore.Key) {

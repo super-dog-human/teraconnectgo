@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"time"
 
 	"github.com/SuperDogHuman/teraconnectgo/infrastructure"
 	"google.golang.org/appengine/datastore"
@@ -35,7 +36,7 @@ func GetCurrentUsersGraphics(ctx context.Context, userID string) ([]Graphic, err
 		return nil, err
 	}
 
-	storeGraphicThumbnailUrl(ctx, &graphics, keys)
+	storeGraphicThumbnailURL(ctx, &graphics, keys)
 
 	return graphics, nil
 }
@@ -49,7 +50,7 @@ func GetPublicGraphics(ctx context.Context) ([]Graphic, error){
 		return nil, err
 	}
 
-	if err = storeGraphicThumbnailUrl(ctx, &graphics, keys); err != nil {
+	if err = storeGraphicThumbnailURL(ctx, &graphics, keys); err != nil {
 		return nil, err
 	}
 
@@ -75,10 +76,26 @@ func GetGraphicFileTypes(ctx context.Context, graphicIDs []string) (map[string]s
 	return graphicFileTypes, nil
 }
 
-func storeGraphicThumbnailUrl(ctx context.Context, graphics *[]Graphic, keys []*datastore.Key) error {
+func CreateGraphic(ctx context.Context, id string, userID string, fileType string) error {
+	graphic := new(Graphic)
+
+	graphic.ID = id
+	graphic.UserID = userID
+	graphic.Created = time.Now()
+	graphic.FileType = fileType
+
+	key := datastore.NewKey(ctx, "Graphic", graphic.ID, 0, nil)
+	if _, err := datastore.Put(ctx, key, graphic); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func storeGraphicThumbnailURL(ctx context.Context, graphics *[]Graphic, keys []*datastore.Key) error {
 	for i, key := range keys {
 		id := key.StringID()
-		filePath := "graphic/" + id + "." + (*graphics)[i].FileType
+		filePath := storageObjectFilePath("Graphic", id, (*graphics)[i].FileType)
 		fileType := "" // this is unnecessary when GET request
 		bucketName := infrastructure.MaterialBucketName(ctx)
 		url, err := infrastructure.GetGCSSignedURL(ctx, bucketName, filePath, "GET", fileType)

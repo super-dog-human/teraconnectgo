@@ -21,8 +21,9 @@ func getRawVoiceTexts(c echo.Context) error {
 	}
 
 	if len(voiceTexts) == 0 {
-		warnLog(err)
-		return c.JSON(http.StatusNotFound, "raw voice texts not found.")
+		errMessage := "raw voice texts not found."
+		warnLog(errMessage)
+		return c.JSON(http.StatusNotFound, errMessage)
 	}
 
 	return c.JSON(http.StatusOK, voiceTexts)

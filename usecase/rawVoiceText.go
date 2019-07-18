@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"context"
 	"net/http"
 
 	"github.com/SuperDogHuman/teraconnectgo/domain"

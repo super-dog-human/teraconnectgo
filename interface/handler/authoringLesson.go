@@ -65,7 +65,6 @@ func updateAuthoringLesson(c echo.Context) error {
 	lesson, err := usecase.UpdateAuthoringLesson(id, c.Request())
 	if err != nil {
 		fatalLog(err)
-
 		authoringLessonErr, ok := err.(usecase.AuthoringLessonErrorCode)
 		if ok && authoringLessonErr == usecase.AuthoringLessonNotFound {
 			return c.JSON(http.StatusNotFound, err.Error())

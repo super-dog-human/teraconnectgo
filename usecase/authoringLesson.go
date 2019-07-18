@@ -34,7 +34,6 @@ func (e AuthoringLessonErrorCode) Error() string {
     }
 }
 
-
 func GetAuthoringLesson(request *http.Request, id string) (domain.Lesson, error) {
 	ctx := appengine.NewContext(request)
 

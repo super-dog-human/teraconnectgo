@@ -13,6 +13,7 @@ func getGraphics(c echo.Context) error {
 	graphics, err := usecase.GetAvailableGraphics(c.Request())
 
 	if err != nil {
+		fatalLog(err)
 		authErr, ok := err.(domain.AuthErrorCode)
 		if ok && authErr == domain.UserNotFound {
 			// when token is valid but user account not exists.
@@ -29,4 +30,24 @@ func getGraphics(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, graphics)
+}
+
+func createGraphics(c echo.Context) error {
+	objectRequest := new(domain.StorageObjectRequest)
+	if err := c.Bind(objectRequest); err != nil {
+		fatalLog(err)
+		authErr, ok := err.(domain.AuthErrorCode)
+		if ok && authErr == domain.UserNotFound {
+			return c.JSON(http.StatusNotFound, err.Error())
+		}
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+
+	signedURLs, err := usecase.CreateGraphicsAndBlankFile(c.Request(), *objectRequest)
+	if err != nil {
+		fatalLog(err)
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, signedURLs)
 }

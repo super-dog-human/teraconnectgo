@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/SuperDogHuman/teraconnectgo/domain"
+	"github.com/rs/xid"
 	"google.golang.org/appengine"
 )
 
@@ -31,4 +32,34 @@ func GetAvailableGraphics(request *http.Request) ([]domain.Graphic, error) {
 	graphics = append(graphics, publicGraphics...)
 
 	return graphics, nil
+}
+
+func CreateGraphicsAndBlankFile(request *http.Request, objectRequest domain.StorageObjectRequest) (domain.SignedURLs, error) {
+	ctx := appengine.NewContext(request)
+
+	var signedURLs domain.SignedURLs
+
+	currentUser, err := domain.GetCurrentUser(request)
+	if err != nil {
+		return signedURLs, err
+	}
+
+	urls := make([]domain.SignedURL, len(objectRequest.FileRequests))
+
+	for i, fileRequest := range objectRequest.FileRequests {
+		fileID := xid.New().String()
+
+		url, err := domain.CreateBlankFileToGCS(ctx, fileID, "graphic", fileRequest)
+		if err != nil {
+			return signedURLs, err
+		}
+		urls[i] = domain.SignedURL{fileID, url}
+
+		if err = domain.CreateGraphic(ctx, fileID, currentUser.ID, fileRequest.Extension); err != nil {
+			return signedURLs, err
+		}
+	}
+
+	signedURLs = domain.SignedURLs{SignedURLs: urls}
+	return signedURLs, nil
 }
