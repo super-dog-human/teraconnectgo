@@ -31,7 +31,7 @@ func getAuthoringLesson(c echo.Context) error {
 	return c.JSON(http.StatusOK, lesson)
 }
 
-func createAuthoringLesson(c echo.Context) error {
+func postAuthoringLesson(c echo.Context) error {
 	lesson := new(domain.Lesson)
 
 	if err := c.Bind(lesson); err != nil {
@@ -50,7 +50,7 @@ func createAuthoringLesson(c echo.Context) error {
 	return c.JSON(http.StatusCreated, lesson)
 }
 
-func updateAuthoringLesson(c echo.Context) error {
+func patchAuthoringLesson(c echo.Context) error {
 	id := c.Param("id")
 
 	ids := []string{id}

@@ -45,7 +45,7 @@ func getLesson(c echo.Context) error {
 	return c.JSON(http.StatusOK, lesson)
 }
 
-func destroyLesson(c echo.Context) error {
+func deleteLesson(c echo.Context) error {
 	id := c.Param("id")
 
 	ids := []string{id}

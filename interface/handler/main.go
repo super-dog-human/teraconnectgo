@@ -26,19 +26,19 @@ func Main(appEnv string) {
 		SigningMethod: "RS256",
 	}))
 
-	auth.DELETE("/lessons/:id", destroyLesson)
+	auth.DELETE("/lessons/:id", deleteLesson)
 	auth.GET("/avatars", getAvatars)
-	auth.POST("/avatars", createAvatars)
+	auth.POST("/avatars", postAvatars)
 	auth.GET("/graphics", getGraphics)
-	auth.POST("/graphics", createGraphics)
+	auth.POST("/graphics", postGraphics)
 	auth.GET("/authoring_lessons/:id", getAuthoringLesson)
-	auth.POST("/authoring_lessons", createAuthoringLesson)
-	auth.PATCH("/authoring_lessons/:id", updateAuthoringLesson)
+	auth.POST("/authoring_lessons", postAuthoringLesson)
+	auth.PATCH("/authoring_lessons/:id", patchAuthoringLesson)
 	auth.GET("/authoring_lessons/:id/materials", getAuthoringLessonMaterials)
 	auth.POST("/authoring_lessons/:id/materials", putAuthoringLessonMaterial)
 	auth.PUT("/authoring_lessons/:id/materials", putAuthoringLessonMaterial) // same function as POST
 	auth.GET("/lessons/:id/raw_voice_texts", getRawVoiceTexts)
-	auth.PUT("/lessons/:id/packs", updateLessonPack)
+	auth.PUT("/lessons/:id/packs", putLessonPack)
 	auth.GET("/storage_objects", getStorageObjects)
 	auth.POST("/blank_raw_voices", postBlankRawVoice)
 

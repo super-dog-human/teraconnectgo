@@ -30,7 +30,7 @@ func getAvatars(c echo.Context) error {
 	return c.JSON(http.StatusOK, avatars)
 }
 
-func createAvatars(c echo.Context) error {
+func postAvatars(c echo.Context) error {
 	objectRequest := new(domain.StorageObjectRequest)
 	if err := c.Bind(objectRequest); err != nil {
 		fatalLog(err)

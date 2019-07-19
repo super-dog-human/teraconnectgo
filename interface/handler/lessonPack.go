@@ -7,7 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func updateLessonPack(c echo.Context) error {
+func putLessonPack(c echo.Context) error {
 	id := c.Param("id")
 
 	ids := []string{id}

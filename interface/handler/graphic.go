@@ -32,7 +32,7 @@ func getGraphics(c echo.Context) error {
 	return c.JSON(http.StatusOK, graphics)
 }
 
-func createGraphics(c echo.Context) error {
+func postGraphics(c echo.Context) error {
 	objectRequest := new(domain.StorageObjectRequest)
 	if err := c.Bind(objectRequest); err != nil {
 		fatalLog(err)
