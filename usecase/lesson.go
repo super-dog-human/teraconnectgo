@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/SuperDogHuman/teraconnectgo/domain"
@@ -63,7 +64,7 @@ func GetAvailableLesson(request *http.Request, id string) (domain.Lesson, error)
 	return lesson, LessonNotAvailable
 }
 
-func DestroyOwnLessonById(request *http.Request, id string) error {
+func DeleteOwnLessonById(request *http.Request, id string) error {
 	ctx := appengine.NewContext(request)
 
 	currentUser, err := domain.GetCurrentUser(request)
@@ -83,9 +84,36 @@ func DestroyOwnLessonById(request *http.Request, id string) error {
 		return LessonNotAvailable
 	}
 
-	if err := domain.DestroyLessonAndRecources(ctx, lesson.ID); err != nil {
+	if err := deleteLessonAndRecources(ctx, lesson); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func deleteLessonAndRecources(ctx context.Context, lesson domain.Lesson) error {
+	err := datastore.RunInTransaction(ctx, func(ctx context.Context) error {
+
+		if err := domain.DeleteAvatar(ctx, lesson.AvatarID); err != nil {
+			return err
+		}
+
+		if err := domain.DeleteGraphics(ctx, lesson.GraphicIDs); err != nil {
+			return err
+		}
+
+		if err := domain.DeleteRawVoiceTextsByLessonID(ctx, lesson.ID); err != nil {
+			return err
+		}
+
+		// TODO remove files in GCS
+
+		if err := domain.DeleteLessonById(ctx, lesson.ID); err != nil {
+			return err
+		}
+
+		return nil
+	}, nil)
+
+	return err
 }

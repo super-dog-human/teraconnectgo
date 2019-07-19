@@ -66,6 +66,15 @@ func CreateAvatar(ctx context.Context, id string, userID string) error {
 	return nil
 }
 
+func DeleteAvatar(ctx context.Context, id string) error {
+	key := datastore.NewKey(ctx, "Avatar", id, 0, nil)
+	if err := datastore.Delete(ctx, key); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func storeAvatarThumbnailUrl(ctx context.Context, avatars *[]Avatar, keys []*datastore.Key) {
 	for i, key := range keys {
 		id := key.StringID()

@@ -20,6 +20,17 @@ func GetLessonById(ctx context.Context, id string) (Lesson, error) {
 	return *lesson, nil
 }
 
+func GetLessonsByUserID(ctx context.Context, userID string) ([]Lesson, error) {
+	var lessons []Lesson
+
+	query := datastore.NewQuery("Lesson").Filter("UserID =", userID)
+	if _, err := query.GetAll(ctx, &lessons); err != nil {
+		return lessons, err
+	}
+
+	return lessons, nil
+}
+
 func CreateNewLesson(ctx context.Context, lesson Lesson, userID string) error {
 	lesson.ID = xid.New().String()
 	lesson.UserID = userID
@@ -43,24 +54,7 @@ func UpdateLesson(ctx context.Context, lesson Lesson) error {
 	return nil
 }
 
-func DestroyLessonAndRecources(ctx context.Context, id string) error {
-	err := datastore.RunInTransaction(ctx, func(ctx context.Context) error {
-		if err := destroyLessonById(ctx, id); err != nil {
-			return err
-		}
-
-		// remove voicetexts
-		// remove voice files
-		// remove zip file
-
-//		_, err := datastore.Delete(ctx, lessonKey, lesson)
-		return nil
-	}, nil)
-
-	return err
-}
-
-func destroyLessonById(ctx context.Context, id string) error {
+func DeleteLessonById(ctx context.Context, id string) error {
 	key := datastore.NewKey(ctx, "Lesson", id, 0, nil)
 	if err := datastore.Delete(ctx, key); err != nil {
 		return err

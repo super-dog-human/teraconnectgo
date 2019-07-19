@@ -47,7 +47,7 @@ func UpdateUser(ctx context.Context, user User) error {
 	return nil
 }
 
-func DestroyUser(ctx context.Context, id string) error {
+func DeleteUser(ctx context.Context, id string) error {
 	key := datastore.NewKey(ctx, "User", id, 0, nil)
 	if err := datastore.Delete(ctx, key); err != nil {
 		return err

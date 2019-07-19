@@ -92,6 +92,20 @@ func CreateGraphic(ctx context.Context, id string, userID string, fileType strin
 	return nil
 }
 
+func DeleteGraphics(ctx context.Context, ids []string) error {
+	var graphicKeys []*datastore.Key
+
+	for _, id := range ids {
+		graphicKeys = append(graphicKeys, datastore.NewKey(ctx, "Graphic", id, 0, nil))
+	}
+
+	if err := datastore.DeleteMulti(ctx, graphicKeys); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func storeGraphicThumbnailURL(ctx context.Context, graphics *[]Graphic, keys []*datastore.Key) error {
 	for i, key := range keys {
 		id := key.StringID()

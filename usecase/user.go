@@ -85,11 +85,20 @@ func UnsubscribeCurrentUser(request *http.Request) error {
 		return err
 	}
 
-	if err := domain.DestroyUser(ctx, currentUser.ID); err != nil {
+	lessons, err := domain.GetLessonsByUserID(ctx, currentUser.ID)
+	if err != nil {
 		return err
 	}
 
-	// remove all resources with user.
+	for _, lesson := range lessons {
+		if err := deleteLessonAndRecources(ctx, lesson); err != nil {
+			return err
+		}
+	}
+
+	if err = domain.DeleteUser(ctx, currentUser.ID); err != nil {
+		return err
+	}
 
 	return err
 }

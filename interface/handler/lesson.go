@@ -55,7 +55,7 @@ func deleteLesson(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, errMessage)
 	}
 
-	if err := usecase.DestroyOwnLessonById(c.Request(), id); err != nil {
+	if err := usecase.DeleteOwnLessonById(c.Request(), id); err != nil {
 		fatalLog(err)
 		lessonErr, ok := err.(usecase.LessonErrorCode)
 		if ok && lessonErr == usecase.LessonNotFound {

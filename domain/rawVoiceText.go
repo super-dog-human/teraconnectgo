@@ -15,3 +15,19 @@ func GetRawVoiceTexts(ctx context.Context, lessonID string) ([]RawVoiceText, err
 
 	return voiceTexts, nil
 }
+
+func DeleteRawVoiceTextsByLessonID(ctx context.Context, lessonID string) error {
+	var voiceTexts []RawVoiceText
+	var keys []*datastore.Key
+	query := datastore.NewQuery("RawVoiceText").Filter("LessonID =", lessonID)
+
+	if _, err := query.GetAll(ctx, &voiceTexts); err != nil {
+		return err
+	}
+
+	if err := datastore.DeleteMulti(ctx, keys); err != nil {
+		return err
+	}
+
+	return nil
+}
