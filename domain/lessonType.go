@@ -4,13 +4,16 @@ import "time"
 
 // User is application registrated user
 type User struct {
-	ID       string	`json:"id" datastore:"-"`
-	Auth0Sub string	`json:"-"`
+	ID       string	   `json:"id" datastore:"-"`
+	Auth0Sub string	   `json:"-"`
+	Created  time.Time `json:"created"`
+	Updated  time.Time `json:"updated"`
 }
 
 // Lesson is the lesson infomation type.
 type Lesson struct {
 	ID           string    `json:"id" datastore:"-"`
+	CategoryID   string    `json:"categoryID"`
 	AvatarID     string    `json:"avatarID"`
 	Avatar       Avatar    `json:"avatar" datastore:"-"`
 	Title        string    `json:"title"`
@@ -26,6 +29,14 @@ type Lesson struct {
 	UserID       string    `json:"userID"`
 	Created      time.Time `json:"created"`
 	Updated      time.Time `json:"updated"`
+}
+
+// Category is used for lesson.
+type Category struct {
+	ID       string `json:"id" datastore:"-"`
+	Name     string `json:"name"`
+	Created  time.Time `json:"created"`
+	Updated  time.Time `json:"updated"`
 }
 
 // Avatar is used for lesson.

@@ -34,6 +34,7 @@ func CreateNewLesson(ctx context.Context, lesson Lesson, userID string) error {
 }
 
 func UpdateLesson(ctx context.Context, lesson Lesson) error {
+	lesson.Updated = time.Now()
 	key := datastore.NewKey(ctx, "Lesson", lesson.ID, 0, nil)
 	if _, err := datastore.Put(ctx, key, lesson); err != nil {
 		return err

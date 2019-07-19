@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"reflect"
 	"strings"
-	"time"
 
 	"github.com/SuperDogHuman/teraconnectgo/domain"
 	"google.golang.org/appengine"
@@ -87,7 +86,6 @@ func UpdateAuthoringLesson(id string, request *http.Request) (domain.Lesson, err
 		}
 		return lesson, err
 	}
-	lesson.Updated = time.Now()
 
 	if lesson.UserID != currentUser.ID {
 		return lesson, InvalidAuthoringLessonParams
@@ -107,7 +105,7 @@ func UpdateAuthoringLesson(id string, request *http.Request) (domain.Lesson, err
 		structKey := strings.Title(key)
 		switch v := lessonField.(type) {
 		case []interface{}:
-			array := make([]string, len(v)) // TODO support another types. reflect.TypeOf(v[0])
+			array := make([]string, len(v)) // TODO support not string in array types. use reflect.TypeOf(v[0])
 			mutable.FieldByName(structKey).Set(reflect.ValueOf(array))
 			for i := range v {
 				mutable.FieldByName(structKey).Index(i).Set(reflect.ValueOf(v[i]))

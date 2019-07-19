@@ -26,6 +26,11 @@ func Main(appEnv string) {
 		SigningMethod: "RS256",
 	}))
 
+	auth.GET("/users/me", getUserMe)
+	auth.GET("/users/:id", getUser)
+	auth.POST("/user", postUser)
+	auth.PATCH("/user", patchUser)
+	auth.DELETE("/user", deleteUser)
 	auth.DELETE("/lessons/:id", deleteLesson)
 	auth.GET("/avatars", getAvatars)
 	auth.POST("/avatars", postAvatars)
