@@ -32,14 +32,13 @@ func getAuthoringLesson(c echo.Context) error {
 }
 
 func createAuthoringLesson(c echo.Context) error {
-	postedLesson := new(domain.Lesson)
+	lesson := new(domain.Lesson)
 
-	if err := c.Bind(postedLesson); err != nil {
+	if err := c.Bind(lesson); err != nil {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 
-	lesson, err := usecase.CreateAuthoringLesson(c.Request(), *postedLesson)
-	if err != nil {
+	if err := usecase.CreateAuthoringLesson(c.Request(), *lesson); err != nil {
 		fatalLog(err)
 		authoringLessonErr, ok := err.(usecase.AuthoringLessonErrorCode)
 		if ok && authoringLessonErr == usecase.InvalidAuthoringLessonParams {

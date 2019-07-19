@@ -56,19 +56,19 @@ func GetAuthoringLesson(request *http.Request, id string) (domain.Lesson, error)
 	return lesson, nil
 }
 
-func CreateAuthoringLesson(request *http.Request, lesson domain.Lesson) (domain.Lesson, error) {
+func CreateAuthoringLesson(request *http.Request, lesson domain.Lesson) error {
 	ctx := appengine.NewContext(request)
 
 	currentUser, err := domain.GetCurrentUser(request)
 	if err != nil {
-		return lesson, err
+		return err
 	}
 
 	if err = domain.CreateNewLesson(ctx, lesson, currentUser.ID); err != nil {
-		return lesson, err
+		return err
 	}
 
-	return lesson, nil
+	return nil
 }
 
 func UpdateAuthoringLesson(id string, request *http.Request) (domain.Lesson, error){
