@@ -67,6 +67,8 @@ func CreateAuthoringLesson(request *http.Request, lesson domain.Lesson) error {
 		return err
 	}
 
+	// TODO uplaod thumbnail to GCS
+
 	return nil
 }
 

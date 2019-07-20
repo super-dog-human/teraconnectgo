@@ -10,6 +10,12 @@ type User struct {
 	Updated  time.Time `json:"updated"`
 }
 
+// Category is lesson's category type.
+type Category struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+}
+
 // Lesson is the lesson infomation type.
 type Lesson struct {
 	ID           string    `json:"id" datastore:"-"`
@@ -29,14 +35,6 @@ type Lesson struct {
 	UserID       string    `json:"userID"`
 	Created      time.Time `json:"created"`
 	Updated      time.Time `json:"updated"`
-}
-
-// Category is used for lesson.
-type Category struct {
-	ID       string `json:"id" datastore:"-"`
-	Name     string `json:"name"`
-	Created  time.Time `json:"created"`
-	Updated  time.Time `json:"updated"`
 }
 
 // Avatar is used for lesson.
