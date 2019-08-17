@@ -9,8 +9,27 @@ import (
 )
 
 func getLessons(c echo.Context) error {
-	// TODO add pagination
-	return c.JSON(http.StatusOK, "")
+	lessons, err := usecase.GetLessonsByConditions(c.Request())
+	if err != nil {
+		lessonErr, ok := err.(usecase.LessonErrorCode)
+		if ok && lessonErr == usecase.LessonNotFound {
+			return c.JSON(http.StatusNotFound, err.Error())
+		} else if ok {
+			fatalLog(lessonErr)
+			return c.JSON(http.StatusInternalServerError, err.Error())
+		}
+
+		authErr, ok := err.(domain.AuthErrorCode)
+		if ok {
+			fatalLog(authErr)
+			return c.JSON(http.StatusUnauthorized, err.Error())
+		}
+
+		fatalLog(err)
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, lessons)
 }
 
 func getLesson(c echo.Context) error {
@@ -32,6 +51,7 @@ func getLesson(c echo.Context) error {
 			warnLog(lessonErr)
 			return c.JSON(http.StatusForbidden, err.Error())
 		}
+
 		authErr, ok := err.(domain.AuthErrorCode)
 		if ok {
 			warnLog(authErr)

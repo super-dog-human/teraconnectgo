@@ -53,13 +53,22 @@ func getUser(c echo.Context) error {
 func postUser(c echo.Context) error {
 	user := new(domain.User)
 
+	userSubject, err := domain.UserSubject(c.Request())
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+	user.Auth0Sub = userSubject
+
 	if err := c.Bind(user); err != nil {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 
-	if err := usecase.CreateUser(c.Request(), *user); err != nil {
-		fatalLog(err)
-		return c.JSON(http.StatusNotFound, err.Error())
+	if err := usecase.CreateUser(c.Request(), user); err != nil {
+		userErr, ok := err.(usecase.UserErrorCode)
+		if ok && userErr == usecase.AlreadyUserExists {
+			return c.JSON(http.StatusConflict, err.Error())
+		}
+		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, user)
@@ -73,7 +82,7 @@ func patchUser(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	if err := usecase.UpdateUser(c.Request(), *user); err != nil {
+	if err := usecase.UpdateUser(c.Request(), user); err != nil {
 		fatalLog(err)
 		userErr, ok := err.(usecase.UserErrorCode)
 		if ok && userErr == usecase.UserNotAvailable {
@@ -88,6 +97,10 @@ func patchUser(c echo.Context) error {
 func deleteUser(c echo.Context) error {
 	if err := usecase.UnsubscribeCurrentUser(c.Request()); err != nil {
 		fatalLog(err)
+		authErr, ok := err.(domain.AuthErrorCode)
+		if ok && authErr == domain.UserNotFound {
+			return c.JSON(http.StatusNotFound, err.Error())
+		}
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 

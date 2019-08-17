@@ -14,8 +14,15 @@ const (
 	AlreadyUserExists UserErrorCode = 2
 )
 
-func (_ UserErrorCode) Error() string {
-	return "user not available"
+func (e UserErrorCode) Error() string {
+	switch e {
+    case UserNotAvailable:
+		return "user not available"
+	case AlreadyUserExists:
+		return "user is already created"
+	default:
+		return "unknown error"
+	}
 }
 
 // GetUser for fetch current user account
@@ -41,11 +48,11 @@ func GetUser(request *http.Request, id string) (domain.User, error) {
 	return currentUser, nil
 }
 
-func CreateUser(request *http.Request, user domain.User) error {
+func CreateUser(request *http.Request, user *domain.User) error {
 	ctx := appengine.NewContext(request)
 
-	// not error when current user not found.
-	if _, err := domain.GetCurrentUser(request); err != domain.UserNotFound {
+	// not error when current user was not found.
+	if _, err := domain.GetCurrentUser(request); err != nil && err != domain.UserNotFound {
 		return err
 	} else if err == nil {
 		return AlreadyUserExists
@@ -58,7 +65,7 @@ func CreateUser(request *http.Request, user domain.User) error {
 	return nil
 }
 
-func UpdateUser(request *http.Request, user domain.User) error {
+func UpdateUser(request *http.Request, user *domain.User) error {
 	ctx := appengine.NewContext(request)
 
 	currentUser, err := domain.GetCurrentUser(request)
@@ -81,7 +88,7 @@ func UnsubscribeCurrentUser(request *http.Request) error {
 	ctx := appengine.NewContext(request)
 
 	currentUser, err := domain.GetCurrentUser(request)
-	if err == nil {
+	if err != nil {
 		return err
 	}
 
@@ -100,5 +107,5 @@ func UnsubscribeCurrentUser(request *http.Request) error {
 		return err
 	}
 
-	return err
+	return nil
 }

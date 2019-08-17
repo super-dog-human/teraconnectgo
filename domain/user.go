@@ -24,9 +24,11 @@ func GetUserByID(ctx context.Context, id string) (User, error) {
 	return *user, nil
 }
 
-func CreateUser(ctx context.Context, user User) error {
-	user.ID = xid.New().String()
+// CreateUser is creating user.
+func CreateUser(ctx context.Context, user *User) error {
 	user.Created = time.Now()
+
+	user.ID = xid.New().String()
 
 	key := datastore.NewKey(ctx, "User", user.ID, 0, nil)
 	if _, err := datastore.Put(ctx, key, user); err != nil {
@@ -36,7 +38,7 @@ func CreateUser(ctx context.Context, user User) error {
 	return nil
 }
 
-func UpdateUser(ctx context.Context, user User) error {
+func UpdateUser(ctx context.Context, user *User) error {
 	user.Updated = time.Now()
 
 	key := datastore.NewKey(ctx, "User", user.ID, 0, nil)

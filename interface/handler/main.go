@@ -41,8 +41,8 @@ func Main(appEnv string) {
 	auth.POST("/authoring_lessons", postAuthoringLesson)
 	auth.PATCH("/authoring_lessons/:id", patchAuthoringLesson)
 	auth.GET("/authoring_lessons/:id/materials", getAuthoringLessonMaterials)
-	auth.POST("/authoring_lessons/:id/materials", putAuthoringLessonMaterial)
-	auth.PUT("/authoring_lessons/:id/materials", putAuthoringLessonMaterial) // same function as POST
+	auth.POST("/authoring_lessons/:id/materials", postAuthoringLessonMaterial)
+	auth.PUT("/authoring_lessons/:id/materials", putAuthoringLessonMaterial)
 	auth.GET("/lessons/:id/raw_voice_texts", getRawVoiceTexts)
 	auth.PUT("/lessons/:id/packs", putLessonPack)
 	auth.GET("/storage_objects", getStorageObjects)

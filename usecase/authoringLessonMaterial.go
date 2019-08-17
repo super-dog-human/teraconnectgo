@@ -34,5 +34,23 @@ func CreateAuthoringLessonMaterial(request *http.Request, lessonID string, lesso
 		return err
 	}
 
+	if err := domain.DeleteRawVoiceTextsByLessonID(ctx, lessonID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func UpdateAuthoringLessonMaterial(request *http.Request, lessonID string, lessonMaterial domain.LessonMaterial) error {
+	ctx := appengine.NewContext(request)
+
+	if err := currentUserAccessToLesson(ctx, request, lessonID); err != nil {
+		return err
+	}
+
+	if err := domain.CreateLessonMaterialFileToGCS(ctx, lessonID, lessonMaterial); err != nil {
+		return err
+	}
+
 	return nil
 }

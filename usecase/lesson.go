@@ -27,10 +27,16 @@ func (e LessonErrorCode) Error() string {
     }
 }
 
-// GetLessons for fetch lessons
-func GetLessons(request *http.Request) ([]domain.Lesson, error) {
+// GetLessonsByConditions for search lessons
+func GetLessonsByConditions(request *http.Request) ([]domain.Lesson, error) {
+//		ctx := appengine.NewContext(request)
+
+//	id := c.Param("id")
+
 	// 検索パラメータ
+	// ページネーション
 	// SearchAPIが必須
+
 	return nil, nil
 }
 

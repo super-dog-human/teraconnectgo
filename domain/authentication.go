@@ -49,7 +49,7 @@ func PublicKey() *rsa.PublicKey {
 func GetCurrentUser(request *http.Request) (User, error) {
 	user := new(User) // for return blank user when error
 
-	userSubject, err := userSubject(request)
+	userSubject, err := UserSubject(request)
 	if err != nil {
 		return *user, err
 	}
@@ -57,7 +57,7 @@ func GetCurrentUser(request *http.Request) (User, error) {
 	var users []User
 	ctx := appengine.NewContext(request)
 	query := datastore.NewQuery("User").Filter("Auth0Sub =", userSubject).Limit(1)
-	_, err = query.GetAll(ctx, &users)
+	keys, err := query.GetAll(ctx, &users)
 	if err != nil {
 		return *user, FailedGettingUser
 	}
@@ -66,10 +66,13 @@ func GetCurrentUser(request *http.Request) (User, error) {
 		return *user, UserNotFound
 	}
 
+	user = &users[0]
+	user.ID = keys[0].StringID()
 	return users[0], nil
 }
 
-func userSubject(r *http.Request) (string, error) {
+// UserSubject is return auth0 subject.
+func UserSubject(r *http.Request) (string, error) {
 	raw_header := r.Header.Get("Authorization")
 	if raw_header == "" {
 		return "", TokenNotFound
