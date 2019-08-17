@@ -38,7 +38,7 @@ func postAuthoringLesson(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 
-	if err := usecase.CreateAuthoringLesson(c.Request(), *lesson); err != nil {
+	if err := usecase.CreateAuthoringLesson(c.Request(), lesson); err != nil {
 		fatalLog(err)
 		authoringLessonErr, ok := err.(usecase.AuthoringLessonErrorCode)
 		if ok && authoringLessonErr == usecase.InvalidAuthoringLessonParams {

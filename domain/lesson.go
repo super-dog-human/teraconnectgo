@@ -31,7 +31,7 @@ func GetLessonsByUserID(ctx context.Context, userID string) ([]Lesson, error) {
 	return lessons, nil
 }
 
-func CreateNewLesson(ctx context.Context, lesson Lesson, userID string) error {
+func CreateLesson(ctx context.Context, lesson *Lesson, userID string) error {
 	lesson.ID = xid.New().String()
 	lesson.UserID = userID
 	lesson.Created = time.Now()
@@ -44,7 +44,7 @@ func CreateNewLesson(ctx context.Context, lesson Lesson, userID string) error {
 	return nil
 }
 
-func UpdateLesson(ctx context.Context, lesson Lesson) error {
+func UpdateLesson(ctx context.Context, lesson *Lesson) error {
 	lesson.Updated = time.Now()
 	key := datastore.NewKey(ctx, "Lesson", lesson.ID, 0, nil)
 	if _, err := datastore.Put(ctx, key, lesson); err != nil {

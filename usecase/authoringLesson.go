@@ -55,7 +55,7 @@ func GetAuthoringLesson(request *http.Request, id string) (domain.Lesson, error)
 	return lesson, nil
 }
 
-func CreateAuthoringLesson(request *http.Request, lesson domain.Lesson) error {
+func CreateAuthoringLesson(request *http.Request, lesson *domain.Lesson) error {
 	ctx := appengine.NewContext(request)
 
 	currentUser, err := domain.GetCurrentUser(request)
@@ -63,7 +63,7 @@ func CreateAuthoringLesson(request *http.Request, lesson domain.Lesson) error {
 		return err
 	}
 
-	if err = domain.CreateNewLesson(ctx, lesson, currentUser.ID); err != nil {
+	if err = domain.CreateLesson(ctx, lesson, currentUser.ID); err != nil {
 		return err
 	}
 
@@ -122,7 +122,7 @@ func UpdateAuthoringLesson(id string, request *http.Request) (domain.Lesson, err
 		}
 	}
 
-	if err = domain.UpdateLesson(ctx, lesson); err != nil {
+	if err = domain.UpdateLesson(ctx, &lesson); err != nil {
 		return lesson, err
 	}
 

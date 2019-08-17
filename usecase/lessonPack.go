@@ -49,7 +49,7 @@ func PackLesson(request *http.Request, id string) error {
 	}
 
 	lesson.IsPacked = true
-	if err = domain.UpdateLesson(ctx, lesson); err != nil {
+	if err = domain.UpdateLesson(ctx, &lesson); err != nil {
 		return err
 	}
 
