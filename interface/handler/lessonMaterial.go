@@ -8,7 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func getAuthoringLessonMaterials(c echo.Context) error {
+func getLessonMaterials(c echo.Context) error {
 	lessonID := c.Param("id")
 
 	ids := []string{lessonID}
@@ -18,7 +18,7 @@ func getAuthoringLessonMaterials(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, errMessage)
 	}
 
-	lessonMaterial, err := usecase.GetAuthoringLessonMaterial(c.Request(), lessonID)
+	lessonMaterial, err := usecase.GetLessonMaterial(c.Request(), lessonID)
 	if err != nil {
 		fatalLog(err)
 		lessonErr, ok := err.(usecase.LessonErrorCode)
@@ -33,7 +33,7 @@ func getAuthoringLessonMaterials(c echo.Context) error {
 	return c.JSON(http.StatusOK, lessonMaterial)
 }
 
-func postAuthoringLessonMaterial(c echo.Context) error {
+func postLessonMaterial(c echo.Context) error {
 	lessonID := c.Param("id")
 
 	ids := []string{lessonID}
@@ -49,7 +49,7 @@ func postAuthoringLessonMaterial(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	if err := usecase.CreateAuthoringLessonMaterial(c.Request(), lessonID, *lessonMaterial); err != nil {
+	if err := usecase.CreateLessonMaterial(c.Request(), lessonID, *lessonMaterial); err != nil {
 		fatalLog(err)
 		lessonErr, ok := err.(usecase.LessonErrorCode)
 		if ok && lessonErr == usecase.LessonNotFound {
@@ -64,7 +64,7 @@ func postAuthoringLessonMaterial(c echo.Context) error {
 	return c.JSON(http.StatusCreated, "succeeded")
 }
 
-func putAuthoringLessonMaterial(c echo.Context) error {
+func putLessonMaterial(c echo.Context) error {
 	lessonID := c.Param("id")
 
 	ids := []string{lessonID}
@@ -80,7 +80,7 @@ func putAuthoringLessonMaterial(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	if err := usecase.UpdateAuthoringLessonMaterial(c.Request(), lessonID, *lessonMaterial); err != nil {
+	if err := usecase.UpdateLessonMaterial(c.Request(), lessonID, *lessonMaterial); err != nil {
 		fatalLog(err)
 		lessonErr, ok := err.(usecase.LessonErrorCode)
 		if ok && lessonErr == usecase.LessonNotFound {

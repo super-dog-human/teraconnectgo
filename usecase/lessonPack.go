@@ -52,6 +52,10 @@ func PackLesson(request *http.Request, id string) error {
 	if err = domain.UpdateLesson(ctx, &lesson); err != nil {
 		return err
 	}
-
+/*
+	if err = domain.CreateLessonIndex(ctx, currentUser, &lesson, &voiceTexts); err != nil {
+		return err
+	}
+*/
 	return nil
 }

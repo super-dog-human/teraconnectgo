@@ -7,7 +7,7 @@ import (
 	"google.golang.org/appengine"
 )
 
-func GetAuthoringLessonMaterial(request *http.Request, lessonID string) (domain.LessonMaterial, error) {
+func GetLessonMaterial(request *http.Request, lessonID string) (domain.LessonMaterial, error) {
 	ctx := appengine.NewContext(request)
 
 	var lessonMaterial domain.LessonMaterial
@@ -23,7 +23,7 @@ func GetAuthoringLessonMaterial(request *http.Request, lessonID string) (domain.
 	return lessonMaterial, nil
 }
 
-func CreateAuthoringLessonMaterial(request *http.Request, lessonID string, lessonMaterial domain.LessonMaterial) error {
+func CreateLessonMaterial(request *http.Request, lessonID string, lessonMaterial domain.LessonMaterial) error {
 	ctx := appengine.NewContext(request)
 
 	if err := currentUserAccessToLesson(ctx, request, lessonID); err != nil {
@@ -41,7 +41,7 @@ func CreateAuthoringLessonMaterial(request *http.Request, lessonID string, lesso
 	return nil
 }
 
-func UpdateAuthoringLessonMaterial(request *http.Request, lessonID string, lessonMaterial domain.LessonMaterial) error {
+func UpdateLessonMaterial(request *http.Request, lessonID string, lessonMaterial domain.LessonMaterial) error {
 	ctx := appengine.NewContext(request)
 
 	if err := currentUserAccessToLesson(ctx, request, lessonID); err != nil {
