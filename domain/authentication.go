@@ -22,20 +22,20 @@ const (
 )
 
 func (e AuthErrorCode) Error() string {
-    switch e {
-    case TokenNotFound:
-        return "token not found in header"
-    case UnexpectedSigningMethod:
-        return "unexpected token signing"
+	switch e {
+	case TokenNotFound:
+		return "token not found in header"
+	case UnexpectedSigningMethod:
+		return "unexpected token signing"
 	case InvalidToken:
 		return "invalid token"
 	case FailedGettingUser:
 		return "failed getting user"
 	case UserNotFound:
 		return "user not found"
-    default:
-        return "unknown token error"
-    }
+	default:
+		return "unknown token error"
+	}
 }
 
 // PublicKey is return rsa key from pub file.
