@@ -1,7 +1,7 @@
 package teraconnectgo
 
 import (
-	"github.com/SuperDogHuman/teraconnectgo/interface/handler"
+	"github.com/super-dog-human/teraconnectgo/interface/handler"
 	"google.golang.org/appengine"
 )
 
