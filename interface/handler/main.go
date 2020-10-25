@@ -3,8 +3,8 @@ package handler
 import (
 	"net/http"
 
-	"github.com/SuperDogHuman/teraconnectgo/domain"
-	"github.com/SuperDogHuman/teraconnectgo/infrastructure"
+	"github.com/super-dog-human/teraconnectgo/domain"
+	"github.com/super-dog-human/teraconnectgo/infrastructure"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )

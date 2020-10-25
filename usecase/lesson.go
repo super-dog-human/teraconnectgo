@@ -9,7 +9,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/SuperDogHuman/teraconnectgo/domain"
+	"github.com/super-dog-human/teraconnectgo/domain"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
 )

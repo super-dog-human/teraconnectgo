@@ -3,7 +3,7 @@ package domain
 import (
 	"context"
 
-	"github.com/SuperDogHuman/teraconnectgo/infrastructure"
+	"github.com/super-dog-human/teraconnectgo/infrastructure"
 )
 
 const contentType = "audio/wav"

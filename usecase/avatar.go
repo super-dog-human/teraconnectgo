@@ -3,7 +3,7 @@ package usecase
 import (
 	"net/http"
 
-	"github.com/SuperDogHuman/teraconnectgo/domain"
+	"github.com/super-dog-human/teraconnectgo/domain"
 	"github.com/rs/xid"
 	"google.golang.org/appengine"
 )

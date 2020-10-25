@@ -3,7 +3,7 @@ package handler
 import (
 	"net/http"
 
-	"github.com/SuperDogHuman/teraconnectgo/usecase"
+	"github.com/super-dog-human/teraconnectgo/usecase"
 	"github.com/labstack/echo/v4"
 )
 

@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/SuperDogHuman/teraconnectgo/domain"
+	"github.com/super-dog-human/teraconnectgo/domain"
 )
 
 func currentUserAccessToLesson(ctx context.Context, request *http.Request, lessonID string) error {

@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 
 	"cloud.google.com/go/storage"
-	"github.com/SuperDogHuman/teraconnectgo/infrastructure"
+	"github.com/super-dog-human/teraconnectgo/infrastructure"
 )
 
 func GetLessonMaterialFromGCS(ctx context.Context, lessonID string) (LessonMaterial, error) {

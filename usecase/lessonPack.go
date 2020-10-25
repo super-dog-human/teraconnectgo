@@ -3,7 +3,7 @@ package usecase
 import (
 	"net/http"
 
-	"github.com/SuperDogHuman/teraconnectgo/domain"
+	"github.com/super-dog-human/teraconnectgo/domain"
 	"google.golang.org/appengine"
 )
 
@@ -52,10 +52,10 @@ func PackLesson(request *http.Request, id string) error {
 	if err = domain.UpdateLesson(ctx, &lesson); err != nil {
 		return err
 	}
-/*
-	if err = domain.CreateLessonIndex(ctx, currentUser, &lesson, &voiceTexts); err != nil {
-		return err
-	}
-*/
+	/*
+		if err = domain.CreateLessonIndex(ctx, currentUser, &lesson, &voiceTexts); err != nil {
+			return err
+		}
+	*/
 	return nil
 }

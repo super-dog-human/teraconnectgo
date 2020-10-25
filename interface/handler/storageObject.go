@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/SuperDogHuman/teraconnectgo/domain"
-	"github.com/SuperDogHuman/teraconnectgo/usecase"
+	"github.com/super-dog-human/teraconnectgo/domain"
+	"github.com/super-dog-human/teraconnectgo/usecase"
 	"github.com/labstack/echo/v4"
 )
 

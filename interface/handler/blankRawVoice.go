@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/SuperDogHuman/teraconnectgo/domain"
-	"github.com/SuperDogHuman/teraconnectgo/usecase"
+	"github.com/super-dog-human/teraconnectgo/domain"
+	"github.com/super-dog-human/teraconnectgo/usecase"
 )
 
 func postBlankRawVoice(c echo.Context) error {

@@ -3,7 +3,7 @@ package usecase
 import (
 	"net/http"
 
-	"github.com/SuperDogHuman/teraconnectgo/domain"
+	"github.com/super-dog-human/teraconnectgo/domain"
 	"google.golang.org/appengine"
 )
 
@@ -16,7 +16,7 @@ const (
 
 func (e UserErrorCode) Error() string {
 	switch e {
-    case UserNotAvailable:
+	case UserNotAvailable:
 		return "user not available"
 	case AlreadyUserExists:
 		return "user is already created"

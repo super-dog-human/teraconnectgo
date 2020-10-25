@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	"github.com/SuperDogHuman/teraconnectgo/infrastructure"
+	"github.com/super-dog-human/teraconnectgo/infrastructure"
 	"google.golang.org/appengine/datastore"
 )
 

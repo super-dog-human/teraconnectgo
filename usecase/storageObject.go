@@ -5,10 +5,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/SuperDogHuman/teraconnectgo/domain"
+	"github.com/super-dog-human/teraconnectgo/domain"
 	"google.golang.org/appengine"
 )
-
 
 type StorageObjectErrorCode uint
 
@@ -66,17 +65,17 @@ func currentUserAccessToStorageObject(ctx context.Context, request *http.Request
 
 func entityIDFromRequest(entityName string, rawID string) (string, string) {
 	switch entityName {
-		case "Lesson":
-			return rawID, entityName
-		case "Avatar":
-			return rawID, entityName
-		case "Graphic":
-			return rawID, entityName
-		default:
-			// using Lesson when entity is "voice/:lessonID"
-			// checking count is enough once because voices belongs to one lesson.
-			separatorIndex := strings.Index(rawID, "/")
-			// 本当にちゃんととれる？
-			return rawID[separatorIndex:len(rawID)], "Lesson"
+	case "Lesson":
+		return rawID, entityName
+	case "Avatar":
+		return rawID, entityName
+	case "Graphic":
+		return rawID, entityName
+	default:
+		// using Lesson when entity is "voice/:lessonID"
+		// checking count is enough once because voices belongs to one lesson.
+		separatorIndex := strings.Index(rawID, "/")
+		// 本当にちゃんととれる？
+		return rawID[separatorIndex:len(rawID)], "Lesson"
 	}
 }

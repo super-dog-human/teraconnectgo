@@ -7,7 +7,7 @@ import (
 	"io"
 
 	"cloud.google.com/go/storage"
-	"github.com/SuperDogHuman/teraconnectgo/infrastructure"
+	"github.com/super-dog-human/teraconnectgo/infrastructure"
 )
 
 func CreateLessonZip(ctx context.Context, lesson Lesson, graphicFileTypes map[string]string, voiceTexts []RawVoiceText) (*bytes.Buffer, error) {
