@@ -1,12 +1,13 @@
-package teraconnectgo
+package main
 
 import (
+	"os"
+
 	"github.com/super-dog-human/teraconnectgo/interface/handler"
-	"google.golang.org/appengine"
 )
 
-// Main serve Teraconnect API
-func Main(appEnv string) {
-	handler.Main(appEnv)
-	appengine.Main()
+func main() {
+	if appEnv := os.Args[1]; appEnv != "" {
+		handler.Main(appEnv)
+	}
 }

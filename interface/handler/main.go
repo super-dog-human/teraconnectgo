@@ -1,18 +1,18 @@
 package handler
 
 import (
-	"net/http"
-
-	"github.com/super-dog-human/teraconnectgo/domain"
-	"github.com/super-dog-human/teraconnectgo/infrastructure"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/super-dog-human/teraconnectgo/domain"
+	"github.com/super-dog-human/teraconnectgo/infrastructure"
 )
 
 // Main is handling API request.
 func Main(appEnv string) {
 	e := echo.New()
 	e.Pre(middleware.RemoveTrailingSlash())
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{infrastructure.OriginUrl(appEnv)},
 	}))
@@ -47,5 +47,9 @@ func Main(appEnv string) {
 	auth.GET("/storage_objects", getStorageObjects)
 	auth.POST("/blank_raw_voices", postBlankRawVoice)
 
-	http.Handle("/", e)
+	port := ":80"
+	if appEnv == "development" {
+		port = ":1234"
+	}
+	e.Logger.Fatal(e.Start(port))
 }
