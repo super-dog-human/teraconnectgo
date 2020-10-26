@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/super-dog-human/teraconnectgo/domain"
-	"google.golang.org/appengine"
 )
 
 type StorageObjectErrorCode uint
@@ -19,7 +18,7 @@ func (_ StorageObjectErrorCode) Error() string {
 
 // GetStorageObjectURLs is generate signed URL of object in GCS.
 func GetStorageObjectURLs(request *http.Request, fileRequests []domain.FileRequest) (domain.SignedURLs, error) {
-	ctx := appengine.NewContext(request)
+	ctx := request.Context()
 
 	var signedURLs domain.SignedURLs
 

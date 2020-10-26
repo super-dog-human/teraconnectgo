@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/super-dog-human/teraconnectgo/domain"
-	"google.golang.org/appengine"
 )
 
 type UserErrorCode uint
@@ -38,7 +37,7 @@ func GetCurrentUser(request *http.Request) (domain.User, error) {
 
 // GetUser for fetch user account by id.
 func GetUser(request *http.Request, id string) (domain.User, error) {
-	ctx := appengine.NewContext(request)
+	ctx := request.Context()
 
 	currentUser, err := domain.GetUserByID(ctx, id)
 	if err != nil {
@@ -49,7 +48,7 @@ func GetUser(request *http.Request, id string) (domain.User, error) {
 }
 
 func CreateUser(request *http.Request, user *domain.User) error {
-	ctx := appengine.NewContext(request)
+	ctx := request.Context()
 
 	// not error when current user was not found.
 	if _, err := domain.GetCurrentUser(request); err != nil && err != domain.UserNotFound {
@@ -66,7 +65,7 @@ func CreateUser(request *http.Request, user *domain.User) error {
 }
 
 func UpdateUser(request *http.Request, user *domain.User) error {
-	ctx := appengine.NewContext(request)
+	ctx := request.Context()
 
 	currentUser, err := domain.GetCurrentUser(request)
 	if err == nil {
@@ -85,7 +84,7 @@ func UpdateUser(request *http.Request, user *domain.User) error {
 }
 
 func UnsubscribeCurrentUser(request *http.Request) error {
-	ctx := appengine.NewContext(request)
+	ctx := request.Context()
 
 	currentUser, err := domain.GetCurrentUser(request)
 	if err != nil {

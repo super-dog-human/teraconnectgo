@@ -4,11 +4,10 @@ import (
 	"net/http"
 
 	"github.com/super-dog-human/teraconnectgo/domain"
-	"google.golang.org/appengine"
 )
 
 func GetLessonMaterial(request *http.Request, lessonID string) (domain.LessonMaterial, error) {
-	ctx := appengine.NewContext(request)
+	ctx := request.Context()
 
 	var lessonMaterial domain.LessonMaterial
 	if err := currentUserAccessToLesson(ctx, request, lessonID); err != nil {
@@ -24,7 +23,7 @@ func GetLessonMaterial(request *http.Request, lessonID string) (domain.LessonMat
 }
 
 func CreateLessonMaterial(request *http.Request, lessonID string, lessonMaterial domain.LessonMaterial) error {
-	ctx := appengine.NewContext(request)
+	ctx := request.Context()
 
 	if err := currentUserAccessToLesson(ctx, request, lessonID); err != nil {
 		return err
@@ -42,7 +41,7 @@ func CreateLessonMaterial(request *http.Request, lessonID string, lessonMaterial
 }
 
 func UpdateLessonMaterial(request *http.Request, lessonID string, lessonMaterial domain.LessonMaterial) error {
-	ctx := appengine.NewContext(request)
+	ctx := request.Context()
 
 	if err := currentUserAccessToLesson(ctx, request, lessonID); err != nil {
 		return err

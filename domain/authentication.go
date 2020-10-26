@@ -7,16 +7,15 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/dgrijalva/jwt-go/request"
-	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
 )
 
 type AuthErrorCode uint
 
 const (
-    TokenNotFound           AuthErrorCode = 1
+	TokenNotFound           AuthErrorCode = 1
 	UnexpectedSigningMethod AuthErrorCode = 2
-    InvalidToken            AuthErrorCode = 3
+	InvalidToken            AuthErrorCode = 3
 	FailedGettingUser       AuthErrorCode = 4
 	UserNotFound            AuthErrorCode = 5
 )
@@ -55,7 +54,7 @@ func GetCurrentUser(request *http.Request) (User, error) {
 	}
 
 	var users []User
-	ctx := appengine.NewContext(request)
+	ctx := request.Context()
 	query := datastore.NewQuery("User").Filter("Auth0Sub =", userSubject).Limit(1)
 	keys, err := query.GetAll(ctx, &users)
 	if err != nil {
@@ -73,8 +72,8 @@ func GetCurrentUser(request *http.Request) (User, error) {
 
 // UserSubject is return auth0 subject.
 func UserSubject(r *http.Request) (string, error) {
-	raw_header := r.Header.Get("Authorization")
-	if raw_header == "" {
+	rawHeader := r.Header.Get("Authorization")
+	if rawHeader == "" {
 		return "", TokenNotFound
 	}
 

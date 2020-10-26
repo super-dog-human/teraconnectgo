@@ -5,12 +5,11 @@ import (
 
 	"github.com/rs/xid"
 	"github.com/super-dog-human/teraconnectgo/domain"
-	"google.golang.org/appengine"
 )
 
 // CreateBlankRawVoiceFile for create blank file of raw voice text to Cloud Storage.
 func CreateBlankRawVoiceFile(request *http.Request, lessonID string) (domain.SignedURL, error) {
-	ctx := appengine.NewContext(request)
+	ctx := request.Context()
 
 	var signedURL domain.SignedURL
 	if err := currentUserAccessToLesson(ctx, request, lessonID); err != nil {

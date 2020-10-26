@@ -3,14 +3,13 @@ package usecase
 import (
 	"net/http"
 
-	"github.com/super-dog-human/teraconnectgo/domain"
 	"github.com/rs/xid"
-	"google.golang.org/appengine"
+	"github.com/super-dog-human/teraconnectgo/domain"
 )
 
 // GetAvailableGraphics for fetch graphic object from Cloud Datastore
 func GetAvailableGraphics(request *http.Request) ([]domain.Graphic, error) {
-	ctx := appengine.NewContext(request)
+	ctx := request.Context()
 
 	var graphics []domain.Graphic
 
@@ -35,7 +34,7 @@ func GetAvailableGraphics(request *http.Request) ([]domain.Graphic, error) {
 }
 
 func CreateGraphicsAndBlankFile(request *http.Request, objectRequest domain.StorageObjectRequest) (domain.SignedURLs, error) {
-	ctx := appengine.NewContext(request)
+	ctx := request.Context()
 
 	var signedURLs domain.SignedURLs
 

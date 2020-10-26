@@ -4,13 +4,11 @@ import (
 	"net/http"
 
 	"github.com/super-dog-human/teraconnectgo/domain"
-	"google.golang.org/appengine"
 )
 
 // GetRawVoiceTexts for fetch voice textsfrom Cloud Datastore
 func GetRawVoiceTexts(request *http.Request, lessonID string) ([]domain.RawVoiceText, error) {
-	ctx := appengine.NewContext(request)
-
+	ctx := request.Context()
 	if err := currentUserAccessToLesson(ctx, request, lessonID); err != nil {
 		return nil, err
 	}

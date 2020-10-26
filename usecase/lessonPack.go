@@ -4,12 +4,11 @@ import (
 	"net/http"
 
 	"github.com/super-dog-human/teraconnectgo/domain"
-	"google.golang.org/appengine"
 )
 
 // PackLesson is packing the lesson to zip and upload GCS
 func PackLesson(request *http.Request, id string) error {
-	ctx := appengine.NewContext(request)
+	ctx := request.Context()
 
 	currentUser, err := domain.GetCurrentUser(request)
 	if err != nil {

@@ -3,14 +3,13 @@ package usecase
 import (
 	"net/http"
 
-	"github.com/super-dog-human/teraconnectgo/domain"
 	"github.com/rs/xid"
-	"google.golang.org/appengine"
+	"github.com/super-dog-human/teraconnectgo/domain"
 )
 
 // GetAvailableAvatars for fetch avatar object from Cloud Datastore
 func GetAvailableAvatars(request *http.Request) ([]domain.Avatar, error) {
-	ctx := appengine.NewContext(request)
+	ctx := request.Context()
 
 	var avatars []domain.Avatar
 
@@ -35,7 +34,7 @@ func GetAvailableAvatars(request *http.Request) ([]domain.Avatar, error) {
 }
 
 func CreateAvatarsAndBlankFile(request *http.Request, objectRequest domain.StorageObjectRequest) (domain.SignedURLs, error) {
-	ctx := appengine.NewContext(request)
+	ctx := request.Context()
 
 	var signedURLs domain.SignedURLs
 

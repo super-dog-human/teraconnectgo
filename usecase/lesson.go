@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	"github.com/super-dog-human/teraconnectgo/domain"
-	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
 )
 
@@ -23,23 +22,23 @@ const (
 )
 
 func (e LessonErrorCode) Error() string {
-    switch e {
+	switch e {
 	case LessonNotFound:
 		return "lesson not found"
 	case LessonNotAvailable:
 		return "lesson not available"
 	case InvalidLessonParams:
-        return "invalid lesson params"
-    default:
-        return "unknown lesson error"
-    }
+		return "invalid lesson params"
+	default:
+		return "unknown lesson error"
+	}
 }
 
 // GetLessonsByConditions for search lessons
 func GetLessonsByConditions(request *http.Request) ([]domain.Lesson, error) {
-//		ctx := appengine.NewContext(request)
+	//		ctx := request.Context()
 
-//	id := c.Param("id")
+	//	id := c.Param("id")
 
 	// 検索パラメータ
 	// ページネーション
@@ -50,7 +49,7 @@ func GetLessonsByConditions(request *http.Request) ([]domain.Lesson, error) {
 
 // GetPublicLesson for fetch the lesson by id
 func GetPublicLesson(request *http.Request, id string) (domain.Lesson, error) {
-	ctx := appengine.NewContext(request)
+	ctx := request.Context()
 
 	_, err := domain.GetCurrentUser(request)
 	authErr, ok := err.(domain.AuthErrorCode)
@@ -75,7 +74,7 @@ func GetPublicLesson(request *http.Request, id string) (domain.Lesson, error) {
 }
 
 func GetPrivateLesson(request *http.Request, id string) (domain.Lesson, error) {
-	ctx := appengine.NewContext(request)
+	ctx := request.Context()
 
 	currentUser, err := domain.GetCurrentUser(request)
 	if err != nil {
@@ -98,7 +97,7 @@ func GetPrivateLesson(request *http.Request, id string) (domain.Lesson, error) {
 }
 
 func CreateLesson(request *http.Request, lesson *domain.Lesson) error {
-	ctx := appengine.NewContext(request)
+	ctx := request.Context()
 
 	currentUser, err := domain.GetCurrentUser(request)
 	if err != nil {
@@ -114,8 +113,8 @@ func CreateLesson(request *http.Request, lesson *domain.Lesson) error {
 	return nil
 }
 
-func UpdateLesson(id string, request *http.Request) (domain.Lesson, error){
-	ctx := appengine.NewContext(request)
+func UpdateLesson(id string, request *http.Request) (domain.Lesson, error) {
+	ctx := request.Context()
 
 	currentUser, err := domain.GetCurrentUser(request)
 	if err != nil {
@@ -172,7 +171,7 @@ func UpdateLesson(id string, request *http.Request) (domain.Lesson, error){
 }
 
 func DeleteOwnLessonById(request *http.Request, id string) error {
-	ctx := appengine.NewContext(request)
+	ctx := request.Context()
 
 	currentUser, err := domain.GetCurrentUser(request)
 	if err != nil {
@@ -180,7 +179,7 @@ func DeleteOwnLessonById(request *http.Request, id string) error {
 	}
 
 	lesson, err := domain.GetLessonById(ctx, id)
-	if err != nil{
+	if err != nil {
 		if err == datastore.ErrNoSuchEntity {
 			return LessonNotFound
 		}
