@@ -39,7 +39,7 @@ func GetStorageObjectURLs(request *http.Request, fileRequests []domain.FileReque
 		if err != nil {
 			return signedURLs, err
 		}
-		urls[i] = domain.SignedURL{fileRequest.ID, url}
+		urls[i] = domain.SignedURL{FileID: fileRequest.ID, SignedURL: url}
 	}
 
 	signedURLs = domain.SignedURLs{SignedURLs: urls}

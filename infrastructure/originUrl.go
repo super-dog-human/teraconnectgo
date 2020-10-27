@@ -1,15 +1,13 @@
 package infrastructure
 
-// OriginUrl return API root url each current env
-func OriginUrl(appEnv string) string {
-	switch appEnv {
+// OriginURL return API root url each current env
+func OriginURL() string {
+	switch AppEnv() {
 	case "production":
-		return "https://authoring.teraconnect.org"
+		return "https://teraconnect.org"
 	case "staging":
-		return "https://teraconnect-authoring-development-dot-teraconnect-209509.appspot.com"
-	case "development":
-		return "http://localhost:1234"
+		return "https://teraconnect-front-dot-teraconnect-stg.an.r.appspot.com"
 	default:
-		return "http://localhost:1234"
+		return ""
 	}
 }

@@ -4,8 +4,8 @@ import (
 	"context"
 	"strings"
 
+	"cloud.google.com/go/datastore"
 	"github.com/super-dog-human/teraconnectgo/infrastructure"
-	"google.golang.org/appengine/datastore"
 )
 
 type SignedURL struct {
@@ -49,9 +49,15 @@ func CreateBlankFileToGCS(ctx context.Context, fileID string, fileEntity string,
 }
 
 func EntityOfRequestedFile(ctx context.Context, entityID string, entityName string) (EntityBelongToFile, error) {
-	key := datastore.NewKey(ctx, entityName, entityID, 0, nil)
 	entity := new(EntityBelongToFile)
-	if err := datastore.Get(ctx, key, entity); err != nil {
+
+	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
+	if err != nil {
+		return *entity, err
+	}
+
+	key := datastore.NameKey(entityName, entityID, nil)
+	if err := client.Get(ctx, key, entity); err != nil {
 		return *entity, err
 	}
 

@@ -5,19 +5,21 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"cloud.google.com/go/datastore"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/dgrijalva/jwt-go/request"
-	"google.golang.org/appengine/datastore"
+	"github.com/super-dog-human/teraconnectgo/infrastructure"
 )
 
 type AuthErrorCode uint
 
 const (
-	TokenNotFound           AuthErrorCode = 1
-	UnexpectedSigningMethod AuthErrorCode = 2
-	InvalidToken            AuthErrorCode = 3
-	FailedGettingUser       AuthErrorCode = 4
-	UserNotFound            AuthErrorCode = 5
+	TokenNotFound             AuthErrorCode = 1
+	UnexpectedSigningMethod   AuthErrorCode = 2
+	InvalidToken              AuthErrorCode = 3
+	FailedDatastoreInitialize AuthErrorCode = 4
+	FailedGettingUser         AuthErrorCode = 5
+	UserNotFound              AuthErrorCode = 6
 )
 
 func (e AuthErrorCode) Error() string {
@@ -28,6 +30,8 @@ func (e AuthErrorCode) Error() string {
 		return "unexpected token signing"
 	case InvalidToken:
 		return "invalid token"
+	case FailedDatastoreInitialize:
+		return "failed datastore initialize"
 	case FailedGettingUser:
 		return "failed getting user"
 	case UserNotFound:
@@ -55,8 +59,13 @@ func GetCurrentUser(request *http.Request) (User, error) {
 
 	var users []User
 	ctx := request.Context()
+	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
+	if err != nil {
+		return *user, FailedDatastoreInitialize
+	}
+
 	query := datastore.NewQuery("User").Filter("Auth0Sub =", userSubject).Limit(1)
-	keys, err := query.GetAll(ctx, &users)
+	keys, err := client.GetAll(ctx, query, &users)
 	if err != nil {
 		return *user, FailedGettingUser
 	}
@@ -66,7 +75,7 @@ func GetCurrentUser(request *http.Request) (User, error) {
 	}
 
 	user = &users[0]
-	user.ID = keys[0].StringID()
+	user.ID = keys[0].Name
 	return users[0], nil
 }
 
@@ -81,9 +90,8 @@ func UserSubject(r *http.Request) (string, error) {
 		_, ok := token.Method.(*jwt.SigningMethodRSA)
 		if !ok {
 			return nil, UnexpectedSigningMethod
-		} else {
-			return PublicKey(), nil
 		}
+		return PublicKey(), nil
 	})
 
 	if err != nil {
@@ -92,7 +100,6 @@ func UserSubject(r *http.Request) (string, error) {
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		return claims["sub"].(string), nil
-	} else {
-		return "", InvalidToken
 	}
+	return "", InvalidToken
 }

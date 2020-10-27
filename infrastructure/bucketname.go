@@ -2,42 +2,40 @@ package infrastructure
 
 import (
 	"context"
-
-	"google.golang.org/appengine"
 )
 
 // MaterialBucketName is return bucket name each environments.
 func MaterialBucketName(ctx context.Context) string {
-	bucketName := "teraconn_material"
-	module := appengine.ModuleName(ctx)
-
-	if module == "teraconnect-api" {
-		return bucketName
+	switch AppEnv() {
+	case "production":
+		return "teraconn_material"
+	case "staging":
+		return "teraconn_material_staging"
+	default:
+		return ""
 	}
-
-	return bucketName + "_development"
 }
 
 // RawVoiceBucketName is return bucket name each environments.
 func RawVoiceBucketName(ctx context.Context) string {
-	bucketName := "teraconn_raw_voice"
-	module := appengine.ModuleName(ctx)
-
-	if module == "teraconnect-api" {
-		return bucketName
+	switch AppEnv() {
+	case "production":
+		return "teraconn_raw_voice"
+	case "staging":
+		return "teraconn_raw_voice_staging"
+	default:
+		return ""
 	}
-
-	return bucketName + "_development"
 }
 
 // VoiceForTranscriptionBucketName is return bucket name each environments.
 func VoiceForTranscriptionBucketName(ctx context.Context) string {
-	bucketName := "teraconn_voice_for_transcription"
-	module := appengine.ModuleName(ctx)
-
-	if module == "teraconnect-api" {
-		return bucketName
+	switch AppEnv() {
+	case "production":
+		return "teraconn_voice_for_transcription"
+	case "staging":
+		return "teraconn_voice_for_transcription_staging"
+	default:
+		return ""
 	}
-
-	return bucketName + "_development"
 }

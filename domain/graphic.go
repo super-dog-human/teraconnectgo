@@ -4,19 +4,24 @@ import (
 	"context"
 	"time"
 
+	"cloud.google.com/go/datastore"
 	"github.com/super-dog-human/teraconnectgo/infrastructure"
-	"google.golang.org/appengine/datastore"
 )
 
-func GetGraphicsByIds(ctx context.Context, ids []string) ([]Graphic, error) {
+func GetGraphicsByIDs(ctx context.Context, ids []string) ([]Graphic, error) {
 	var graphicKeys []*datastore.Key
 
+	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
+	if err != nil {
+		return nil, err
+	}
+
 	for _, id := range ids {
-		graphicKeys = append(graphicKeys, datastore.NewKey(ctx, "Graphic", id, 0, nil))
+		graphicKeys = append(graphicKeys, datastore.NameKey("Graphic", id, nil))
 	}
 
 	graphics := make([]Graphic, len(ids))
-	if err := datastore.GetMulti(ctx, graphicKeys, graphics); err != nil {
+	if err := client.GetMulti(ctx, graphicKeys, graphics); err != nil {
 		return nil, err
 	}
 
@@ -27,11 +32,16 @@ func GetGraphicsByIds(ctx context.Context, ids []string) ([]Graphic, error) {
 	return graphics, nil
 }
 
-func GetCurrentUsersGraphics(ctx context.Context, userID string) ([]Graphic, error){
+func GetCurrentUsersGraphics(ctx context.Context, userID string) ([]Graphic, error) {
 	var graphics []Graphic
 
-	query := datastore.NewQuery("Graphic").Filter("UserId =", userID)
-	keys, err := query.GetAll(ctx, &graphics)
+	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
+	if err != nil {
+		return nil, err
+	}
+
+	query := datastore.NewQuery("Graphic").Filter("UserID =", userID)
+	keys, err := client.GetAll(ctx, query, &graphics)
 	if err != nil {
 		return nil, err
 	}
@@ -41,11 +51,16 @@ func GetCurrentUsersGraphics(ctx context.Context, userID string) ([]Graphic, err
 	return graphics, nil
 }
 
-func GetPublicGraphics(ctx context.Context) ([]Graphic, error){
+func GetPublicGraphics(ctx context.Context) ([]Graphic, error) {
 	var graphics []Graphic
 
+	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
+	if err != nil {
+		return nil, err
+	}
+
 	query := datastore.NewQuery("Graphic").Filter("IsPublic =", true)
-	keys, err := query.GetAll(ctx, &graphics)
+	keys, err := client.GetAll(ctx, query, &graphics)
 	if err != nil {
 		return nil, err
 	}
@@ -59,13 +74,19 @@ func GetPublicGraphics(ctx context.Context) ([]Graphic, error){
 
 func GetGraphicFileTypes(ctx context.Context, graphicIDs []string) (map[string]string, error) {
 	var keys []*datastore.Key
+
+	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
+	if err != nil {
+		return nil, err
+	}
+
 	for _, id := range graphicIDs {
-		keys = append(keys, datastore.NewKey(ctx, "Graphic", id, 0, nil))
+		keys = append(keys, datastore.NameKey("Graphic", id, nil))
 	}
 
 	graphicFileTypes := map[string]string{}
 	graphics := make([]Graphic, len(graphicIDs))
-	if err := datastore.GetMulti(ctx, keys, graphics); err != nil {
+	if err := client.GetMulti(ctx, keys, graphics); err != nil {
 		return nil, err
 	}
 
@@ -84,22 +105,27 @@ func CreateGraphic(ctx context.Context, id string, userID string, fileType strin
 	graphic.Created = time.Now()
 	graphic.FileType = fileType
 
-	key := datastore.NewKey(ctx, "Graphic", graphic.ID, 0, nil)
-	if _, err := datastore.Put(ctx, key, graphic); err != nil {
+	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
+	if err != nil {
+		return err
+	}
+
+	key := datastore.NameKey("Graphic", graphic.ID, nil)
+	if _, err := client.Put(ctx, key, graphic); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func DeleteGraphics(ctx context.Context, ids []string) error {
+func DeleteGraphicsInTransaction(tx *datastore.Transaction, ids []string) error {
 	var graphicKeys []*datastore.Key
 
 	for _, id := range ids {
-		graphicKeys = append(graphicKeys, datastore.NewKey(ctx, "Graphic", id, 0, nil))
+		graphicKeys = append(graphicKeys, datastore.NameKey("Graphic", id, nil))
 	}
 
-	if err := datastore.DeleteMulti(ctx, graphicKeys); err != nil {
+	if err := tx.DeleteMulti(graphicKeys); err != nil {
 		return err
 	}
 
@@ -108,7 +134,7 @@ func DeleteGraphics(ctx context.Context, ids []string) error {
 
 func storeGraphicThumbnailURL(ctx context.Context, graphics *[]Graphic, keys []*datastore.Key) error {
 	for i, key := range keys {
-		id := key.StringID()
+		id := key.Name
 		filePath := storageObjectFilePath("Graphic", id, (*graphics)[i].FileType)
 		fileType := "" // this is unnecessary when GET request
 		bucketName := infrastructure.MaterialBucketName(ctx)

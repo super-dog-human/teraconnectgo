@@ -52,7 +52,7 @@ func CreateAvatarsAndBlankFile(request *http.Request, objectRequest domain.Stora
 		if err != nil {
 			return signedURLs, err
 		}
-		urls[i] = domain.SignedURL{fileID, url}
+		urls[i] = domain.SignedURL{FileID: fileID, SignedURL: url}
 
 		if err = domain.CreateAvatar(ctx, fileID, currentUser.ID); err != nil {
 			return signedURLs, err

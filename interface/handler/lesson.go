@@ -3,9 +3,9 @@ package handler
 import (
 	"net/http"
 
+	"github.com/labstack/echo/v4"
 	"github.com/super-dog-human/teraconnectgo/domain"
 	"github.com/super-dog-human/teraconnectgo/usecase"
-	"github.com/labstack/echo/v4"
 )
 
 func getLessons(c echo.Context) error {
@@ -127,7 +127,7 @@ func deleteLesson(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, errMessage)
 	}
 
-	if err := usecase.DeleteOwnLessonById(c.Request(), id); err != nil {
+	if err := usecase.DeleteOwnLessonByID(c.Request(), id); err != nil {
 		fatalLog(err)
 		lessonErr, ok := err.(usecase.LessonErrorCode)
 		if ok && lessonErr == usecase.LessonNotFound {

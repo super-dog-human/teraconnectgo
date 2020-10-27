@@ -3,9 +3,9 @@ package handler
 import (
 	"net/http"
 
+	"github.com/labstack/echo/v4"
 	"github.com/super-dog-human/teraconnectgo/domain"
 	"github.com/super-dog-human/teraconnectgo/usecase"
-	"github.com/labstack/echo/v4"
 )
 
 func getAvatars(c echo.Context) error {
@@ -16,9 +16,8 @@ func getAvatars(c echo.Context) error {
 		if ok && authErr == domain.UserNotFound {
 			// when token is valid but user account not exists.
 			return c.JSON(http.StatusNotFound, err.Error())
-		} else {
-			return c.JSON(http.StatusInternalServerError, err.Error())
 		}
+		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
 	if len(avatars) == 0 {

@@ -9,12 +9,14 @@ import (
 
 // Main is handling API request.
 func Main(appEnv string) {
+	infrastructure.SetAppEnv(appEnv)
+
 	e := echo.New()
 	e.Pre(middleware.RemoveTrailingSlash())
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{infrastructure.OriginUrl(appEnv)},
+		AllowOrigins: []string{infrastructure.OriginURL()},
 	}))
 
 	e.GET("/categories", getCategories)
@@ -47,9 +49,5 @@ func Main(appEnv string) {
 	auth.GET("/storage_objects", getStorageObjects)
 	auth.POST("/blank_raw_voices", postBlankRawVoice)
 
-	port := ":80"
-	if appEnv == "development" {
-		port = ":1234"
-	}
-	e.Logger.Fatal(e.Start(port))
+	e.Logger.Fatal(e.Start(":80"))
 }

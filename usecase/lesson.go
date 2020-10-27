@@ -9,8 +9,9 @@ import (
 	"reflect"
 	"strings"
 
+	"cloud.google.com/go/datastore"
 	"github.com/super-dog-human/teraconnectgo/domain"
-	"google.golang.org/appengine/datastore"
+	"github.com/super-dog-human/teraconnectgo/infrastructure"
 )
 
 type LessonErrorCode uint
@@ -59,7 +60,7 @@ func GetPublicLesson(request *http.Request, id string) (domain.Lesson, error) {
 		return *lesson, err
 	}
 
-	lesson, err := domain.GetLessonById(ctx, id)
+	lesson, err := domain.GetLessonByID(ctx, id)
 	if err == datastore.ErrNoSuchEntity {
 		return lesson, LessonNotFound
 	} else if err != nil {
@@ -82,7 +83,7 @@ func GetPrivateLesson(request *http.Request, id string) (domain.Lesson, error) {
 		return *lesson, err
 	}
 
-	lesson, err := getLessonByIdWithResources(ctx, id)
+	lesson, err := getLessonByIDWithResources(ctx, id)
 	if err == datastore.ErrNoSuchEntity {
 		return lesson, LessonNotFound
 	} else if err != nil {
@@ -122,7 +123,7 @@ func UpdateLesson(id string, request *http.Request) (domain.Lesson, error) {
 		return *lesson, err
 	}
 
-	lesson, err := domain.GetLessonById(ctx, id)
+	lesson, err := domain.GetLessonByID(ctx, id)
 	if err != nil {
 		if err == datastore.ErrNoSuchEntity {
 			return lesson, LessonNotFound
@@ -170,7 +171,7 @@ func UpdateLesson(id string, request *http.Request) (domain.Lesson, error) {
 	return lesson, nil
 }
 
-func DeleteOwnLessonById(request *http.Request, id string) error {
+func DeleteOwnLessonByID(request *http.Request, id string) error {
 	ctx := request.Context()
 
 	currentUser, err := domain.GetCurrentUser(request)
@@ -178,7 +179,7 @@ func DeleteOwnLessonById(request *http.Request, id string) error {
 		return err
 	}
 
-	lesson, err := domain.GetLessonById(ctx, id)
+	lesson, err := domain.GetLessonByID(ctx, id)
 	if err != nil {
 		if err == datastore.ErrNoSuchEntity {
 			return LessonNotFound
@@ -197,8 +198,8 @@ func DeleteOwnLessonById(request *http.Request, id string) error {
 	return nil
 }
 
-func getLessonByIdWithResources(ctx context.Context, id string) (domain.Lesson, error) {
-	lesson, err := domain.GetLessonById(ctx, id)
+func getLessonByIDWithResources(ctx context.Context, id string) (domain.Lesson, error) {
+	lesson, err := domain.GetLessonByID(ctx, id)
 
 	if err != nil {
 		if err == datastore.ErrNoSuchEntity {
@@ -207,13 +208,13 @@ func getLessonByIdWithResources(ctx context.Context, id string) (domain.Lesson, 
 		return lesson, err
 	}
 
-	avatar, err := domain.GetAvatarByIds(ctx, lesson.AvatarID)
+	avatar, err := domain.GetAvatarByIDs(ctx, lesson.AvatarID)
 	if err != nil {
 		return lesson, err
 	}
 	lesson.Avatar = avatar
 
-	graphics, err := domain.GetGraphicsByIds(ctx, lesson.GraphicIDs)
+	graphics, err := domain.GetGraphicsByIDs(ctx, lesson.GraphicIDs)
 	if err != nil {
 		return lesson, err
 	}
@@ -223,23 +224,32 @@ func getLessonByIdWithResources(ctx context.Context, id string) (domain.Lesson, 
 }
 
 func deleteLessonAndRecources(ctx context.Context, lesson domain.Lesson) error {
-	err := datastore.RunInTransaction(ctx, func(ctx context.Context) error {
+	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
+	if err != nil {
+		return err
+	}
 
-		if err := domain.DeleteAvatar(ctx, lesson.AvatarID); err != nil {
+	voiceTexts, err := domain.GetRawVoiceTexts(ctx, lesson.ID)
+	if err != nil {
+		return err
+	}
+
+	_, err = client.RunInTransaction(ctx, func(tx *datastore.Transaction) error {
+		if err := domain.DeleteAvatarInTransaction(tx, lesson.AvatarID); err != nil {
 			return err
 		}
 
-		if err := domain.DeleteGraphics(ctx, lesson.GraphicIDs); err != nil {
+		if err := domain.DeleteGraphicsInTransaction(tx, lesson.GraphicIDs); err != nil {
 			return err
 		}
 
-		if err := domain.DeleteRawVoiceTextsByLessonID(ctx, lesson.ID); err != nil {
+		if err := domain.DeleteRawVoiceTextsInTransactionByLessonID(tx, voiceTexts); err != nil {
 			return err
 		}
 
 		// TODO remove files in GCS
 
-		if err := domain.DeleteLessonById(ctx, lesson.ID); err != nil {
+		if err := domain.DeleteLessonInTransactionByID(tx, lesson.ID); err != nil {
 			return err
 		}
 
