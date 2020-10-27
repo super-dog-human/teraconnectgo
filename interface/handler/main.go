@@ -1,6 +1,9 @@
 package handler
 
 import (
+	"log"
+	"net/http"
+
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/super-dog-human/teraconnectgo/domain"
@@ -12,6 +15,8 @@ func Main(appEnv string) {
 	infrastructure.SetAppEnv(appEnv)
 
 	e := echo.New()
+	http.Handle("/", e)
+
 	e.Pre(middleware.RemoveTrailingSlash())
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
@@ -49,5 +54,5 @@ func Main(appEnv string) {
 	auth.GET("/storage_objects", getStorageObjects)
 	auth.POST("/blank_raw_voices", postBlankRawVoice)
 
-	e.Logger.Fatal(e.Start(":80"))
+	log.Fatal(http.ListenAndServe(":80", nil))
 }
