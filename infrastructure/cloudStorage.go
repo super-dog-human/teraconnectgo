@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/base64"
-	"fmt"
+	"log"
 	"time"
 
 	"cloud.google.com/go/storage"
@@ -18,14 +18,16 @@ var iamService *iam.Service
 func init() {
 	cred, err := google.DefaultClient(context.Background(), iam.CloudPlatformScope)
 	if err != nil {
-		fmt.Printf("failed to initialize the Google client.\n")
-		fmt.Printf("%v+\n", errors.WithStack(err.(error)).Error())
+		log.Printf("failed to initialize the Google client.\n")
+		log.Printf("%v+\n", errors.WithStack(err.(error)).Error())
+		return
 	}
 
 	iamService, err = iam.New(cred)
 	if err != nil {
-		fmt.Printf("failed to initialize the IAM.\n")
-		fmt.Printf("%v+\n", errors.WithStack(err.(error)).Error())
+		log.Printf("failed to initialize the IAM.\n")
+		log.Printf("%v+\n", errors.WithStack(err.(error)).Error())
+		return
 	}
 }
 
