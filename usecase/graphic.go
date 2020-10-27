@@ -52,7 +52,7 @@ func CreateGraphicsAndBlankFile(request *http.Request, objectRequest domain.Stor
 		if err != nil {
 			return signedURLs, err
 		}
-		urls[i] = domain.SignedURL{fileID, url}
+		urls[i] = domain.SignedURL{FileID: fileID, SignedURL: url}
 
 		if err = domain.CreateGraphic(ctx, fileID, currentUser.ID, fileRequest.Extension); err != nil {
 			return signedURLs, err

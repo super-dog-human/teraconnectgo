@@ -24,7 +24,7 @@ func (e UserErrorCode) Error() string {
 	}
 }
 
-// GetUser for fetch current user account
+// GetCurrentUser for fetch current user account
 func GetCurrentUser(request *http.Request) (domain.User, error) {
 	var currentUser domain.User
 	currentUser, err := domain.GetCurrentUser(request)
