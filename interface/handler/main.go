@@ -3,6 +3,7 @@ package handler
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -54,5 +55,11 @@ func Main(appEnv string) {
 	auth.GET("/storage_objects", getStorageObjects)
 	auth.POST("/blank_raw_voices", postBlankRawVoice)
 
-	log.Fatal(http.ListenAndServe(":80", nil))
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	log.Printf("Listening on port %s", port)
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
