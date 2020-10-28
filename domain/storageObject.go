@@ -34,7 +34,7 @@ type EntityBelongToFile struct {
 
 func CreateBlankFileToGCS(ctx context.Context, fileID string, fileEntity string, fileRequest FileRequest) (string, error) {
 	filePath := storageObjectFilePath(fileEntity, fileID, fileRequest.Extension)
-	bucketName := infrastructure.MaterialBucketName(ctx)
+	bucketName := infrastructure.MaterialBucketName()
 
 	if err := infrastructure.CreateObjectToGCS(ctx, bucketName, filePath, fileRequest.ContentType, nil); err != nil {
 		return "", err
@@ -66,7 +66,7 @@ func EntityOfRequestedFile(ctx context.Context, entityID string, entityName stri
 
 func GetSignedURL(ctx context.Context, request FileRequest) (string, error) {
 	filePath := storageObjectFilePath(request.Entity, request.ID, request.Extension)
-	bucketName := infrastructure.MaterialBucketName(ctx)
+	bucketName := infrastructure.MaterialBucketName()
 	url, err := infrastructure.GetGCSSignedURL(ctx, bucketName, filePath, "GET", "")
 	if err != nil {
 		return "", nil

@@ -11,7 +11,7 @@ import (
 func GetLessonMaterialFromGCS(ctx context.Context, lessonID string) (LessonMaterial, error) {
 	lessonMaterial := new(LessonMaterial)
 
-	bucketName := infrastructure.MaterialBucketName(ctx)
+	bucketName := infrastructure.MaterialBucketName()
 	bytes, err := infrastructure.GetObjectFromGCS(ctx, bucketName, lessonFilePath(lessonID))
 
 	if err != nil {
@@ -35,7 +35,7 @@ func CreateLessonMaterialFileToGCS(ctx context.Context, lessonID string, lessonM
 	}
 
 	contentType := "application/json"
-	bucketName := infrastructure.MaterialBucketName(ctx)
+	bucketName := infrastructure.MaterialBucketName()
 	if err := infrastructure.CreateObjectToGCS(ctx, bucketName, lessonFilePath(lessonID), contentType, contents); err != nil {
 		return err
 	}

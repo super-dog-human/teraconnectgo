@@ -6,8 +6,8 @@ func OriginURL() string {
 	case "production":
 		return "https://teraconnect.org"
 	case "staging":
-		return "https://teraconnect-front-dot-teraconnect-stg.an.r.appspot.com"
+		return "https://teraconnect-front-dot-teraconnect-staging.an.r.appspot.com"
 	default:
-		return ""
+		return "http://localhost:1234"
 	}
 }

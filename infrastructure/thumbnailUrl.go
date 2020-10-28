@@ -20,12 +20,5 @@ func GraphicThumbnailURL(ctx context.Context, id string, fileType string) string
 }
 
 func storageURL(ctx context.Context) string {
-	switch AppEnv() {
-	case "production":
-		return "https://storage.googleapis.com/teraconn_thumbnail"
-	case "staging":
-		return "https://storage.googleapis.com/teraconn_thumbnail_staging"
-	default:
-		return ""
-	}
+	return "https://storage.googleapis.com/" + ThumbnailBucketName()
 }

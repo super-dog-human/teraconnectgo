@@ -137,7 +137,7 @@ func storeGraphicThumbnailURL(ctx context.Context, graphics *[]Graphic, keys []*
 		id := key.Name
 		filePath := storageObjectFilePath("Graphic", id, (*graphics)[i].FileType)
 		fileType := "" // this is unnecessary when GET request
-		bucketName := infrastructure.MaterialBucketName(ctx)
+		bucketName := infrastructure.MaterialBucketName()
 		url, err := infrastructure.GetGCSSignedURL(ctx, bucketName, filePath, "GET", fileType)
 		if err != nil {
 			return err

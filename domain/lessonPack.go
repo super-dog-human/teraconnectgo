@@ -35,7 +35,7 @@ func CreateLessonZip(ctx context.Context, lesson Lesson, graphicFileTypes map[st
 func UploadLessonZipToGCS(ctx context.Context, lessonID string, zip *bytes.Buffer) error {
 	zipFilePath := "lesson/" + lessonID + ".zip"
 	contentType := "application/zip"
-	bucketName := infrastructure.MaterialBucketName(ctx)
+	bucketName := infrastructure.MaterialBucketName()
 	if err := infrastructure.CreateObjectToGCS(ctx, bucketName, zipFilePath, contentType, zip.Bytes()); err != nil {
 		return err
 	}
@@ -46,8 +46,8 @@ func UploadLessonZipToGCS(ctx context.Context, lessonID string, zip *bytes.Buffe
 func RemoveUsedFilesInGCS(ctx context.Context, id string, voiceTexts []RawVoiceText) error {
 	var err error
 
-	rawVoiceBucketName := infrastructure.RawVoiceBucketName(ctx)
-	voiceForTranscriptionBucketName := infrastructure.VoiceForTranscriptionBucketName(ctx)
+	rawVoiceBucketName := infrastructure.RawVoiceBucketName()
+	voiceForTranscriptionBucketName := infrastructure.VoiceForTranscriptionBucketName()
 	for _, voiceText := range voiceTexts {
 		filePathInGCS := id + "-" + voiceText.FileID + ".wav"
 
@@ -69,7 +69,7 @@ func addGraphicsToZip(ctx context.Context, usedGraphicIDs []string, graphicFileT
 	for _, graphicID := range usedGraphicIDs {
 		fileType := graphicFileTypes[graphicID]
 		filePathInGCS := "graphic/" + graphicID + "." + fileType
-		bucketName := infrastructure.MaterialBucketName(ctx)
+		bucketName := infrastructure.MaterialBucketName()
 
 		objectBytes, err := infrastructure.GetObjectFromGCS(ctx, bucketName, filePathInGCS)
 		if err != nil {
@@ -94,7 +94,7 @@ func addGraphicsToZip(ctx context.Context, usedGraphicIDs []string, graphicFileT
 func addVoiceToZip(ctx context.Context, voiceTexts []RawVoiceText, id string, zipWriter *zip.Writer) error {
 	for _, voiceText := range voiceTexts {
 		filePathInGCS := "voice/" + id + "/" + voiceText.FileID + ".ogg"
-		bucketName := infrastructure.MaterialBucketName(ctx)
+		bucketName := infrastructure.MaterialBucketName()
 
 		objectBytes, err := infrastructure.GetObjectFromGCS(ctx, bucketName, filePathInGCS)
 		if err != nil {
@@ -118,7 +118,7 @@ func addVoiceToZip(ctx context.Context, voiceTexts []RawVoiceText, id string, zi
 
 func addLessonJSONToZip(ctx context.Context, id string, zipWriter *zip.Writer) error {
 	filePathInGCS := "lesson/" + id + ".json"
-	bucketName := infrastructure.MaterialBucketName(ctx)
+	bucketName := infrastructure.MaterialBucketName()
 	jsonBytes, err := infrastructure.GetObjectFromGCS(ctx, bucketName, filePathInGCS)
 	if err != nil {
 		return err

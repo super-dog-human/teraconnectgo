@@ -8,6 +8,6 @@ func ProjectID() string {
 	case "staging":
 		return "teraconnect-staging"
 	default:
-		return ""
+		return "teraconnect-development"
 	}
 }
