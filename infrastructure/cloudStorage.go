@@ -19,14 +19,14 @@ func init() {
 	cred, err := google.DefaultClient(context.Background(), iam.CloudPlatformScope)
 	if err != nil {
 		log.Printf("failed to initialize the Google client.\n")
-		log.Printf("%v+\n", errors.WithStack(err.(error)).Error())
+		log.Printf("%v\n", errors.WithStack(err.(error)).Error())
 		return
 	}
 
 	iamService, err = iam.New(cred)
 	if err != nil {
 		log.Printf("failed to initialize the IAM.\n")
-		log.Printf("%v+\n", errors.WithStack(err.(error)).Error())
+		log.Printf("%v\n", errors.WithStack(err.(error)).Error())
 		return
 	}
 }
