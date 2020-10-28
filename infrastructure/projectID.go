@@ -6,7 +6,7 @@ func ProjectID() string {
 	case "production":
 		return "teraconnect-209509"
 	case "staging":
-		return "teraconnect-stagin"
+		return "teraconnect-staging"
 	default:
 		return ""
 	}
