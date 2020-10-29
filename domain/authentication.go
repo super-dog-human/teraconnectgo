@@ -41,8 +41,9 @@ func (e AuthErrorCode) Error() string {
 	}
 }
 
-// PublicKey is return rsa key from pub file.
-func PublicKey() *rsa.PublicKey {
+publicKey := publicKey()
+
+func publicKey() *rsa.PublicKey {
 	keyData, _ := ioutil.ReadFile("./teraconnect.pub")
 	publicKey, _ := jwt.ParseRSAPublicKeyFromPEM(keyData)
 	return publicKey
@@ -91,11 +92,11 @@ func UserSubject(r *http.Request) (string, error) {
 		if !ok {
 			return nil, UnexpectedSigningMethod
 		}
-		return PublicKey(), nil
+		return publicKey, nil
 	})
 
 	if err != nil {
-		return "", UnexpectedSigningMethod
+		return "", err
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
