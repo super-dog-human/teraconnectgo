@@ -1,13 +1,14 @@
 package domain
 
 import (
-	"crypto/rsa"
 	"io/ioutil"
+	"log"
 	"net/http"
 
 	"cloud.google.com/go/datastore"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/dgrijalva/jwt-go/request"
+	"github.com/pkg/errors"
 	"github.com/super-dog-human/teraconnectgo/infrastructure"
 )
 
@@ -41,12 +42,15 @@ func (e AuthErrorCode) Error() string {
 	}
 }
 
-publicKey := publicKey()
+var PublicKey = loadPublicKey()
 
-func publicKey() *rsa.PublicKey {
-	keyData, _ := ioutil.ReadFile("./teraconnect.pub")
-	publicKey, _ := jwt.ParseRSAPublicKeyFromPEM(keyData)
-	return publicKey
+func loadPublicKey() string {
+	bytes, err := ioutil.ReadFile("./publicKey.json")
+	if err == nil {
+		return string(bytes)
+	}
+	log.Printf(errors.WithStack(err.(error)).Error())
+	return ""
 }
 
 // GetCurrentUser is return logged in user
@@ -92,7 +96,7 @@ func UserSubject(r *http.Request) (string, error) {
 		if !ok {
 			return nil, UnexpectedSigningMethod
 		}
-		return publicKey, nil
+		return PublicKey, nil
 	})
 
 	if err != nil {

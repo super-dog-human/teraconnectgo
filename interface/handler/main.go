@@ -31,7 +31,7 @@ func Main(appEnv string) {
 
 	auth := e.Group("")
 	auth.Use(middleware.JWTWithConfig(middleware.JWTConfig{
-		SigningKey:    domain.PublicKey(),
+		SigningKey:    domain.PublicKey,
 		SigningMethod: "RS256",
 	}))
 
