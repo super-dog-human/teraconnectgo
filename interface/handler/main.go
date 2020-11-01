@@ -7,7 +7,6 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/super-dog-human/teraconnectgo/domain"
 	"github.com/super-dog-human/teraconnectgo/infrastructure"
 )
 
@@ -29,12 +28,7 @@ func Main(appEnv string) {
 	e.GET("/lessons", getLessons)
 	e.GET("/lessons/:id", getLesson)
 
-	auth := e.Group("")
-	auth.Use(middleware.JWTWithConfig(middleware.JWTConfig{
-		SigningKey:    domain.PublicKey,
-		SigningMethod: "RS256",
-	}))
-
+	auth := e.Group("", Authentication())
 	auth.GET("/users/me", getUserMe)
 	auth.GET("/users/:id", getUser) // publicでもいいかも
 	auth.POST("/users", postUser)

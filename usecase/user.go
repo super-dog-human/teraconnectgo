@@ -48,8 +48,6 @@ func GetUser(request *http.Request, id string) (domain.User, error) {
 }
 
 func CreateUser(request *http.Request, user *domain.User) error {
-	ctx := request.Context()
-
 	// not error when current user was not found.
 	if _, err := domain.GetCurrentUser(request); err != nil && err != domain.UserNotFound {
 		return err
@@ -57,7 +55,7 @@ func CreateUser(request *http.Request, user *domain.User) error {
 		return AlreadyUserExists
 	}
 
-	if err := domain.CreateUser(ctx, user); err != nil {
+	if err := domain.CreateUser(request, user); err != nil {
 		return err
 	}
 

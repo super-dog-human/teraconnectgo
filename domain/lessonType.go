@@ -4,11 +4,11 @@ import "time"
 
 // User is application registrated user
 type User struct {
-	ID       string	   `json:"id" datastore:"-"`
-	Name     string    `json:"name"`
-	Auth0Sub string	   `json:"-"`
-	Created  time.Time `json:"created"`
-	Updated  time.Time `json:"updated"`
+	ID      string    `json:"id" datastore:"-"`
+	Name    string    `json:"name"`
+	AuthSub string    `json:"-"`
+	Created time.Time `json:"created"`
+	Updated time.Time `json:"updated"`
 }
 
 // Category is lesson's category type.

@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"net/http"
 	"time"
 
 	"cloud.google.com/go/datastore"
@@ -31,12 +32,19 @@ func GetUserByID(ctx context.Context, id string) (User, error) {
 }
 
 // CreateUser is creating user.
-func CreateUser(ctx context.Context, user *User) error {
+func CreateUser(request *http.Request, user *User) error {
+	ctx := request.Context()
+
 	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
 	if err != nil {
 		return err
 	}
 
+	userSubject, err := UserSubject(request)
+	if err != nil {
+		return err
+	}
+	user.AuthSub = userSubject
 	user.Created = time.Now()
 	user.ID = xid.New().String()
 

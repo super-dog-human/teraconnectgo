@@ -3,9 +3,9 @@ package handler
 import (
 	"net/http"
 
+	"github.com/labstack/echo/v4"
 	"github.com/super-dog-human/teraconnectgo/domain"
 	"github.com/super-dog-human/teraconnectgo/usecase"
-	"github.com/labstack/echo/v4"
 )
 
 func getUserMe(c echo.Context) error {
@@ -52,12 +52,6 @@ func getUser(c echo.Context) error {
 
 func postUser(c echo.Context) error {
 	user := new(domain.User)
-
-	userSubject, err := domain.UserSubject(c.Request())
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, err.Error())
-	}
-	user.Auth0Sub = userSubject
 
 	if err := c.Bind(user); err != nil {
 		return c.JSON(http.StatusBadRequest, err.Error())
