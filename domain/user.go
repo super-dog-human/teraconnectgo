@@ -40,11 +40,11 @@ func CreateUser(request *http.Request, user *User) error {
 		return err
 	}
 
-	userSubject, err := UserSubject(request)
+	providerID, err := ProviderID(request)
 	if err != nil {
 		return err
 	}
-	user.AuthSub = userSubject
+	user.ProviderID = providerID
 	user.Created = time.Now()
 	user.ID = xid.New().String()
 

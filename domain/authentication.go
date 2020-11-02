@@ -92,22 +92,23 @@ func ValidTokenClaims(r *http.Request) (map[string]interface{}, error) {
 	return claims, nil
 }
 
-// UserSubject is return user subject in JWT.
-func UserSubject(r *http.Request) (string, error) {
+// ProviderID is return user account provider and subject in JWT.
+func ProviderID(r *http.Request) (string, error) {
 	claims, err := ValidTokenClaims(r)
 
 	if err != nil {
 		return "", err
 	}
 
-	return claims["sub"].(string), nil
+	providerID := claims["provider"].(string) + "_" + claims["id"].(string)
+	return providerID, nil
 }
 
 // GetCurrentUser is return logged in user
 func GetCurrentUser(request *http.Request) (User, error) {
 	user := new(User) // for return blank user when error
 
-	userSubject, err := UserSubject(request)
+	providerID, err := ProviderID(request)
 	if err != nil {
 		return *user, err
 	}
@@ -119,7 +120,7 @@ func GetCurrentUser(request *http.Request) (User, error) {
 		return *user, FailedDatastoreInitialize
 	}
 
-	query := datastore.NewQuery("User").Filter("AuthSub =", userSubject).Limit(1)
+	query := datastore.NewQuery("User").Filter("ProviderID =", providerID).Limit(1)
 	keys, err := client.GetAll(ctx, query, &users)
 	if err != nil {
 		return *user, FailedGettingUser
