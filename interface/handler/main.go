@@ -54,6 +54,5 @@ func Main(appEnv string) {
 		port = "8080"
 	}
 
-	log.Printf("Listening on port %s", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }

@@ -6,10 +6,8 @@ import (
 	"log"
 	"net/http"
 
-	"cloud.google.com/go/datastore"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/dgrijalva/jwt-go/request"
-	"github.com/super-dog-human/teraconnectgo/infrastructure"
 )
 
 type AuthErrorCode uint
@@ -87,8 +85,6 @@ func ValidTokenClaims(r *http.Request) (map[string]interface{}, error) {
 		return nil, InvalidToken
 	}
 
-	log.Printf("claims %v", claims)
-
 	return claims, nil
 }
 
@@ -102,35 +98,4 @@ func ProviderID(r *http.Request) (string, error) {
 
 	providerID := claims["provider"].(string) + "_" + claims["id"].(string)
 	return providerID, nil
-}
-
-// GetCurrentUser is return logged in user
-func GetCurrentUser(request *http.Request) (User, error) {
-	user := new(User) // for return blank user when error
-
-	providerID, err := ProviderID(request)
-	if err != nil {
-		return *user, err
-	}
-
-	var users []User
-	ctx := request.Context()
-	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
-	if err != nil {
-		return *user, FailedDatastoreInitialize
-	}
-
-	query := datastore.NewQuery("User").Filter("ProviderID =", providerID).Limit(1)
-	keys, err := client.GetAll(ctx, query, &users)
-	if err != nil {
-		return *user, FailedGettingUser
-	}
-
-	if len(users) == 0 {
-		return *user, UserNotFound
-	}
-
-	user = &users[0]
-	user.ID = keys[0].Name
-	return users[0], nil
 }

@@ -10,6 +10,37 @@ import (
 	"github.com/super-dog-human/teraconnectgo/infrastructure"
 )
 
+// GetCurrentUser is return logged in user
+func GetCurrentUser(request *http.Request) (User, error) {
+	user := new(User) // for return blank user when error
+
+	providerID, err := ProviderID(request)
+	if err != nil {
+		return *user, err
+	}
+
+	var users []User
+	ctx := request.Context()
+	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
+	if err != nil {
+		return *user, FailedDatastoreInitialize
+	}
+
+	query := datastore.NewQuery("User").Filter("ProviderID =", providerID).Limit(1)
+	keys, err := client.GetAll(ctx, query, &users)
+	if err != nil {
+		return *user, FailedGettingUser
+	}
+
+	if len(users) == 0 {
+		return *user, UserNotFound
+	}
+
+	user = &users[0]
+	user.ID = keys[0].Name
+	return users[0], nil
+}
+
 // GetUserByID is return user has ID.
 func GetUserByID(ctx context.Context, id string) (User, error) {
 	user := new(User)
