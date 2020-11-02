@@ -12,4 +12,5 @@
 *.out
 go.sum
 *.DS_Store
-*publickey.json
+public.pem
+
