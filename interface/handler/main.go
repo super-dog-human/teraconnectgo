@@ -27,10 +27,10 @@ func Main(appEnv string) {
 	e.GET("/categories", getCategories)
 	e.GET("/lessons", getLessons)
 	e.GET("/lessons/:id", getLesson)
+	e.GET("/users/:id", getUser)
 
 	auth := e.Group("", Authentication())
 	auth.GET("/users/me", getUserMe)
-	auth.GET("/users/:id", getUser) // publicでもいいかも
 	auth.POST("/users", postUser)
 	auth.PATCH("/users", patchUser)
 	auth.DELETE("/users", deleteUser)
