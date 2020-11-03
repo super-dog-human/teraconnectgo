@@ -48,12 +48,20 @@ func GetUser(request *http.Request, id string) (domain.User, error) {
 }
 
 func CreateUser(request *http.Request, user *domain.User) error {
-	// not error when current user was not found.
-	if _, err := domain.GetCurrentUser(request); err != nil && err != domain.UserNotFound {
+	providerID, err := domain.ProviderID(request)
+	if err != nil {
 		return err
-	} else if err == nil {
+	}
+
+	err = domain.ReserveUserProviderID(request, providerID)
+	if err == domain.AlreadyProviderIDExists {
 		return AlreadyUserExists
 	}
+	if err != nil {
+		return err
+	}
+
+	user.ProviderID = providerID
 
 	if err := domain.CreateUser(request, user); err != nil {
 		return err

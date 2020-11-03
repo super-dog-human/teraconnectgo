@@ -10,6 +10,21 @@ import (
 	"github.com/super-dog-human/teraconnectgo/infrastructure"
 )
 
+type UserErrorCode uint
+
+const (
+	AlreadyProviderIDExists UserErrorCode = 1
+)
+
+func (e UserErrorCode) Error() string {
+	switch e {
+	case AlreadyProviderIDExists:
+		return "provider id is already existed"
+	default:
+		return "unknown error"
+	}
+}
+
 // GetCurrentUser is return logged in user
 func GetCurrentUser(request *http.Request) (User, error) {
 	user := new(User) // for return blank user when error
@@ -62,6 +77,38 @@ func GetUserByID(ctx context.Context, id string) (User, error) {
 	return *user, nil
 }
 
+// ReserveUserProviderID creates user's ProviderID for  exclusion control.
+func ReserveUserProviderID(request *http.Request, providerID string) error {
+	ctx := request.Context()
+
+	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
+	if err != nil {
+		return err
+	}
+
+	_, err = client.RunInTransaction(ctx, func(tx *datastore.Transaction) error {
+		key := datastore.NameKey("UserProviderID", providerID, nil)
+		userProviderID := new(UserProviderID)
+
+		err := tx.Get(key, userProviderID)
+		if err == nil {
+			return AlreadyProviderIDExists
+		}
+		if err != datastore.ErrNoSuchEntity {
+			return err
+		}
+
+		// Put only when ErrNoSuchEntity
+		if _, err := tx.Put(key, userProviderID); err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	return err
+}
+
 // CreateUser is creating user.
 func CreateUser(request *http.Request, user *User) error {
 	ctx := request.Context()
@@ -71,13 +118,8 @@ func CreateUser(request *http.Request, user *User) error {
 		return err
 	}
 
-	providerID, err := ProviderID(request)
-	if err != nil {
-		return err
-	}
-	user.ProviderID = providerID
-	user.Created = time.Now()
 	user.ID = xid.New().String()
+	user.Created = time.Now()
 
 	key := datastore.NameKey("User", user.ID, nil)
 	if _, err := client.Put(ctx, key, user); err != nil {

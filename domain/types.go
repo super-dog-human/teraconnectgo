@@ -2,6 +2,10 @@ package domain
 
 import "time"
 
+type UserProviderID struct {
+	ID string
+}
+
 // User is application registrated user
 type User struct {
 	ID         string    `json:"id" datastore:"-"`
