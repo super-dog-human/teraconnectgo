@@ -254,7 +254,7 @@ func deleteLessonAndRecources(ctx context.Context, lesson domain.Lesson) error {
 		}
 
 		return nil
-	}, nil)
+	})
 
 	return err
 }

@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"cloud.google.com/go/datastore"
-	"github.com/rs/xid"
 	"github.com/super-dog-human/teraconnectgo/infrastructure"
 )
 
@@ -77,56 +76,34 @@ func GetUserByID(ctx context.Context, id string) (User, error) {
 	return *user, nil
 }
 
-// ReserveUserProviderID creates user's ProviderID for  exclusion control.
-func ReserveUserProviderID(request *http.Request, providerID string) error {
-	ctx := request.Context()
+// ReserveUserProviderIDInTransaction creates user's ProviderID for exclusion control.
+func ReserveUserProviderIDInTransaction(tx *datastore.Transaction, providerID string) error {
+	key := datastore.NameKey("UserProviderID", providerID, nil)
+	userProviderID := new(UserProviderID)
 
-	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
-	if err != nil {
+	err := tx.Get(key, userProviderID)
+	if err == nil {
+		return AlreadyProviderIDExists
+	}
+	if err != datastore.ErrNoSuchEntity {
 		return err
 	}
 
-	_, err = client.RunInTransaction(ctx, func(tx *datastore.Transaction) error {
-		key := datastore.NameKey("UserProviderID", providerID, nil)
-		userProviderID := new(UserProviderID)
-
-		err := tx.Get(key, userProviderID)
-		if err == nil {
-			return AlreadyProviderIDExists
-		}
-		if err != datastore.ErrNoSuchEntity {
-			return err
-		}
-
-		// Put only when ErrNoSuchEntity
-		if _, err := tx.Put(key, userProviderID); err != nil {
-			return err
-		}
-
-		return nil
-	})
-
+	// Put only when ErrNoSuchEntity
+	_, err = tx.Put(key, userProviderID)
 	return err
 }
 
-// CreateUser is creating user.
-func CreateUser(request *http.Request, user *User) error {
-	ctx := request.Context()
+// CreateUserInTransaction creates new user.
+func CreateUserInTransaction(tx *datastore.Transaction, user *User) (*datastore.PendingKey, error) {
+	key := datastore.IncompleteKey("User", nil)
 
-	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
+	pendingKey, err := tx.Put(key, user)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	user.ID = xid.New().String()
-	user.Created = time.Now()
-
-	key := datastore.NameKey("User", user.ID, nil)
-	if _, err := client.Put(ctx, key, user); err != nil {
-		return err
-	}
-
-	return nil
+	return pendingKey, nil
 }
 
 func UpdateUser(ctx context.Context, user *User) error {

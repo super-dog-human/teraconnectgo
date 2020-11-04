@@ -2,8 +2,12 @@ package usecase
 
 import (
 	"net/http"
+	"strconv"
+	"time"
 
+	"cloud.google.com/go/datastore"
 	"github.com/super-dog-human/teraconnectgo/domain"
+	"github.com/super-dog-human/teraconnectgo/infrastructure"
 )
 
 type UserErrorCode uint
@@ -47,25 +51,45 @@ func GetUser(request *http.Request, id string) (domain.User, error) {
 	return currentUser, nil
 }
 
+// CreateUser creates new user with exclusion control.
 func CreateUser(request *http.Request, user *domain.User) error {
+	ctx := request.Context()
+
+	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
+	if err != nil {
+		return err
+	}
+
 	providerID, err := domain.ProviderID(request)
 	if err != nil {
 		return err
 	}
 
-	err = domain.ReserveUserProviderID(request, providerID)
-	if err == domain.AlreadyProviderIDExists {
-		return AlreadyUserExists
-	}
+	user.ProviderID = providerID
+	user.Created = time.Now()
+
+	var pendingKey *datastore.PendingKey
+	commit, err := client.RunInTransaction(ctx, func(tx *datastore.Transaction) error {
+		err = domain.ReserveUserProviderIDInTransaction(tx, providerID)
+		if err == domain.AlreadyProviderIDExists {
+			return AlreadyUserExists
+		}
+		if err != nil {
+			return err
+		}
+
+		if pendingKey, err = domain.CreateUserInTransaction(tx, user); err != nil {
+			return err
+		}
+
+		return nil
+	})
+
 	if err != nil {
 		return err
 	}
 
-	user.ProviderID = providerID
-
-	if err := domain.CreateUser(request, user); err != nil {
-		return err
-	}
+	user.ID = strconv.FormatInt(commit.Key(pendingKey).ID, 10)
 
 	return nil
 }
