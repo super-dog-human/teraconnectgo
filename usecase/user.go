@@ -3,9 +3,9 @@ package usecase
 import (
 	"net/http"
 	"strconv"
-	"time"
 
 	"cloud.google.com/go/datastore"
+	"github.com/imdario/mergo"
 	"github.com/super-dog-human/teraconnectgo/domain"
 	"github.com/super-dog-human/teraconnectgo/infrastructure"
 )
@@ -42,13 +42,21 @@ func GetCurrentUser(request *http.Request) (domain.User, error) {
 // GetUser for fetch user account by id.
 func GetUser(request *http.Request, id string) (domain.User, error) {
 	ctx := request.Context()
+	var user domain.User
 
-	currentUser, err := domain.GetUserByID(ctx, id)
+	intID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
-		return currentUser, err
+		return user, err
 	}
 
-	return currentUser, nil
+	user, err = domain.GetUserByID(ctx, intID)
+	if err != nil {
+		return user, err
+	}
+
+	user.ID = id
+
+	return user, nil
 }
 
 // CreateUser creates new user with exclusion control.
@@ -66,7 +74,6 @@ func CreateUser(request *http.Request, user *domain.User) error {
 	}
 
 	user.ProviderID = providerID
-	user.Created = time.Now()
 
 	var pendingKey *datastore.PendingKey
 	commit, err := client.RunInTransaction(ctx, func(tx *datastore.Transaction) error {
@@ -98,13 +105,14 @@ func UpdateUser(request *http.Request, user *domain.User) error {
 	ctx := request.Context()
 
 	currentUser, err := domain.GetCurrentUser(request)
-	if err == nil {
-		return err
-	}
-
-	if user.ID != currentUser.ID {
+	if err != nil {
 		return UserNotAvailable
 	}
+
+	if err := mergo.Merge(user, currentUser); err != nil {
+		return err
+	}
+	user.Created = currentUser.Created // Created field not merged because this time.Time fieled was initialized is not nil.
 
 	if err = domain.UpdateUser(ctx, user); err != nil {
 		return err

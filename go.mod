@@ -7,6 +7,7 @@ require (
 	cloud.google.com/go/datastore v1.3.0
 	cloud.google.com/go/storage v1.12.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/imdario/mergo v0.3.11
 	github.com/labstack/echo/v4 v4.1.17
 	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/pkg/errors v0.9.1

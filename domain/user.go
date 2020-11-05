@@ -3,6 +3,7 @@ package domain
 import (
 	"context"
 	"net/http"
+	"strconv"
 	"time"
 
 	"cloud.google.com/go/datastore"
@@ -24,7 +25,7 @@ func (e UserErrorCode) Error() string {
 	}
 }
 
-// GetCurrentUser is return logged in user
+// GetCurrentUser returns user from valid token.
 func GetCurrentUser(request *http.Request) (User, error) {
 	user := new(User) // for return blank user when error
 
@@ -51,12 +52,12 @@ func GetCurrentUser(request *http.Request) (User, error) {
 	}
 
 	user = &users[0]
-	user.ID = keys[0].Name
+	user.ID = strconv.FormatInt(keys[0].ID, 10)
 	return users[0], nil
 }
 
 // GetUserByID is return user has ID.
-func GetUserByID(ctx context.Context, id string) (User, error) {
+func GetUserByID(ctx context.Context, id int64) (User, error) {
 	user := new(User)
 
 	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
@@ -64,14 +65,13 @@ func GetUserByID(ctx context.Context, id string) (User, error) {
 		return *user, err
 	}
 
-	key := datastore.NameKey("User", id, nil)
+	key := datastore.IDKey("User", id, nil)
 	if err := client.Get(ctx, key, user); err != nil {
 		if err == datastore.ErrNoSuchEntity {
 			return *user, UserNotFound
 		}
 		return *user, err
 	}
-	user.ID = id
 
 	return *user, nil
 }
@@ -98,6 +98,8 @@ func ReserveUserProviderIDInTransaction(tx *datastore.Transaction, providerID st
 func CreateUserInTransaction(tx *datastore.Transaction, user *User) (*datastore.PendingKey, error) {
 	key := datastore.IncompleteKey("User", nil)
 
+	user.Created = time.Now()
+
 	pendingKey, err := tx.Put(key, user)
 	if err != nil {
 		return nil, err
@@ -112,9 +114,14 @@ func UpdateUser(ctx context.Context, user *User) error {
 		return err
 	}
 
+	userID, err := strconv.ParseInt(user.ID, 10, 64)
+	if err != nil {
+		return err
+	}
+	key := datastore.IDKey("User", userID, nil)
+
 	user.Updated = time.Now()
 
-	key := datastore.NameKey("User", user.ID, nil)
 	if _, err := client.Put(ctx, key, user); err != nil {
 		return err
 	}

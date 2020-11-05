@@ -26,16 +26,7 @@ func getUserMe(c echo.Context) error {
 }
 
 func getUser(c echo.Context) error {
-	id := c.Param("id")
-
-	ids := []string{id}
-	if !IsValidXIDs(ids) {
-		errMessage := "Invalid ID(s) error"
-		warnLog(errMessage)
-		return c.JSON(http.StatusBadRequest, errMessage)
-	}
-
-	user, err := usecase.GetUser(c.Request(), id)
+	user, err := usecase.GetUser(c.Request(), c.Param("id"))
 
 	if err != nil {
 		authErr, ok := err.(domain.AuthErrorCode)

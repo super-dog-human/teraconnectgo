@@ -12,8 +12,8 @@ type User struct {
 	ProviderID string    `json:"-"`
 	Name       string    `json:"name"`
 	Email      string    `json:"email"`
-	Created    time.Time `json:"created"`
-	Updated    time.Time `json:"updated"`
+	Created    time.Time `json:"-"`
+	Updated    time.Time `json:"-"`
 }
 
 // Category is lesson's category type.
