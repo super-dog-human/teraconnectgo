@@ -2,21 +2,17 @@ package infrastructure
 
 import (
 	"context"
-	"strings"
+	"fmt"
 )
 
 // AvatarThumbnailURL is return thumbnail URL of avatar each environments.
-func AvatarThumbnailURL(ctx context.Context, id string) string {
-	avatarThumbnailURL := storageURL(ctx) + "/avatar/{id}.png"
-	return strings.Replace(avatarThumbnailURL, "{id}", id, 1)
+func AvatarThumbnailURL(ctx context.Context, id int64) string {
+	return fmt.Sprintf("%s/avatar/%d.png", storageURL(ctx), id)
 }
 
 // GraphicThumbnailURL is return thumbnail URL of graphic each environments.
-func GraphicThumbnailURL(ctx context.Context, id string, fileType string) string {
-	graphicThumbnailURL := storageURL(ctx) + "/graphic/{id}.{fileType}"
-	graphicThumbnailURL = strings.Replace(graphicThumbnailURL, "{id}", id, 1)
-	return strings.Replace(graphicThumbnailURL, "{fileType}", fileType, 1)
-
+func GraphicThumbnailURL(ctx context.Context, id int64, fileType string) string {
+	return fmt.Sprintf("%s/graphic/%d.%s", storageURL(ctx), id, fileType)
 }
 
 func storageURL(ctx context.Context) string {

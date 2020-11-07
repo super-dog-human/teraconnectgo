@@ -2,19 +2,18 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 
+	"github.com/labstack/echo/v4"
 	"github.com/super-dog-human/teraconnectgo/domain"
 	"github.com/super-dog-human/teraconnectgo/usecase"
-	"github.com/labstack/echo/v4"
 )
 
 func getLessonMaterials(c echo.Context) error {
-	lessonID := c.Param("id")
-
-	ids := []string{lessonID}
-	if !IsValidXIDs(ids) {
+	lessonID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
 		errMessage := "Invalid ID(s) error"
-		fatalLog(errMessage)
+		warnLog(errMessage)
 		return c.JSON(http.StatusBadRequest, errMessage)
 	}
 
@@ -34,12 +33,10 @@ func getLessonMaterials(c echo.Context) error {
 }
 
 func postLessonMaterial(c echo.Context) error {
-	lessonID := c.Param("id")
-
-	ids := []string{lessonID}
-	if !IsValidXIDs(ids) {
+	lessonID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
 		errMessage := "Invalid ID(s) error"
-		fatalLog(errMessage)
+		warnLog(errMessage)
 		return c.JSON(http.StatusBadRequest, errMessage)
 	}
 
@@ -60,17 +57,14 @@ func postLessonMaterial(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-
 	return c.JSON(http.StatusCreated, "succeeded")
 }
 
 func putLessonMaterial(c echo.Context) error {
-	lessonID := c.Param("id")
-
-	ids := []string{lessonID}
-	if !IsValidXIDs(ids) {
+	lessonID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
 		errMessage := "Invalid ID(s) error"
-		fatalLog(errMessage)
+		warnLog(errMessage)
 		return c.JSON(http.StatusBadRequest, errMessage)
 	}
 
@@ -90,7 +84,6 @@ func putLessonMaterial(c echo.Context) error {
 		}
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
-
 
 	return c.JSON(http.StatusCreated, "succeeded")
 }

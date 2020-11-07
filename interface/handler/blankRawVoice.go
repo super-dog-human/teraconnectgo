@@ -15,15 +15,7 @@ func postBlankRawVoice(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 
-	lessonID := request.LessonID
-	ids := []string{lessonID}
-	if !IsValidXIDs(ids) {
-		errMessage := "Invalid ID(s) error"
-		fatalLog(errMessage)
-		return c.JSON(http.StatusBadRequest, errMessage)
-	}
-
-	signedURL, err := usecase.CreateBlankRawVoiceFile(c.Request(), lessonID)
+	signedURL, err := usecase.CreateBlankRawVoiceFile(c.Request(), request.LessonID)
 	if err != nil {
 		fatalLog(err)
 		lessonErr, ok := err.(usecase.LessonErrorCode)
@@ -41,5 +33,5 @@ func postBlankRawVoice(c echo.Context) error {
 }
 
 type postRawVoiceRequest struct {
-	LessonID string `json:"lesson_id"`
+	LessonID int64 `json:"lesson_id"`
 }

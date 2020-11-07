@@ -3,12 +3,13 @@ package domain
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	"cloud.google.com/go/storage"
 	"github.com/super-dog-human/teraconnectgo/infrastructure"
 )
 
-func GetLessonMaterialFromGCS(ctx context.Context, lessonID string) (LessonMaterial, error) {
+func GetLessonMaterialFromGCS(ctx context.Context, lessonID int64) (LessonMaterial, error) {
 	lessonMaterial := new(LessonMaterial)
 
 	bucketName := infrastructure.MaterialBucketName()
@@ -28,7 +29,7 @@ func GetLessonMaterialFromGCS(ctx context.Context, lessonID string) (LessonMater
 	return *lessonMaterial, nil
 }
 
-func CreateLessonMaterialFileToGCS(ctx context.Context, lessonID string, lessonMaterial LessonMaterial) error {
+func CreateLessonMaterialFileToGCS(ctx context.Context, lessonID int64, lessonMaterial LessonMaterial) error {
 	contents, err := json.Marshal(lessonMaterial)
 	if err != nil {
 		return err
@@ -43,8 +44,8 @@ func CreateLessonMaterialFileToGCS(ctx context.Context, lessonID string, lessonM
 	return nil
 }
 
-func lessonFilePath(lessonID string) string {
-	return "lesson/" + lessonID + ".json"
+func lessonFilePath(lessonID int64) string {
+	return fmt.Sprintf("lesson/%d.json", lessonID)
 }
 
 type LessonMaterial struct {

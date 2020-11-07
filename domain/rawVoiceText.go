@@ -7,7 +7,7 @@ import (
 	"github.com/super-dog-human/teraconnectgo/infrastructure"
 )
 
-func GetRawVoiceTexts(ctx context.Context, lessonID string) ([]RawVoiceText, error) {
+func GetRawVoiceTexts(ctx context.Context, lessonID int64) ([]RawVoiceText, error) {
 	var voiceTexts []RawVoiceText
 
 	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
@@ -23,7 +23,7 @@ func GetRawVoiceTexts(ctx context.Context, lessonID string) ([]RawVoiceText, err
 	return voiceTexts, nil
 }
 
-func DeleteRawVoiceTextsByLessonID(ctx context.Context, lessonID string) error {
+func DeleteRawVoiceTextsByLessonID(ctx context.Context, lessonID int64) error {
 	var voiceTexts []RawVoiceText
 	var keys []*datastore.Key
 

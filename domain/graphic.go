@@ -2,13 +2,14 @@ package domain
 
 import (
 	"context"
+	"strconv"
 	"time"
 
 	"cloud.google.com/go/datastore"
 	"github.com/super-dog-human/teraconnectgo/infrastructure"
 )
 
-func GetGraphicsByIDs(ctx context.Context, ids []string) ([]Graphic, error) {
+func GetGraphicsByIDs(ctx context.Context, ids []int64) ([]Graphic, error) {
 	var graphicKeys []*datastore.Key
 
 	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
@@ -17,7 +18,7 @@ func GetGraphicsByIDs(ctx context.Context, ids []string) ([]Graphic, error) {
 	}
 
 	for _, id := range ids {
-		graphicKeys = append(graphicKeys, datastore.NameKey("Graphic", id, nil))
+		graphicKeys = append(graphicKeys, datastore.IDKey("Graphic", id, nil))
 	}
 
 	graphics := make([]Graphic, len(ids))
@@ -32,7 +33,7 @@ func GetGraphicsByIDs(ctx context.Context, ids []string) ([]Graphic, error) {
 	return graphics, nil
 }
 
-func GetCurrentUsersGraphics(ctx context.Context, userID string) ([]Graphic, error) {
+func GetCurrentUsersGraphics(ctx context.Context, userID int64) ([]Graphic, error) {
 	var graphics []Graphic
 
 	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
@@ -72,7 +73,7 @@ func GetPublicGraphics(ctx context.Context) ([]Graphic, error) {
 	return graphics, nil
 }
 
-func GetGraphicFileTypes(ctx context.Context, graphicIDs []string) (map[string]string, error) {
+func GetGraphicFileTypes(ctx context.Context, graphicIDs []int64) (map[int64]string, error) {
 	var keys []*datastore.Key
 
 	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
@@ -81,10 +82,10 @@ func GetGraphicFileTypes(ctx context.Context, graphicIDs []string) (map[string]s
 	}
 
 	for _, id := range graphicIDs {
-		keys = append(keys, datastore.NameKey("Graphic", id, nil))
+		keys = append(keys, datastore.IDKey("Graphic", id, nil))
 	}
 
-	graphicFileTypes := map[string]string{}
+	graphicFileTypes := map[int64]string{}
 	graphics := make([]Graphic, len(graphicIDs))
 	if err := client.GetMulti(ctx, keys, graphics); err != nil {
 		return nil, err
@@ -97,32 +98,30 @@ func GetGraphicFileTypes(ctx context.Context, graphicIDs []string) (map[string]s
 	return graphicFileTypes, nil
 }
 
-func CreateGraphic(ctx context.Context, id string, userID string, fileType string) error {
-	graphic := new(Graphic)
-
-	graphic.ID = id
-	graphic.UserID = userID
-	graphic.Created = time.Now()
-	graphic.FileType = fileType
-
+func CreateGraphic(ctx context.Context, graphic *Graphic) error {
 	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
 	if err != nil {
 		return err
 	}
 
-	key := datastore.NameKey("Graphic", graphic.ID, nil)
-	if _, err := client.Put(ctx, key, graphic); err != nil {
+	graphic.Created = time.Now()
+
+	key := datastore.IncompleteKey("Graphic", nil)
+	putKey, err := client.Put(ctx, key, graphic)
+	if err != nil {
 		return err
 	}
+
+	graphic.ID = putKey.ID
 
 	return nil
 }
 
-func DeleteGraphicsInTransaction(tx *datastore.Transaction, ids []string) error {
+func DeleteGraphicsInTransaction(tx *datastore.Transaction, ids []int64) error {
 	var graphicKeys []*datastore.Key
 
 	for _, id := range ids {
-		graphicKeys = append(graphicKeys, datastore.NameKey("Graphic", id, nil))
+		graphicKeys = append(graphicKeys, datastore.IDKey("Graphic", id, nil))
 	}
 
 	if err := tx.DeleteMulti(graphicKeys); err != nil {
@@ -134,8 +133,8 @@ func DeleteGraphicsInTransaction(tx *datastore.Transaction, ids []string) error 
 
 func storeGraphicThumbnailURL(ctx context.Context, graphics *[]Graphic, keys []*datastore.Key) error {
 	for i, key := range keys {
-		id := key.Name
-		filePath := storageObjectFilePath("Graphic", id, (*graphics)[i].FileType)
+		fileID := strconv.FormatInt(key.ID, 10)
+		filePath := storageObjectFilePath("Graphic", fileID, (*graphics)[i].FileType)
 		fileType := "" // this is unnecessary when GET request
 		bucketName := infrastructure.MaterialBucketName()
 		url, err := infrastructure.GetGCSSignedURL(ctx, bucketName, filePath, "GET", fileType)
@@ -143,9 +142,9 @@ func storeGraphicThumbnailURL(ctx context.Context, graphics *[]Graphic, keys []*
 			return err
 		}
 
-		(*graphics)[i].ID = id
+		(*graphics)[i].ID = key.ID
 		(*graphics)[i].URL = url
-		(*graphics)[i].ThumbnailURL = infrastructure.GraphicThumbnailURL(ctx, id, fileType)
+		(*graphics)[i].ThumbnailURL = infrastructure.GraphicThumbnailURL(ctx, key.ID, fileType)
 	}
 
 	return nil

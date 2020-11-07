@@ -47,7 +47,7 @@ func GetStorageObjectURLs(request *http.Request, fileRequests []domain.FileReque
 	return signedURLs, nil
 }
 
-func currentUserAccessToStorageObject(ctx context.Context, request *http.Request, fileRequest domain.FileRequest, userID string) error {
+func currentUserAccessToStorageObject(ctx context.Context, request *http.Request, fileRequest domain.FileRequest, userID int64) error {
 	rawEntityName := strings.ToLower(fileRequest.Entity)
 	entityID, entityName := entityIDFromRequest(rawEntityName, fileRequest.ID)
 	entity, err := domain.EntityOfRequestedFile(ctx, entityID, entityName)

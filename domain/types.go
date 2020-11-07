@@ -8,7 +8,7 @@ type UserProviderID struct {
 
 // User is application registrated user
 type User struct {
-	ID         string    `json:"id" datastore:"-"`
+	ID         int64     `json:"id" datastore:"-"`
 	ProviderID string    `json:"-"`
 	Name       string    `json:"name"`
 	Email      string    `json:"email"`
@@ -18,35 +18,35 @@ type User struct {
 
 // Category is lesson's category type.
 type Category struct {
-	ID   int    `json:"id"`
+	ID   int64  `json:"id"`
 	Name string `json:"name"`
 }
 
 // Lesson is the lesson infomation type.
 type Lesson struct {
-	ID           string    `json:"id" datastore:"-"`
-	CategoryID   string    `json:"categoryID"`
-	AvatarID     string    `json:"avatarID"`
+	ID           int64     `json:"id" datastore:"-"`
+	CategoryID   int64     `json:"categoryID"`
+	AvatarID     int64     `json:"avatarID"`
 	Avatar       Avatar    `json:"avatar" datastore:"-"`
 	Title        string    `json:"title"`
 	Description  string    `json:"description"`
 	DurationSec  float64   `json:"durationSec"`
 	ThumbnailURL string    `json:"thumbnailURL" datastore:"-"`
-	GraphicIDs   []string  `json:"graphicIDs"`
+	GraphicIDs   []int64   `json:"graphicIDs"`
 	Graphics     []Graphic `json:"graphics" datastore:"-"`
 	ViewCount    int64     `json:"viewCount"`
 	Version      int64     `json:"version"`
 	IsPacked     bool      `json:"isPacked"`
 	IsPublic     bool      `json:"isPublic"`
-	UserID       string    `json:"userID"`
+	UserID       int64     `json:"userID"`
 	Created      time.Time `json:"created"`
 	Updated      time.Time `json:"updated"`
 }
 
 // Avatar is used for lesson.
 type Avatar struct {
-	ID           string    `json:"id" datastore:"-"`
-	UserID       string    `json:"userID"`
+	ID           int64     `json:"id" datastore:"-"`
+	UserID       int64     `json:"userID"`
 	URL          string    `json:"url" datastore:"-"`
 	ThumbnailURL string    `json:"thumbnailURL" datastore:"-"`
 	Name         string    `json:"name"`
@@ -58,9 +58,9 @@ type Avatar struct {
 
 // LessonAuthor is author of lesson.
 type LessonAuthor struct {
-	ID       string    `json:"id" datastore:"-"`
-	LessonID string    `json:"lessonID"`
-	UserID   string    `json:"userID"`
+	ID       int64     `json:"id" datastore:"-"`
+	LessonID int64     `json:"lessonID"`
+	UserID   int64     `json:"userID"`
 	Role     string    `json:"role"`
 	Created  time.Time `json:"created"`
 	Updated  time.Time `json:"updated"`
@@ -68,11 +68,11 @@ type LessonAuthor struct {
 
 // Graphic is used for lesson.
 type Graphic struct {
-	ID                string    `json:"id" datastore:"-"`
+	ID                int64     `json:"id" datastore:"-"`
 	URL               string    `json:"url" datastore:"-"`
 	ThumbnailURL      string    `json:"thumbnailURL" datastore:"-"`
-	GraphicCategoryID string    `json:"graphicCategoryID"`
-	UserID            string    `json:"userID"`
+	GraphicCategoryID int64     `json:"graphicCategoryID"`
+	UserID            int64     `json:"userID"`
 	FileType          string    `json:"fileType"`
 	IsPublic          bool      `json:"isPublic"`
 	Created           time.Time `json:"created"`
@@ -82,7 +82,7 @@ type Graphic struct {
 // RawVoiceText is used for lesson.
 type RawVoiceText struct {
 	FileID      string  `json:"fileID"`
-	LessonID    string  `json:"lessonID"`
+	LessonID    int64   `json:"lessonID"`
 	DurationSec float64 `json:"durationSec"`
 	Text        string  `json:"text"`
 	IsTexted    bool    `json:"isTexted"`

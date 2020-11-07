@@ -2,8 +2,8 @@ package usecase
 
 import (
 	"net/http"
+	"strconv"
 
-	"github.com/rs/xid"
 	"github.com/super-dog-human/teraconnectgo/domain"
 )
 
@@ -46,17 +46,20 @@ func CreateGraphicsAndBlankFile(request *http.Request, objectRequest domain.Stor
 	urls := make([]domain.SignedURL, len(objectRequest.FileRequests))
 
 	for i, fileRequest := range objectRequest.FileRequests {
-		fileID := xid.New().String()
+		graphic := new(domain.Graphic)
+		graphic.UserID = currentUser.ID
+		graphic.FileType = fileRequest.Extension
 
+		if err = domain.CreateGraphic(ctx, graphic); err != nil {
+			return signedURLs, err
+		}
+
+		fileID := strconv.FormatInt(graphic.ID, 10)
 		url, err := domain.CreateBlankFileToGCS(ctx, fileID, "graphic", fileRequest)
 		if err != nil {
 			return signedURLs, err
 		}
 		urls[i] = domain.SignedURL{FileID: fileID, SignedURL: url}
-
-		if err = domain.CreateGraphic(ctx, fileID, currentUser.ID, fileRequest.Extension); err != nil {
-			return signedURLs, err
-		}
 	}
 
 	signedURLs = domain.SignedURLs{SignedURLs: urls}

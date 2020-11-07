@@ -3,16 +3,17 @@ package domain
 import (
 	"context"
 	"net/http"
-	"strconv"
 	"time"
 
 	"cloud.google.com/go/datastore"
 	"github.com/super-dog-human/teraconnectgo/infrastructure"
 )
 
+// UserErrorCode is user error code.
 type UserErrorCode uint
 
 const (
+	// AlreadyProviderIDExists is exists privider-id of user
 	AlreadyProviderIDExists UserErrorCode = 1
 )
 
@@ -52,8 +53,9 @@ func GetCurrentUser(request *http.Request) (User, error) {
 	}
 
 	user = &users[0]
-	user.ID = strconv.FormatInt(keys[0].ID, 10)
-	return users[0], nil
+	user.ID = keys[0].ID
+
+	return *user, nil
 }
 
 // GetUserByID is return user has ID.
@@ -108,17 +110,14 @@ func CreateUserInTransaction(tx *datastore.Transaction, user *User) (*datastore.
 	return pendingKey, nil
 }
 
+// UpdateUser updates user.
 func UpdateUser(ctx context.Context, user *User) error {
 	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
 	if err != nil {
 		return err
 	}
 
-	userID, err := strconv.ParseInt(user.ID, 10, 64)
-	if err != nil {
-		return err
-	}
-	key := datastore.IDKey("User", userID, nil)
+	key := datastore.IDKey("User", user.ID, nil)
 
 	user.Updated = time.Now()
 
@@ -129,13 +128,14 @@ func UpdateUser(ctx context.Context, user *User) error {
 	return nil
 }
 
-func DeleteUser(ctx context.Context, id string) error {
+// DeleteUser deletes user.
+func DeleteUser(ctx context.Context, id int64) error {
 	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
 	if err != nil {
 		return err
 	}
 
-	key := datastore.NameKey("User", id, nil)
+	key := datastore.IDKey("User", id, nil)
 	if err := client.Delete(ctx, key); err != nil {
 		return err
 	}

@@ -7,7 +7,7 @@ import (
 	"github.com/super-dog-human/teraconnectgo/domain"
 )
 
-func currentUserAccessToLesson(ctx context.Context, request *http.Request, lessonID string) error {
+func currentUserAccessToLesson(ctx context.Context, request *http.Request, lessonID int64) error {
 	currentUser, err := domain.GetCurrentUser(request)
 	if err != nil {
 		return err

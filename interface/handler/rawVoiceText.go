@@ -2,13 +2,19 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 
-	"github.com/super-dog-human/teraconnectgo/usecase"
 	"github.com/labstack/echo/v4"
+	"github.com/super-dog-human/teraconnectgo/usecase"
 )
 
 func getRawVoiceTexts(c echo.Context) error {
-	id := c.Param("id")
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		errMessage := "Invalid ID(s) error"
+		warnLog(errMessage)
+		return c.JSON(http.StatusBadRequest, errMessage)
+	}
 
 	voiceTexts, err := usecase.GetRawVoiceTexts(c.Request(), id)
 	if err != nil {

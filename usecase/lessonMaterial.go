@@ -6,7 +6,7 @@ import (
 	"github.com/super-dog-human/teraconnectgo/domain"
 )
 
-func GetLessonMaterial(request *http.Request, lessonID string) (domain.LessonMaterial, error) {
+func GetLessonMaterial(request *http.Request, lessonID int64) (domain.LessonMaterial, error) {
 	ctx := request.Context()
 
 	var lessonMaterial domain.LessonMaterial
@@ -22,7 +22,7 @@ func GetLessonMaterial(request *http.Request, lessonID string) (domain.LessonMat
 	return lessonMaterial, nil
 }
 
-func CreateLessonMaterial(request *http.Request, lessonID string, lessonMaterial domain.LessonMaterial) error {
+func CreateLessonMaterial(request *http.Request, lessonID int64, lessonMaterial domain.LessonMaterial) error {
 	ctx := request.Context()
 
 	if err := currentUserAccessToLesson(ctx, request, lessonID); err != nil {
@@ -40,7 +40,7 @@ func CreateLessonMaterial(request *http.Request, lessonID string, lessonMaterial
 	return nil
 }
 
-func UpdateLessonMaterial(request *http.Request, lessonID string, lessonMaterial domain.LessonMaterial) error {
+func UpdateLessonMaterial(request *http.Request, lessonID int64, lessonMaterial domain.LessonMaterial) error {
 	ctx := request.Context()
 
 	if err := currentUserAccessToLesson(ctx, request, lessonID); err != nil {

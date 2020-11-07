@@ -49,7 +49,7 @@ func GetLessonsByConditions(request *http.Request) ([]domain.Lesson, error) {
 }
 
 // GetPublicLesson for fetch the lesson by id
-func GetPublicLesson(request *http.Request, id string) (domain.Lesson, error) {
+func GetPublicLesson(request *http.Request, id int64) (domain.Lesson, error) {
 	ctx := request.Context()
 
 	_, err := domain.GetCurrentUser(request)
@@ -74,7 +74,7 @@ func GetPublicLesson(request *http.Request, id string) (domain.Lesson, error) {
 	return lesson, LessonNotAvailable
 }
 
-func GetPrivateLesson(request *http.Request, id string) (domain.Lesson, error) {
+func GetPrivateLesson(request *http.Request, id int64) (domain.Lesson, error) {
 	ctx := request.Context()
 
 	currentUser, err := domain.GetCurrentUser(request)
@@ -105,7 +105,9 @@ func CreateLesson(request *http.Request, lesson *domain.Lesson) error {
 		return err
 	}
 
-	if err = domain.CreateLesson(ctx, lesson, currentUser.ID); err != nil {
+	lesson.UserID = currentUser.ID
+
+	if err = domain.CreateLesson(ctx, lesson); err != nil {
 		return err
 	}
 
@@ -114,7 +116,7 @@ func CreateLesson(request *http.Request, lesson *domain.Lesson) error {
 	return nil
 }
 
-func UpdateLesson(id string, request *http.Request) (domain.Lesson, error) {
+func UpdateLesson(id int64, request *http.Request) (domain.Lesson, error) {
 	ctx := request.Context()
 
 	currentUser, err := domain.GetCurrentUser(request)
@@ -131,6 +133,7 @@ func UpdateLesson(id string, request *http.Request) (domain.Lesson, error) {
 		return lesson, err
 	}
 
+	// TODO allow permitted users for authoring
 	if lesson.UserID != currentUser.ID {
 		return lesson, InvalidLessonParams
 	}
@@ -171,7 +174,7 @@ func UpdateLesson(id string, request *http.Request) (domain.Lesson, error) {
 	return lesson, nil
 }
 
-func DeleteOwnLessonByID(request *http.Request, id string) error {
+func DeleteOwnLessonByID(request *http.Request, id int64) error {
 	ctx := request.Context()
 
 	currentUser, err := domain.GetCurrentUser(request)
@@ -198,7 +201,7 @@ func DeleteOwnLessonByID(request *http.Request, id string) error {
 	return nil
 }
 
-func getLessonByIDWithResources(ctx context.Context, id string) (domain.Lesson, error) {
+func getLessonByIDWithResources(ctx context.Context, id int64) (domain.Lesson, error) {
 	lesson, err := domain.GetLessonByID(ctx, id)
 
 	if err != nil {

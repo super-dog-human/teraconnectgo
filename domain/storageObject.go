@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"cloud.google.com/go/datastore"
@@ -29,7 +30,7 @@ type FileRequest struct {
 }
 
 type EntityBelongToFile struct {
-	UserID string
+	UserID int64
 }
 
 func CreateBlankFileToGCS(ctx context.Context, fileID string, fileEntity string, fileRequest FileRequest) (string, error) {
@@ -76,5 +77,5 @@ func GetSignedURL(ctx context.Context, request FileRequest) (string, error) {
 }
 
 func storageObjectFilePath(entity string, id string, extension string) string {
-	return strings.ToLower(entity) + "/" + id + "." + extension
+	return fmt.Sprintf("%s/%s.%s", strings.ToLower(entity), id, extension)
 }

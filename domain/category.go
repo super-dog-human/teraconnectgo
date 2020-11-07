@@ -17,8 +17,8 @@ func GetAllCategories() []Category {
 
 	var categories []Category
 	for i, name := range categoryNames {
-		category := Category {
-			ID: i + 1, // ID starts from 1.
+		category := Category{
+			ID:   int64(i) + 1, // ID starts from 1.
 			Name: name,
 		}
 		categories = append(categories, category)

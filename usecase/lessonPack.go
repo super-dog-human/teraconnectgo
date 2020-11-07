@@ -7,7 +7,7 @@ import (
 )
 
 // PackLesson is packing the lesson to zip and upload GCS
-func PackLesson(request *http.Request, id string) error {
+func PackLesson(request *http.Request, id int64) error {
 	ctx := request.Context()
 
 	currentUser, err := domain.GetCurrentUser(request)

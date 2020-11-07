@@ -8,7 +8,7 @@ import (
 )
 
 // CreateBlankRawVoiceFile for create blank file of raw voice text to Cloud Storage.
-func CreateBlankRawVoiceFile(request *http.Request, lessonID string) (domain.SignedURL, error) {
+func CreateBlankRawVoiceFile(request *http.Request, lessonID int64) (domain.SignedURL, error) {
 	ctx := request.Context()
 
 	var signedURL domain.SignedURL

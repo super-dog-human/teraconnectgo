@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"github.com/super-dog-human/teraconnectgo/domain"
@@ -26,7 +27,12 @@ func getUserMe(c echo.Context) error {
 }
 
 func getUser(c echo.Context) error {
-	user, err := usecase.GetUser(c.Request(), c.Param("id"))
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		return err
+	}
+
+	user, err := usecase.GetUser(c.Request(), id)
 
 	if err != nil {
 		authErr, ok := err.(domain.AuthErrorCode)

@@ -2,8 +2,8 @@ package usecase
 
 import (
 	"net/http"
+	"strconv"
 
-	"github.com/rs/xid"
 	"github.com/super-dog-human/teraconnectgo/domain"
 )
 
@@ -46,17 +46,20 @@ func CreateAvatarsAndBlankFile(request *http.Request, objectRequest domain.Stora
 	urls := make([]domain.SignedURL, len(objectRequest.FileRequests))
 
 	for i, fileRequest := range objectRequest.FileRequests {
-		fileID := xid.New().String()
+		avatar := new(domain.Avatar)
+		avatar.UserID = currentUser.ID
 
+		if err = domain.CreateAvatar(ctx, avatar); err != nil {
+			return signedURLs, err
+		}
+
+		fileID := strconv.FormatInt(avatar.ID, 10)
 		url, err := domain.CreateBlankFileToGCS(ctx, fileID, "avatar", fileRequest)
 		if err != nil {
 			return signedURLs, err
 		}
 		urls[i] = domain.SignedURL{FileID: fileID, SignedURL: url}
 
-		if err = domain.CreateAvatar(ctx, fileID, currentUser.ID); err != nil {
-			return signedURLs, err
-		}
 	}
 
 	signedURLs = domain.SignedURLs{SignedURLs: urls}

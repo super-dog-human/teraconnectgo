@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"net/http"
-	"strconv"
 
 	"cloud.google.com/go/datastore"
 	"github.com/imdario/mergo"
@@ -40,16 +39,11 @@ func GetCurrentUser(request *http.Request) (domain.User, error) {
 }
 
 // GetUser for fetch user account by id.
-func GetUser(request *http.Request, id string) (domain.User, error) {
+func GetUser(request *http.Request, id int64) (domain.User, error) {
 	ctx := request.Context()
 	var user domain.User
 
-	intID, err := strconv.ParseInt(id, 10, 64)
-	if err != nil {
-		return user, err
-	}
-
-	user, err = domain.GetUserByID(ctx, intID)
+	user, err := domain.GetUserByID(ctx, id)
 	if err != nil {
 		return user, err
 	}
@@ -96,7 +90,7 @@ func CreateUser(request *http.Request, user *domain.User) error {
 		return err
 	}
 
-	user.ID = strconv.FormatInt(commit.Key(pendingKey).ID, 10)
+	user.ID = commit.Key(pendingKey).ID
 
 	return nil
 }

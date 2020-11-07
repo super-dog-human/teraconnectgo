@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"github.com/super-dog-human/teraconnectgo/domain"
@@ -33,17 +34,16 @@ func getLessons(c echo.Context) error {
 }
 
 func getLesson(c echo.Context) error {
-	id := c.Param("id")
+	var lesson domain.Lesson
+	var err error
 
-	ids := []string{id}
-	if !IsValidXIDs(ids) {
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
 		errMessage := "Invalid ID(s) error"
 		warnLog(errMessage)
 		return c.JSON(http.StatusBadRequest, errMessage)
 	}
 
-	var lesson domain.Lesson
-	var err error
 	if c.Param("for_authoring") == "true" {
 		lesson, err = usecase.GetPrivateLesson(c.Request(), id)
 	} else {
@@ -92,13 +92,10 @@ func postLesson(c echo.Context) error {
 }
 
 func patchLesson(c echo.Context) error {
-	id := c.Param("id")
-
-	ids := []string{id}
-	// TODO add checking of avatarID, graphicIDs
-	if !IsValidXIDs(ids) {
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
 		errMessage := "Invalid ID(s) error"
-		fatalLog(errMessage)
+		warnLog(errMessage)
 		return c.JSON(http.StatusBadRequest, errMessage)
 	}
 
@@ -118,12 +115,10 @@ func patchLesson(c echo.Context) error {
 }
 
 func deleteLesson(c echo.Context) error {
-	id := c.Param("id")
-
-	ids := []string{id}
-	if !IsValidXIDs(ids) {
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
 		errMessage := "Invalid ID(s) error"
-		fatalLog(errMessage)
+		warnLog(errMessage)
 		return c.JSON(http.StatusBadRequest, errMessage)
 	}
 
