@@ -4,5 +4,5 @@
 
 ```bash
 $ gcloud auth application-default login
-$ go run app.go staging
+$ go run main.go development
 ```
