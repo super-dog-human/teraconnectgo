@@ -56,14 +56,20 @@ type LessonMaterial struct {
 }
 
 type LessonTimeline struct {
-	TimeSec float64                 `json:"timeSec"`
-	Text    LessonMaterialText      `json:"text"`
-	Voice   LessonMaterialVoice     `json:"voice"`
-	Graphic []LessonMaterialGraphic `json:"graphics"`
-	Action  LessonAvatarAction      `json:"action"`
+	TimeSec  float64                 `json:"timeSec"`
+	Subtitle LessonMaterialSubtitle  `json:"subtitle"`
+	Caption  LessonMaterialCaption   `json:"caption"`
+	Voice    LessonMaterialVoice     `json:"voice"`
+	Graphic  []LessonMaterialGraphic `json:"graphics"`
+	Action   LessonAvatarAction      `json:"action"`
 }
 
-type LessonMaterialText struct {
+type LessonMaterialSubtitle struct {
+	DurationSec float64 `json:"durationSec"`
+	Body        string  `json:"body"`
+}
+
+type LessonMaterialCaption struct {
 	DurationSec     float64 `json:"durationSec"`
 	Body            string  `json:"body"`
 	HorizontalAlign string  `json:"horizontalAlign"`

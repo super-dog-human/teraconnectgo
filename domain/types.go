@@ -39,6 +39,7 @@ type Lesson struct {
 	IsPacked     bool      `json:"isPacked"`
 	IsPublic     bool      `json:"isPublic"`
 	UserID       int64     `json:"userID"`
+	SizeInBytes  int64     `json:"sizeInBytes"`
 	Created      time.Time `json:"created"`
 	Updated      time.Time `json:"updated"`
 }
@@ -69,14 +70,13 @@ type LessonAuthor struct {
 // Graphic is used for lesson.
 type Graphic struct {
 	ID                int64     `json:"id" datastore:"-"`
-	URL               string    `json:"url" datastore:"-"`
-	ThumbnailURL      string    `json:"thumbnailURL" datastore:"-"`
 	GraphicCategoryID int64     `json:"graphicCategoryID"`
 	UserID            int64     `json:"userID"`
 	FileType          string    `json:"fileType"`
 	IsPublic          bool      `json:"isPublic"`
+	URL               string    `json:"url" datastore:"-"`
+	ThumbnailURL      string    `json:"thumbnailURL" datastore:"-"`
 	Created           time.Time `json:"created"`
-	Updated           time.Time `json:"updated"`
 }
 
 // RawVoiceText is used for lesson.
