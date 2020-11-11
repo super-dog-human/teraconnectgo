@@ -24,24 +24,25 @@ type Category struct {
 
 // Lesson is the lesson infomation type.
 type Lesson struct {
-	ID           int64     `json:"id" datastore:"-"`
-	CategoryID   int64     `json:"categoryID"`
-	AvatarID     int64     `json:"avatarID"`
-	Avatar       Avatar    `json:"avatar" datastore:"-"`
-	Title        string    `json:"title"`
-	Description  string    `json:"description"`
-	DurationSec  float64   `json:"durationSec"`
-	ThumbnailURL string    `json:"thumbnailURL" datastore:"-"`
-	GraphicIDs   []int64   `json:"graphicIDs"`
-	Graphics     []Graphic `json:"graphics" datastore:"-"`
-	ViewCount    int64     `json:"viewCount"`
-	Version      int64     `json:"version"`
-	IsPacked     bool      `json:"isPacked"`
-	IsPublic     bool      `json:"isPublic"`
-	UserID       int64     `json:"userID"`
-	SizeInBytes  int64     `json:"sizeInBytes"`
-	Created      time.Time `json:"created"`
-	Updated      time.Time `json:"updated"`
+	ID             int64     `json:"id" datastore:"-"`
+	CategoryID     int64     `json:"categoryID"`
+	AvatarID       int64     `json:"avatarID"`
+	Avatar         Avatar    `json:"avatar" datastore:"-"`
+	Title          string    `json:"title"`
+	Description    string    `json:"description"`
+	DurationSec    float64   `json:"durationSec"`
+	ThumbnailURL   string    `json:"thumbnailURL" datastore:"-"`
+	GraphicIDs     []int64   `json:"graphicIDs"`
+	Graphics       []Graphic `json:"graphics" datastore:"-"`
+	ViewCount      int64     `json:"viewCount"`
+	Version        int64     `json:"version"`
+	IsIntroduction bool      `json:"isIntroduction"`
+	IsPacked       bool      `json:"isPacked"`
+	IsPublic       bool      `json:"isPublic"`
+	UserID         int64     `json:"userID"`
+	SizeInBytes    int64     `json:"sizeInBytes"`
+	Created        time.Time `json:"created"`
+	Updated        time.Time `json:"updated"`
 }
 
 // Avatar is used for lesson.
