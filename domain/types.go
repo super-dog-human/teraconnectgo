@@ -36,6 +36,7 @@ type Lesson struct {
 	Graphics       []Graphic `json:"graphics" datastore:"-"`
 	ViewCount      int64     `json:"viewCount"`
 	Version        int64     `json:"version"`
+	ViewKey        string    `json:"-"`
 	IsIntroduction bool      `json:"isIntroduction"`
 	IsPacked       bool      `json:"isPacked"`
 	IsPublic       bool      `json:"isPublic"`
