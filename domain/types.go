@@ -16,16 +16,10 @@ type User struct {
 	Updated    time.Time `json:"-"`
 }
 
-// Category is lesson's category type.
-type Category struct {
-	ID   int64  `json:"id"`
-	Name string `json:"name"`
-}
-
 // Lesson is the lesson infomation type.
 type Lesson struct {
 	ID             int64     `json:"id" datastore:"-"`
-	CategoryID     int64     `json:"categoryID"`
+	CategoryName   string    `json:"categoryName"`
 	AvatarID       int64     `json:"avatarID"`
 	Avatar         Avatar    `json:"avatar" datastore:"-"`
 	Title          string    `json:"title"`

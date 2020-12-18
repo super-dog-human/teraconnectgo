@@ -1,5 +1,12 @@
 package domain
 
+// Category of the class type.
+type Category struct {
+	ID           int64  `json:"id"`
+	Name         string `json:"name"`
+	JapaneseName string `json:"japaneseName"`
+}
+
 func GetAllCategories() []Category {
 	categoryNames := [...]string{
 		"japanese",

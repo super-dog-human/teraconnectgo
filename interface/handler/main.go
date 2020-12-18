@@ -24,6 +24,7 @@ func Main(appEnv string) {
 		AllowOrigins: []string{infrastructure.OriginURL()},
 	}))
 
+	e.GET("/subjects", getSubjects)
 	e.GET("/categories", getCategories)
 	e.GET("/lessons", getLessons)
 	e.GET("/lessons/:id", getLesson)

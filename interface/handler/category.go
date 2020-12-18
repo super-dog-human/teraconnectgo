@@ -3,8 +3,8 @@ package handler
 import (
 	"net/http"
 
-	"github.com/super-dog-human/teraconnectgo/usecase"
 	"github.com/labstack/echo/v4"
+	"github.com/super-dog-human/teraconnectgo/usecase"
 )
 
 func getCategories(c echo.Context) error {
