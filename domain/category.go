@@ -25,9 +25,13 @@ func GetJapaneseCategories(ctx context.Context, subjectID int64) ([]Category, er
 	var categories []Category
 	ancestor := datastore.IDKey("Subject", subjectID, nil)
 	query := datastore.NewQuery("JapaneseCategory").Ancestor(ancestor).Order("SortID")
-	_, err = client.GetAll(ctx, query, &categories)
+	keys, err := client.GetAll(ctx, query, &categories)
 	if err != nil {
 		return nil, err
+	}
+
+	for i, key := range keys {
+		categories[i].ID = key.ID
 	}
 
 	return categories, nil

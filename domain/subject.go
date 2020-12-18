@@ -24,9 +24,13 @@ func GetAllSubjects(ctx context.Context) ([]Subject, error) {
 
 	var subjects []Subject
 	query := datastore.NewQuery("Subject").Order("SortID")
-	_, err = client.GetAll(ctx, query, &subjects)
+	keys, err := client.GetAll(ctx, query, &subjects)
 	if err != nil {
 		return nil, err
+	}
+
+	for i, key := range keys {
+		subjects[i].ID = key.ID
 	}
 
 	return subjects, nil
