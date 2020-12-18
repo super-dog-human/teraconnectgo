@@ -1,37 +1,34 @@
 package domain
 
+import (
+	"context"
+
+	"cloud.google.com/go/datastore"
+	"github.com/super-dog-human/teraconnectgo/infrastructure"
+)
+
 // Category of the class type.
 type Category struct {
-	ID           int64  `json:"id"`
-	Name         string `json:"name"`
-	JapaneseName string `json:"japaneseName"`
+	ID        int64  `json:"id"`
+	GroupName string `json:"groupName"`
+	Name      string `json:"name"`
+	SortID    int64  `json:"-"`
 }
 
-func GetAllCategories() []Category {
-	categoryNames := [...]string{
-		"japanese",
-		"geography",
-		"history",
-		"civics",
-		"mathematics",
-		"scientific",
-		"healthAndPE",
-		"art",
-		"english",
-		"homeEconomics",
-		"information",
+// GetJapaneseCategories is return categories by the subject.
+func GetJapaneseCategories(ctx context.Context, subjectID int64) ([]Category, error) {
+	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
+	if err != nil {
+		return nil, err
 	}
 
 	var categories []Category
-	for i, name := range categoryNames {
-		category := Category{
-			ID:   int64(i) + 1, // ID starts from 1.
-			Name: name,
-		}
-		categories = append(categories, category)
+	ancestor := datastore.IDKey("Subject", subjectID, nil)
+	query := datastore.NewQuery("JapaneseCategory").Ancestor(ancestor).Order("SortID")
+	_, err = client.GetAll(ctx, query, &categories)
+	if err != nil {
+		return nil, err
 	}
 
-	categories = append(categories, Category{ID: 999, Name: "other"})
-
-	return categories
+	return categories, nil
 }

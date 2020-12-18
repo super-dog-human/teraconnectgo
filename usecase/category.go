@@ -1,8 +1,22 @@
 package usecase
 
-import "github.com/super-dog-human/teraconnectgo/domain"
+import (
+	"net/http"
+	"strconv"
 
-// GetCategories for fetch avatar object from Cloud Datastore
-func GetCategories() []domain.Category {
-	return domain.GetAllCategories()
+	"github.com/super-dog-human/teraconnectgo/domain"
+)
+
+// GetCategories return categories by the subject.
+func GetCategories(request *http.Request) ([]domain.Category, error) {
+	queryString := request.URL.Query().Get("subjectID")
+	subjectID, err := strconv.ParseInt(queryString, 10, 64)
+
+	if err != nil {
+		return nil, err
+	}
+
+	ctx := request.Context()
+	// Right now, only the Japanese category exists.
+	return domain.GetJapaneseCategories(ctx, subjectID)
 }

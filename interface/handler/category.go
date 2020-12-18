@@ -8,6 +8,10 @@ import (
 )
 
 func getCategories(c echo.Context) error {
-	categories := usecase.GetCategories()
+	categories, err := usecase.GetCategories(c.Request())
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
 	return c.JSON(http.StatusOK, categories)
+
 }
