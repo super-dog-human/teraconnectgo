@@ -50,11 +50,13 @@ func CreateLesson(ctx context.Context, lesson *Lesson) error {
 	lesson.Created = time.Now()
 
 	key := datastore.IncompleteKey("Lesson", nil)
-	if _, err := client.Put(ctx, key, lesson); err != nil {
+	puttedKey, err := client.Put(ctx, key, lesson)
+
+	if err != nil {
 		return err
 	}
 
-	lesson.ID = key.ID
+	lesson.ID = puttedKey.ID
 
 	return nil
 }

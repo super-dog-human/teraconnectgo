@@ -111,8 +111,6 @@ func CreateLesson(request *http.Request, lesson *domain.Lesson) error {
 		return err
 	}
 
-	// TODO upload thumbnail to GCS
-
 	return nil
 }
 
