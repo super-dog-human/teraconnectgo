@@ -73,13 +73,16 @@ func getLesson(c echo.Context) error {
 }
 
 func postLesson(c echo.Context) error {
+	newLesson := new(domain.NewLesson)
 	lesson := new(domain.Lesson)
 
-	if err := c.Bind(lesson); err != nil {
+	if err := c.Bind(newLesson); err != nil {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 
-	if err := usecase.CreateLesson(c.Request(), lesson); err != nil {
+	// TODO validate newLesson
+
+	if err := usecase.CreateLesson(c.Request(), newLesson, lesson); err != nil {
 		fatalLog(err)
 		LessonErr, ok := err.(usecase.LessonErrorCode)
 		if ok && LessonErr == usecase.InvalidLessonParams {

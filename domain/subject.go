@@ -35,3 +35,21 @@ func GetAllSubjects(ctx context.Context) ([]Subject, error) {
 
 	return subjects, nil
 }
+
+// GetSubject is return a subject from id.
+func GetSubject(ctx context.Context, id int64) (Subject, error) {
+	subject := new(Subject)
+
+	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
+	if err != nil {
+		return *subject, err
+	}
+
+	key := datastore.IDKey("Subject", id, nil)
+	if err := client.Get(ctx, key, subject); err != nil {
+		return *subject, err
+	}
+	subject.ID = id
+
+	return *subject, nil
+}

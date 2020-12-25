@@ -8,6 +8,38 @@ import (
 	"github.com/super-dog-human/teraconnectgo/infrastructure"
 )
 
+// NewLesson is only  used when creating new lesson.
+type NewLesson struct {
+	SubjectID          int64  `json:"subjectID"`
+	JapaneseCategoryID int64  `json:"japaneseCategoryID"`
+	Title              string `json:"title"`
+}
+
+// Lesson is the lesson infomation type.
+type Lesson struct {
+	ID             int64     `json:"id" datastore:"-"`
+	SubjectName    string    `json:"subjectName"`
+	CategoryName   string    `json:"categoryName"`
+	AvatarID       int64     `json:"avatarID"`
+	Avatar         Avatar    `json:"avatar" datastore:"-"`
+	Title          string    `json:"title"`
+	Description    string    `json:"description"`
+	DurationSec    float64   `json:"durationSec"`
+	ThumbnailURL   string    `json:"thumbnailURL" datastore:"-"`
+	GraphicIDs     []int64   `json:"graphicIDs"`
+	Graphics       []Graphic `json:"graphics" datastore:"-"`
+	ViewCount      int64     `json:"viewCount"`
+	Version        int64     `json:"version"`
+	ViewKey        string    `json:"-"`
+	IsIntroduction bool      `json:"isIntroduction"`
+	IsPacked       bool      `json:"isPacked"`
+	IsPublic       bool      `json:"isPublic"`
+	UserID         int64     `json:"userID"`
+	SizeInBytes    int64     `json:"sizeInBytes"`
+	Created        time.Time `json:"created"`
+	Updated        time.Time `json:"updated"`
+}
+
 func GetLessonByID(ctx context.Context, id int64) (Lesson, error) {
 	lesson := new(Lesson)
 
@@ -47,16 +79,17 @@ func CreateLesson(ctx context.Context, lesson *Lesson) error {
 		return err
 	}
 
-	lesson.Created = time.Now()
+	currentTime := time.Now()
+	lesson.Created = currentTime
+	lesson.Updated = currentTime
 
-	key := datastore.IncompleteKey("Lesson", nil)
-	puttedKey, err := client.Put(ctx, key, lesson)
+	key, err := client.Put(ctx, datastore.IncompleteKey("Lesson", nil), lesson)
 
 	if err != nil {
 		return err
 	}
 
-	lesson.ID = puttedKey.ID
+	lesson.ID = key.ID
 
 	return nil
 }

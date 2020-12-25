@@ -36,3 +36,22 @@ func GetJapaneseCategories(ctx context.Context, subjectID int64) ([]Category, er
 
 	return categories, nil
 }
+
+// GetJapaneseCategory is return a category from id.
+func GetJapaneseCategory(ctx context.Context, id int64, subjectID int64) (Category, error) {
+	category := new(Category)
+
+	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
+	if err != nil {
+		return *category, err
+	}
+
+	ancestor := datastore.IDKey("Subject", subjectID, nil)
+	key := datastore.IDKey("JapaneseCategory", id, ancestor)
+	if err := client.Get(ctx, key, category); err != nil {
+		return *category, err
+	}
+	category.ID = id
+
+	return *category, nil
+}

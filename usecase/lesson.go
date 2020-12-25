@@ -5,11 +5,14 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"log"
 	"net/http"
 	"reflect"
 	"strings"
 
 	"cloud.google.com/go/datastore"
+	"github.com/jinzhu/copier"
+	"github.com/pkg/errors"
 	"github.com/super-dog-human/teraconnectgo/domain"
 	"github.com/super-dog-human/teraconnectgo/infrastructure"
 )
@@ -97,15 +100,32 @@ func GetPrivateLesson(request *http.Request, id int64) (domain.Lesson, error) {
 	return lesson, nil
 }
 
-func CreateLesson(request *http.Request, lesson *domain.Lesson) error {
-	ctx := request.Context()
-
+// CreateLesson is create the new lesson belongs to subject and category.
+func CreateLesson(request *http.Request, newLesson *domain.NewLesson, lesson *domain.Lesson) error {
 	currentUser, err := domain.GetCurrentUser(request)
 	if err != nil {
-		return err
+		return InvalidLessonParams
+	}
+
+	copier.Copy(&lesson, &newLesson)
+
+	ctx := request.Context()
+
+	subject, err := domain.GetSubject(ctx, newLesson.SubjectID)
+	if err != nil {
+		return InvalidLessonParams
+	}
+
+	category, err := domain.GetJapaneseCategory(ctx, newLesson.JapaneseCategoryID, newLesson.SubjectID)
+	if err != nil {
+		log.Printf("category %v\n", newLesson.JapaneseCategoryID)
+		log.Printf("%v\n", errors.WithStack(err.(error)).Error())
+		return InvalidLessonParams
 	}
 
 	lesson.UserID = currentUser.ID
+	lesson.SubjectName = subject.JapaneseName
+	lesson.CategoryName = category.Name
 
 	if err = domain.CreateLesson(ctx, lesson); err != nil {
 		return err
