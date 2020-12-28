@@ -23,18 +23,18 @@ func GetAllBackgroundImages(ctx context.Context) ([]BackgroundImage, error) {
 		return nil, err
 	}
 
-	var subjects []BackgroundImage
+	var images []BackgroundImage
 	query := datastore.NewQuery("BackgroundImage").Order("SortID")
-	keys, err := client.GetAll(ctx, query, &subjects)
+	keys, err := client.GetAll(ctx, query, &images)
 	if err != nil {
 		return nil, err
 	}
 
 	bucketName := infrastructure.PublicBucketName()
 	for i, key := range keys {
-		subjects[i].ID = key.ID
-		subjects[i].URL = infrastructure.GetPublicBackGroundImageURL(bucketName, strconv.FormatInt(key.ID, 10))
+		images[i].ID = key.ID
+		images[i].URL = infrastructure.GetPublicBackGroundImageURL(bucketName, strconv.FormatInt(key.ID, 10))
 	}
 
-	return subjects, nil
+	return images, nil
 }

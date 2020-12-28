@@ -8,13 +8,6 @@ import (
 	"github.com/super-dog-human/teraconnectgo/infrastructure"
 )
 
-// NewLesson is only  used when creating new lesson.
-type NewLesson struct {
-	SubjectID          int64  `json:"subjectID"`
-	JapaneseCategoryID int64  `json:"japaneseCategoryID"`
-	Title              string `json:"title"`
-}
-
 // Lesson is the lesson infomation type.
 type Lesson struct {
 	ID             int64     `json:"id" datastore:"-"`
