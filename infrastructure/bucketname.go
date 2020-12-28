@@ -47,3 +47,15 @@ func ThumbnailBucketName() string {
 		return "teraconn_thumbnail_development"
 	}
 }
+
+// PublicBucketName is return public bucket name each environments.
+func PublicBucketName() string {
+	switch AppEnv() {
+	case "production":
+		return "teraconn_public"
+	case "staging":
+		return "teraconn_public_staging"
+	default:
+		return "teraconn_public_development"
+	}
+}
