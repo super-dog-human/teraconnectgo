@@ -2,11 +2,24 @@ package domain
 
 import (
 	"context"
+	"strconv"
 	"time"
 
 	"cloud.google.com/go/datastore"
 	"github.com/super-dog-human/teraconnectgo/infrastructure"
 )
+
+// Avatar is used for lesson.
+type Avatar struct {
+	ID              int64        `json:"id" datastore:"-"`
+	Name            string       `json:"name"`
+	URL             string       `json:"url"`
+	DefaultPoseKeys []AvatarPose `json:"defaultPoseKeys"`
+	Version         int64        `json:"version"`
+	IsPublic        bool         `json:"-"`
+	Created         time.Time    `json:"created"`
+	Updated         time.Time    `json:"updated"`
+}
 
 // GetAvatarByIDs gets avatar by id.
 func GetAvatarByIDs(ctx context.Context, id int64) (Avatar, error) {
@@ -39,17 +52,27 @@ func GetCurrentUsersAvatars(ctx context.Context, userID int64) ([]Avatar, error)
 		return nil, err
 	}
 
-	query := datastore.NewQuery("Avatar").Filter("UserID =", userID)
+	ancestor := datastore.IDKey("User", userID, nil)
+	query := datastore.NewQuery("Avatar").Ancestor(ancestor).Order("-Created")
 	keys, err := client.GetAll(ctx, query, &avatars)
 	if err != nil {
 		return nil, err
 	}
 
-	storeAvatarThumbnailURL(ctx, &avatars, keys)
+	for i, key := range keys {
+		url, err := createAvatarSignedURLs(ctx, key.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		avatars[i].ID = key.ID
+		avatars[i].URL = url
+	}
 
 	return avatars, nil
 }
 
+// GetPublicAvatars gets public avatars.
 func GetPublicAvatars(ctx context.Context) ([]Avatar, error) {
 	var avatars []Avatar
 
@@ -58,26 +81,52 @@ func GetPublicAvatars(ctx context.Context) ([]Avatar, error) {
 		return avatars, err
 	}
 
-	query := datastore.NewQuery("Avatar").Filter("IsPublic =", true)
+	query := datastore.NewQuery("Avatar").Filter("IsPublic =", true).Order("-Created")
 	keys, err := client.GetAll(ctx, query, &avatars)
 	if err != nil {
 		return nil, err
 	}
 
-	storeAvatarThumbnailURL(ctx, &avatars, keys)
+	for i, key := range keys {
+		url, err := createAvatarSignedURLs(ctx, key.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		avatars[i].ID = key.ID
+		avatars[i].URL = url
+	}
 
 	return avatars, nil
 }
 
-func CreateAvatar(ctx context.Context, avatar *Avatar) error {
+func createAvatarSignedURLs(ctx context.Context, id int64) (string, error) {
+	fileID := strconv.FormatInt(id, 10)
+	filePath := storageObjectFilePath("Avatar", fileID, "vrm")
+	bucketName := infrastructure.MaterialBucketName()
+
+	url, err := infrastructure.GetGCSSignedURL(ctx, bucketName, filePath, "GET", "")
+	if err != nil {
+		return url, err
+	}
+
+	return url, nil
+}
+
+// CreateAvatar creats a new avatar belongs to user.
+func CreateAvatar(ctx context.Context, avatar *Avatar, user *User) error {
 	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
 	if err != nil {
 		return err
 	}
 
-	avatar.Created = time.Now()
+	currentTime := time.Now()
+	avatar.IsPublic = false
+	avatar.Created = currentTime
+	avatar.Updated = currentTime
 
-	key := datastore.IncompleteKey("Avatar", nil)
+	ancestor := datastore.IDKey("User", user.ID, nil)
+	key := datastore.IncompleteKey("Avatar", ancestor)
 	putKey, err := client.Put(ctx, key, avatar)
 	if err != nil {
 		return err
@@ -86,13 +135,6 @@ func CreateAvatar(ctx context.Context, avatar *Avatar) error {
 	avatar.ID = putKey.ID
 
 	return nil
-}
-
-func storeAvatarThumbnailURL(ctx context.Context, avatars *[]Avatar, keys []*datastore.Key) {
-	for i, key := range keys {
-		(*avatars)[i].ID = key.ID
-		(*avatars)[i].ThumbnailURL = infrastructure.AvatarThumbnailURL(ctx, key.ID)
-	}
 }
 
 func DeleteAvatarInTransaction(tx *datastore.Transaction, id int64) error {

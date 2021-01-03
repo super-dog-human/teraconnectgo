@@ -47,9 +47,8 @@ func CreateAvatarsAndBlankFile(request *http.Request, objectRequest domain.Stora
 
 	for i, fileRequest := range objectRequest.FileRequests {
 		avatar := new(domain.Avatar)
-		avatar.UserID = currentUser.ID
 
-		if err = domain.CreateAvatar(ctx, avatar); err != nil {
+		if err = domain.CreateAvatar(ctx, avatar, &currentUser); err != nil {
 			return signedURLs, err
 		}
 

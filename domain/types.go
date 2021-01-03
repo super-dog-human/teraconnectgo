@@ -36,20 +36,6 @@ const (
 	Accepted LessonReviewStatus = 3
 )
 
-// Avatar is used for lesson.
-type Avatar struct {
-	ID              int64        `json:"id" datastore:"-"`
-	UserID          int64        `json:"userID"`
-	URL             string       `json:"url" datastore:"-"`
-	ThumbnailURL    string       `json:"thumbnailURL" datastore:"-"`
-	Name            string       `json:"name"`
-	DefaultPoseKeys []AvatarPose `json:"defaultPoseKeys"`
-	Version         int64        `json:"version"`
-	IsPublic        bool         `json:"isPublic"`
-	Created         time.Time    `json:"created"`
-	Updated         time.Time    `json:"updated"`
-}
-
 // LessonAuthor is author of lesson.
 type LessonAuthor struct {
 	ID       int64     `json:"id" datastore:"-"`

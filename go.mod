@@ -19,7 +19,7 @@ require (
 	golang.org/x/sys v0.0.0-20201026173827-119d4633e4d1 // indirect
 	golang.org/x/tools v0.0.0-20201026223136-e84cfc6dd5ca // indirect
 	google.golang.org/api v0.34.0
-	google.golang.org/appengine v1.6.7 // indirect
+	google.golang.org/appengine v1.6.7
 	google.golang.org/genproto v0.0.0-20201026171402-d4b8fe4fd877 // indirect
 	google.golang.org/grpc v1.33.1 // indirect
 )
