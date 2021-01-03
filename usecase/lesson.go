@@ -63,8 +63,9 @@ func GetPublicLesson(request *http.Request, id int64) (domain.Lesson, error) {
 	ctx := request.Context()
 
 	_, err := domain.GetCurrentUser(request)
-	authErr, ok := err.(domain.AuthErrorCode)
-	if !ok || authErr != domain.TokenNotFound {
+	authErr, _ := err.(domain.AuthErrorCode)
+
+	if err != nil && authErr != domain.TokenNotFound {
 		// can get lesson without token, but can NOT get with invalid token.
 		lesson := new(domain.Lesson)
 		return *lesson, err
