@@ -80,13 +80,12 @@ func GetObjectFromGCS(ctx context.Context, bucketName, filePath string) ([]byte,
 
 // GetGCSSignedURL generates signed-URL for GCS object.
 func GetGCSSignedURL(ctx context.Context, bucket string, key string, method string, contentType string) (string, error) {
-	expire := time.Now().AddDate(1, 0, 0)
-
+	expire := time.Now().AddDate(0, 0, 1) // expire after a day.
 	url, err := storage.SignedURL(bucket, key, &storage.SignedURLOptions{
-		GoogleAccessID: ServiceAccount(),
+		GoogleAccessID: ServiceAccountName(),
 		SignBytes: func(b []byte) ([]byte, error) {
 			resp, err := iamService.Projects.ServiceAccounts.SignBlob(
-				ServiceAccount(),
+				ServiceAccountID(),
 				&iam.SignBlobRequest{BytesToSign: base64.StdEncoding.EncodeToString(b)},
 			).Context(ctx).Do()
 			if err != nil {
@@ -123,11 +122,11 @@ func DeleteObjectsFromGCS(ctx context.Context, bucketName string, filePath strin
 }
 
 // GetPublicBackGroundImageURL returns public image file URL in GCS.
-func GetPublicBackGroundImageURL(bucket string, id string) string {
-	return "https://storage.googleapis.com/" + bucket + "/image/background/" + id + ".jpg"
+func GetPublicBackGroundImageURL(id string) string {
+	return "https://storage.googleapis.com/" + PublicBucketName() + "/image/background/" + id + ".jpg"
 }
 
 // GetPublicBackGroundMusicURL returns public audio file URL in GCS.
-func GetPublicBackGroundMusicURL(bucket string, id string) string {
-	return "https://storage.googleapis.com/" + bucket + "/audio/bgm/" + id + ".mp3"
+func GetPublicBackGroundMusicURL(id string) string {
+	return "https://storage.googleapis.com/" + PublicBucketName() + "/audio/bgm/" + id + ".mp3"
 }

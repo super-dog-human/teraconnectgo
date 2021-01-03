@@ -30,10 +30,9 @@ func GetAllBackgroundImages(ctx context.Context) ([]BackgroundImage, error) {
 		return nil, err
 	}
 
-	bucketName := infrastructure.PublicBucketName()
 	for i, key := range keys {
 		images[i].ID = key.ID
-		images[i].URL = infrastructure.GetPublicBackGroundImageURL(bucketName, strconv.FormatInt(key.ID, 10))
+		images[i].URL = infrastructure.GetPublicBackGroundImageURL(strconv.FormatInt(key.ID, 10))
 	}
 
 	return images, nil

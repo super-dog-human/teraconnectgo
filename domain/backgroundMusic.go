@@ -30,10 +30,9 @@ func GetAllBackgroundMusics(ctx context.Context) ([]BackgroundMusic, error) {
 		return nil, err
 	}
 
-	bucketName := infrastructure.PublicBucketName()
 	for i, key := range keys {
 		musics[i].ID = key.ID
-		musics[i].URL = infrastructure.GetPublicBackGroundMusicURL(bucketName, strconv.FormatInt(key.ID, 10))
+		musics[i].URL = infrastructure.GetPublicBackGroundMusicURL(strconv.FormatInt(key.ID, 10))
 	}
 
 	return musics, nil
