@@ -237,11 +237,13 @@ func getLessonByIDWithResources(ctx context.Context, id int64) (domain.Lesson, e
 		return lesson, err
 	}
 
-	avatar, err := domain.GetAvatarByIDs(ctx, lesson.AvatarID)
-	if err != nil {
-		return lesson, err
+	if lesson.AvatarID != 0 {
+		avatar, err := domain.GetAvatarByIDs(ctx, lesson.AvatarID)
+		if err != nil {
+			return lesson, err
+		}
+		lesson.Avatar = avatar
 	}
-	lesson.Avatar = avatar
 
 	graphics, err := domain.GetGraphicsByIDs(ctx, lesson.GraphicIDs)
 	if err != nil {
