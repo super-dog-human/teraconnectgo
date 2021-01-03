@@ -88,16 +88,16 @@ func GetPublicAvatars(ctx context.Context) ([]Avatar, error) {
 	}
 
 	for i, key := range keys {
-		url, err := createAvatarSignedURLs(ctx, key.ID)
-		if err != nil {
-			return nil, err
-		}
-
 		avatars[i].ID = key.ID
-		avatars[i].URL = url
+		avatars[i].URL = createAvatarPublicURLs(key.ID)
 	}
 
 	return avatars, nil
+}
+
+func createAvatarPublicURLs(id int64) string {
+	fileID := strconv.FormatInt(id, 10)
+	return "https://storage.googleapis.com/" + infrastructure.MaterialBucketName() + "/avatar/" + fileID + ".vrm"
 }
 
 func createAvatarSignedURLs(ctx context.Context, id int64) (string, error) {
