@@ -44,7 +44,7 @@ func getLesson(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, errMessage)
 	}
 
-	if c.Param("for_authoring") == "true" {
+	if c.QueryParam("for_authoring") == "true" {
 		lesson, err = usecase.GetPrivateLesson(c.Request(), id)
 	} else {
 		lesson, err = usecase.GetPublicLesson(c.Request(), id)
