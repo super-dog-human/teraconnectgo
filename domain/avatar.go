@@ -11,14 +11,46 @@ import (
 
 // Avatar is used for lesson.
 type Avatar struct {
-	ID              int64        `json:"id" datastore:"-"`
-	Name            string       `json:"name"`
-	URL             string       `json:"url"`
-	DefaultPoseKeys []AvatarPose `json:"defaultPoseKeys"`
-	Version         int64        `json:"version"`
-	IsPublic        bool         `json:"-"`
-	Created         time.Time    `json:"created"`
-	Updated         time.Time    `json:"updated"`
+	ID       int64        `json:"id" datastore:"-"`
+	Name     string       `json:"name"`
+	URL      string       `json:"url"`
+	Config   AvatarConfig `json:"config"`
+	Version  int64        `json:"version"`
+	IsPublic bool         `json:"-"`
+	Created  time.Time    `json:"created"`
+	Updated  time.Time    `json:"updated"`
+}
+
+type AvatarConfig struct {
+	Scale        float32          `json:"scale"`
+	Positions    []float32        `json:"positions"`
+	InitialPoses []AvatarRotation `json:"initialPoses"`
+}
+
+type AvatarRotation struct {
+	BoneName  string    `json:"boneName"`
+	Rotations []float32 `json:"rotations"`
+}
+
+type AvatarPose struct {
+	LeftHands      []LessonRotation `json:"leftHands"`
+	RightHands     []LessonRotation `json:"rightHands"`
+	LeftElbows     []LessonRotation `json:"leftElbows"`
+	RightElbows    []LessonRotation `json:"rightElbows"`
+	LeftShoulders  []LessonRotation `json:"leftShoulders"`
+	RightShoulders []LessonRotation `json:"rightShoulders"`
+	Necks          []LessonRotation `json:"necks"`
+	CoreBodies     []LessonPosition `json:"coreBodies"`
+}
+
+type LessonRotation struct {
+	Rot  []float32 `json:"rot"`
+	Time float32   `json:"time"`
+}
+
+type LessonPosition struct {
+	Pos  []float32 `json:"pos"`
+	Time float32   `json:"time"`
 }
 
 // GetAvatarByIDs gets avatar by id.

@@ -117,27 +117,6 @@ type AvatarAction struct {
 	Action string `json:"action"`
 }
 
-type AvatarPose struct {
-	LeftHands      []LessonRotation `json:"leftHands"`
-	RightHands     []LessonRotation `json:"rightHands"`
-	LeftElbows     []LessonRotation `json:"leftElbows"`
-	RightElbows    []LessonRotation `json:"rightElbows"`
-	LeftShoulders  []LessonRotation `json:"leftShoulders"`
-	RightShoulders []LessonRotation `json:"rightShoulders"`
-	Necks          []LessonRotation `json:"necks"`
-	CoreBodies     []LessonPosition `json:"coreBodies"`
-}
-
-type LessonRotation struct {
-	Rot  []float32 `json:"rot"`
-	Time float32   `json:"time"`
-}
-
-type LessonPosition struct {
-	Pos  []float32 `json:"pos"`
-	Time float32   `json:"time"`
-}
-
 type AvatarFace struct {
 	AllAngry       AvatarWeight `json:"allAngry"`
 	AllFun         AvatarWeight `json:"allFun"`
