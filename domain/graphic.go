@@ -117,6 +117,31 @@ func CreateGraphic(ctx context.Context, graphic *Graphic) error {
 	return nil
 }
 
+func CreateGraphics(ctx context.Context, graphics []*Graphic) error {
+	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
+	if err != nil {
+		return err
+	}
+
+	keys := make([]*datastore.Key, len(graphics))
+	currentTime := time.Now()
+	for i, graphic := range graphics {
+		keys[i] = datastore.IncompleteKey("Graphic", nil)
+		graphic.Created = currentTime
+	}
+
+	putKeys, err := client.PutMulti(ctx, keys, graphics)
+	if err != nil {
+		return err
+	}
+
+	for i, graphic := range graphics {
+		graphic.ID = putKeys[i].ID
+	}
+
+	return nil
+}
+
 func DeleteGraphicsInTransaction(tx *datastore.Transaction, ids []int64) error {
 	var graphicKeys []*datastore.Key
 

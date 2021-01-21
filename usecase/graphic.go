@@ -33,7 +33,7 @@ func GetAvailableGraphics(request *http.Request) ([]domain.Graphic, error) {
 	return graphics, nil
 }
 
-func CreateGraphicsAndBlankFile(request *http.Request, objectRequest domain.StorageObjectRequest) (domain.SignedURLs, error) {
+func CreateGraphicsAndBlankFiles(request *http.Request, objectRequest domain.StorageObjectRequest) (domain.SignedURLs, error) {
 	ctx := request.Context()
 
 	var signedURLs domain.SignedURLs
@@ -43,18 +43,22 @@ func CreateGraphicsAndBlankFile(request *http.Request, objectRequest domain.Stor
 		return signedURLs, err
 	}
 
+	graphics := make([]*domain.Graphic, len(objectRequest.FileRequests))
 	urls := make([]domain.SignedURL, len(objectRequest.FileRequests))
 
 	for i, fileRequest := range objectRequest.FileRequests {
 		graphic := new(domain.Graphic)
 		graphic.UserID = currentUser.ID
 		graphic.FileType = fileRequest.Extension
+		graphics[i] = graphic
+	}
 
-		if err = domain.CreateGraphic(ctx, graphic); err != nil {
-			return signedURLs, err
-		}
+	if err = domain.CreateGraphics(ctx, graphics); err != nil {
+		return signedURLs, err
+	}
 
-		fileID := strconv.FormatInt(graphic.ID, 10)
+	for i, fileRequest := range objectRequest.FileRequests {
+		fileID := strconv.FormatInt(graphics[i].ID, 10)
 		url, err := domain.CreateBlankFileToGCS(ctx, fileID, "graphic", fileRequest)
 		if err != nil {
 			return signedURLs, err
@@ -62,6 +66,5 @@ func CreateGraphicsAndBlankFile(request *http.Request, objectRequest domain.Stor
 		urls[i] = domain.SignedURL{FileID: fileID, SignedURL: url}
 	}
 
-	signedURLs = domain.SignedURLs{SignedURLs: urls}
-	return signedURLs, nil
+	return domain.SignedURLs{SignedURLs: urls}, nil
 }

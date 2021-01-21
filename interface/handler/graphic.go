@@ -42,7 +42,7 @@ func postGraphics(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 
-	signedURLs, err := usecase.CreateGraphicsAndBlankFile(c.Request(), *objectRequest)
+	signedURLs, err := usecase.CreateGraphicsAndBlankFiles(c.Request(), *objectRequest)
 	if err != nil {
 		fatalLog(err)
 		return c.JSON(http.StatusInternalServerError, err.Error())
