@@ -57,5 +57,9 @@ func Main(appEnv string) {
 		port = "8080"
 	}
 
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	if infrastructure.AppEnv() == "development" {
+		log.Fatal(http.ListenAndServeTLS(":443", "localhost.crt", "localhost.key", nil))
+	} else {
+		log.Fatal(http.ListenAndServe(":"+port, nil))
+	}
 }
