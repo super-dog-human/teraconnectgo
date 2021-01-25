@@ -9,6 +9,17 @@ import (
 	"github.com/super-dog-human/teraconnectgo/infrastructure"
 )
 
+// Graphic is used for lesson.
+type Graphic struct {
+	ID           int64     `json:"id" datastore:"-"`
+	UserID       int64     `json:"userID"`
+	FileType     string    `json:"fileType"`
+	IsPublic     bool      `json:"isPublic"`
+	URL          string    `json:"url" datastore:"-"`
+	ThumbnailURL string    `json:"thumbnailURL" datastore:"-"`
+	Created      time.Time `json:"created"`
+}
+
 func GetGraphicsByIDs(ctx context.Context, ids []int64) ([]Graphic, error) {
 	var graphicKeys []*datastore.Key
 

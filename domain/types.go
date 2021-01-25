@@ -46,18 +46,6 @@ type LessonAuthor struct {
 	Updated  time.Time `json:"updated"`
 }
 
-// Graphic is used for lesson.
-type Graphic struct {
-	ID                int64     `json:"id" datastore:"-"`
-	GraphicCategoryID int64     `json:"graphicCategoryID"`
-	UserID            int64     `json:"userID"`
-	FileType          string    `json:"fileType"`
-	IsPublic          bool      `json:"isPublic"`
-	URL               string    `json:"url" datastore:"-"`
-	ThumbnailURL      string    `json:"thumbnailURL" datastore:"-"`
-	Created           time.Time `json:"created"`
-}
-
 // RawVoiceText is used for lesson.
 type RawVoiceText struct {
 	FileID      string  `json:"fileID"`
