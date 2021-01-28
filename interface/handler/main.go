@@ -60,6 +60,6 @@ func Main(appEnv string) {
 	if infrastructure.AppEnv() == "development" {
 		log.Fatal(http.ListenAndServeTLS(":443", "localhost.crt", "localhost.key", nil))
 	} else {
-		log.Fatal(http.ListenAndServe(":"+port, nil))
+		log.Fatal(e.Start(":" + port))
 	}
 }
