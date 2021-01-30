@@ -109,25 +109,6 @@ func GetGraphicFileTypes(ctx context.Context, graphicIDs []int64) (map[int64]str
 	return graphicFileTypes, nil
 }
 
-func CreateGraphic(ctx context.Context, graphic *Graphic) error {
-	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
-	if err != nil {
-		return err
-	}
-
-	graphic.Created = time.Now()
-
-	key := datastore.IncompleteKey("Graphic", nil)
-	putKey, err := client.Put(ctx, key, graphic)
-	if err != nil {
-		return err
-	}
-
-	graphic.ID = putKey.ID
-
-	return nil
-}
-
 func CreateGraphics(ctx context.Context, graphics []*Graphic) error {
 	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
 	if err != nil {
