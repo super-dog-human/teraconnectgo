@@ -50,23 +50,6 @@ func CreateBlankFileToGCS(ctx context.Context, fileID string, fileEntity string,
 	return url, err
 }
 
-func CreateBlankFileForSpeechToTextToGCS(ctx context.Context, lessonID string, fileID string) (string, error) {
-	filePath := fmt.Sprintf("%s/%s.wav", lessonID, fileID)
-	bucketName := infrastructure.TextToSpeechBucketName()
-	contentType := "audio/wav"
-
-	if err := infrastructure.CreateObjectToGCS(ctx, bucketName, filePath, contentType, nil); err != nil {
-		return "", err
-	}
-
-	url, err := infrastructure.GetGCSSignedURL(ctx, bucketName, filePath, "PUT", contentType)
-	if err != nil {
-		return "", err
-	}
-
-	return url, err
-}
-
 func EntityOfRequestedFile(ctx context.Context, entityID string, entityName string) (EntityBelongToFile, error) {
 	entity := new(EntityBelongToFile)
 

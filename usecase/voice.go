@@ -13,16 +13,11 @@ type CreateVoiceParam struct {
 	DurationSec float64 `json:"durationSec"`
 }
 
-type CreateVoiceResponse struct {
-	Mp3SignedURL string `json:"mp3SignedURL"`
-	WavSignedURL string `json:"wavSignedURL"`
-}
-
-// CreateVoiceAndBlankFiles creats Voice and blank files of mp3 and wav.
-func CreateVoiceAndBlankFiles(request *http.Request, params *CreateVoiceParam) (CreateVoiceResponse, error) {
+// CreateVoiceAndBlankFile creats Voice and blank files of mp3 and wav.
+func CreateVoiceAndBlankFile(request *http.Request, params *CreateVoiceParam) (domain.SignedURL, error) {
 	ctx := request.Context()
 
-	var response CreateVoiceResponse
+	var response domain.SignedURL
 
 	currentUser, err := domain.GetCurrentUser(request)
 	if err != nil {
@@ -48,28 +43,22 @@ func CreateVoiceAndBlankFiles(request *http.Request, params *CreateVoiceParam) (
 		return response, err
 	}
 
-	lessonID := strconv.FormatInt(lesson.ID, 10)
-	fileID := strconv.FormatInt(voice.ID, 10)
+	voiceID := strconv.FormatInt(voice.ID, 10)
 
 	mp3FileRequest := domain.FileRequest{
-		ID:          lessonID,
+		ID:          voiceID,
 		Entity:      "voice",
 		Extension:   "mp3",
 		ContentType: "audio/mpeg",
 	}
 
-	mp3URL, err := domain.CreateBlankFileToGCS(ctx, fileID, "voice", mp3FileRequest)
+	mp3URL, err := domain.CreateBlankFileToGCS(ctx, voiceID, "voice", mp3FileRequest)
 	if err != nil {
 		return response, err
 	}
 
-	wavURL, err := domain.CreateBlankFileForSpeechToTextToGCS(ctx, lessonID, fileID)
-	if err != nil {
-		return response, err
-	}
-
-	response.Mp3SignedURL = mp3URL
-	response.WavSignedURL = wavURL
+	response.FileID = voiceID
+	response.SignedURL = mp3URL
 
 	return response, nil
 }

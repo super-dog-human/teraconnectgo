@@ -13,7 +13,6 @@ func getVoices(c echo.Context) error {
 }
 
 func postVoice(c echo.Context) error {
-	// bind用のstructここで定義する
 	param := new(usecase.CreateVoiceParam)
 	if err := c.Bind(param); err != nil {
 		fatalLog(err)
@@ -24,11 +23,11 @@ func postVoice(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 
-	signedURLs, err := usecase.CreateVoiceAndBlankFiles(c.Request(), param)
+	signedURL, err := usecase.CreateVoiceAndBlankFile(c.Request(), param)
 	if err != nil {
 		fatalLog(err)
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, signedURLs)
+	return c.JSON(http.StatusOK, signedURL)
 }
