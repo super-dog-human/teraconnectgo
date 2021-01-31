@@ -12,7 +12,7 @@ import (
 // Graphic is used for lesson.
 type Graphic struct {
 	ID           int64     `json:"id" datastore:"-"`
-	UserID       int64     `json:"userID"`
+	LessonID     int64     `json:"lessonID"`
 	FileType     string    `json:"fileType"`
 	IsPublic     bool      `json:"isPublic"`
 	URL          string    `json:"url" datastore:"-"`
@@ -109,16 +109,18 @@ func GetGraphicFileTypes(ctx context.Context, graphicIDs []int64) (map[int64]str
 	return graphicFileTypes, nil
 }
 
-func CreateGraphics(ctx context.Context, graphics []*Graphic) error {
+func CreateGraphics(ctx context.Context, user *User, graphics []*Graphic) error {
 	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
 	if err != nil {
 		return err
 	}
 
+	parentKey := datastore.IDKey("User", user.ID, nil)
+
 	keys := make([]*datastore.Key, len(graphics))
 	currentTime := time.Now()
 	for i, graphic := range graphics {
-		keys[i] = datastore.IncompleteKey("Graphic", nil)
+		keys[i] = datastore.IncompleteKey("Graphic", parentKey)
 		graphic.Created = currentTime
 	}
 

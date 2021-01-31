@@ -19,6 +19,7 @@ type SignedURLs struct {
 }
 
 type StorageObjectRequest struct {
+	LesonID      int64         `json:"lessonID"`
 	FileRequests []FileRequest `json:"fileRequests"`
 }
 
