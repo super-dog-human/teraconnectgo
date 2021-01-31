@@ -41,16 +41,16 @@ func Main(appEnv string) {
 	auth.POST("/avatars", postAvatars)
 	auth.GET("/graphics", getGraphics)
 	auth.POST("/graphics", postGraphics)
+	auth.GET("/voices", getVoices)
+	auth.POST("/voice", postVoice)
 	auth.POST("/lessons", postLesson)
 	auth.PATCH("/lessons/:id", patchLesson)
 	auth.DELETE("/lessons/:id", deleteLesson)
 	auth.GET("/lessons/:id/materials", getLessonMaterials)
 	auth.POST("/lessons/:id/materials", postLessonMaterial)
 	auth.PUT("/lessons/:id/materials", putLessonMaterial)
-	auth.GET("/lessons/:id/raw_voice_texts", getRawVoiceTexts)
 	auth.PUT("/lessons/:id/packs", putLessonPack)
 	auth.GET("/storage_objects", getStorageObjects)
-	auth.POST("/blank_raw_voices", postBlankRawVoice)
 
 	port := os.Getenv("PORT")
 	if port == "" {

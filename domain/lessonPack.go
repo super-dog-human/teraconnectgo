@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"io"
 
-	"cloud.google.com/go/storage"
 	"github.com/super-dog-human/teraconnectgo/infrastructure"
 )
 
+/*
 func CreateLessonZip(ctx context.Context, lesson Lesson, graphicFileTypes map[int64]string, voiceTexts []RawVoiceText) (*bytes.Buffer, error) {
 	zipBuffer := new(bytes.Buffer)
 	zipWriter := zip.NewWriter(zipBuffer)
@@ -32,6 +32,7 @@ func CreateLessonZip(ctx context.Context, lesson Lesson, graphicFileTypes map[in
 
 	return zipBuffer, nil
 }
+*/
 
 func UploadLessonZipToGCS(ctx context.Context, lessonID int64, zip *bytes.Buffer) error {
 	zipFilePath := fmt.Sprintf("lesson/%d.zip", lessonID)
@@ -39,28 +40,6 @@ func UploadLessonZipToGCS(ctx context.Context, lessonID int64, zip *bytes.Buffer
 	bucketName := infrastructure.MaterialBucketName()
 	if err := infrastructure.CreateObjectToGCS(ctx, bucketName, zipFilePath, contentType, zip.Bytes()); err != nil {
 		return err
-	}
-
-	return nil
-}
-
-func RemoveUsedFilesInGCS(ctx context.Context, id int64, voiceTexts []RawVoiceText) error {
-	var err error
-
-	rawVoiceBucketName := infrastructure.RawVoiceBucketName()
-	voiceForTranscriptionBucketName := infrastructure.VoiceForTranscriptionBucketName()
-	for _, voiceText := range voiceTexts {
-		filePathInGCS := fmt.Sprintf("%d-%s.wav", id, voiceText.FileID)
-
-		err = infrastructure.DeleteObjectsFromGCS(ctx, rawVoiceBucketName, filePathInGCS)
-		if err != nil && err != storage.ErrObjectNotExist {
-			return err
-		}
-
-		err = infrastructure.DeleteObjectsFromGCS(ctx, voiceForTranscriptionBucketName, filePathInGCS)
-		if err != nil && err != storage.ErrObjectNotExist {
-			return err
-		}
 	}
 
 	return nil
@@ -92,6 +71,7 @@ func addGraphicsToZip(ctx context.Context, usedGraphicIDs []int64, graphicFileTy
 	return nil
 }
 
+/*
 func addVoiceToZip(ctx context.Context, voiceTexts []RawVoiceText, id int64, zipWriter *zip.Writer) error {
 	for _, voiceText := range voiceTexts {
 		filePathInGCS := fmt.Sprintf("voice/%d/%s.ogg", id, voiceText.FileID)
@@ -116,6 +96,7 @@ func addVoiceToZip(ctx context.Context, voiceTexts []RawVoiceText, id int64, zip
 
 	return nil
 }
+*/
 
 func addLessonJSONToZip(ctx context.Context, id int64, zipWriter *zip.Writer) error {
 	filePathInGCS := fmt.Sprintf("lesson/%d.json", id)

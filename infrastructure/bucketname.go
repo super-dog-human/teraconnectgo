@@ -12,8 +12,8 @@ func MaterialBucketName() string {
 	}
 }
 
-// RawVoiceBucketName is return bucket name each environments.
-func RawVoiceBucketName() string {
+// TextToSpeechBucketName is return bucket name each environments.
+func TextToSpeechBucketName() string {
 	switch AppEnv() {
 	case "production":
 		return "teraconn_raw_voice"

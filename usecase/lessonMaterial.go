@@ -33,10 +33,6 @@ func CreateLessonMaterial(request *http.Request, lessonID int64, lessonMaterial 
 		return err
 	}
 
-	if err := domain.DeleteRawVoiceTextsByLessonID(ctx, lessonID); err != nil {
-		return err
-	}
-
 	return nil
 }
 

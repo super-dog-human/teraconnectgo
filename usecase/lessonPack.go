@@ -24,28 +24,27 @@ func PackLesson(request *http.Request, id int64) error {
 		return LessonNotAvailable
 	}
 
-	graphicFileTypes, err := domain.GetGraphicFileTypes(ctx, lesson.GraphicIDs)
-	if err != nil {
-		return err
-	}
+	/*
 
-	voiceTexts, err := domain.GetRawVoiceTexts(ctx, id)
-	if err != nil {
-		return err
-	}
+		graphicFileTypes, err := domain.GetGraphicFileTypes(ctx, lesson.GraphicIDs)
+		if err != nil {
+			return err
+		}
 
-	zip, err := domain.CreateLessonZip(ctx, lesson, graphicFileTypes, voiceTexts)
-	if err != nil {
-		return err
-	}
+		voiceTexts, err := domain.GetRawVoiceTexts(ctx, id)
+		if err != nil {
+			return err
+		}
 
-	if err = domain.UploadLessonZipToGCS(ctx, id, zip); err != nil {
-		return err
-	}
+		zip, err := domain.CreateLessonZip(ctx, lesson, graphicFileTypes, voiceTexts)
+		if err != nil {
+			return err
+		}
 
-	if err = domain.RemoveUsedFilesInGCS(ctx, id, voiceTexts); err != nil {
-		return err
-	}
+		if err = domain.UploadLessonZipToGCS(ctx, id, zip); err != nil {
+			return err
+		}
+	*/
 
 	lesson.IsPacked = true
 	if err = domain.UpdateLesson(ctx, &lesson); err != nil {

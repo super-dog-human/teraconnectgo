@@ -46,16 +46,6 @@ type LessonAuthor struct {
 	Updated  time.Time `json:"updated"`
 }
 
-// RawVoiceText is used for lesson.
-type RawVoiceText struct {
-	FileID      string  `json:"fileID"`
-	LessonID    int64   `json:"lessonID"`
-	DurationSec float64 `json:"durationSec"`
-	Text        string  `json:"text"`
-	IsTexted    bool    `json:"isTexted"`
-	IsConverted bool    `json:"isConverted"`
-}
-
 type LessonMaterial struct {
 	DurationSec float64          `json:"durationSec"`
 	Timelines   []LessonTimeline `json:"timelines"`
@@ -85,11 +75,6 @@ type Caption struct {
 	SizeVW          uint8   `json:"sizeVW"`
 	BodyColor       string  `json:"bodyColor"`
 	BorderColor     string  `json:"borderColor"`
-}
-
-type Voice struct {
-	ID          string  `json:"id"`
-	DurationSec float64 `json:"durationSec"`
 }
 
 type LessonGraphic struct {

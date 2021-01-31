@@ -260,21 +260,12 @@ func deleteLessonAndRecources(ctx context.Context, lesson domain.Lesson) error {
 		return err
 	}
 
-	voiceTexts, err := domain.GetRawVoiceTexts(ctx, lesson.ID)
-	if err != nil {
-		return err
-	}
-
 	_, err = client.RunInTransaction(ctx, func(tx *datastore.Transaction) error {
 		if err := domain.DeleteAvatarInTransaction(tx, lesson.AvatarID); err != nil {
 			return err
 		}
 
 		if err := domain.DeleteGraphicsInTransaction(tx, lesson.GraphicIDs); err != nil {
-			return err
-		}
-
-		if err := domain.DeleteRawVoiceTextsInTransactionByLessonID(tx, voiceTexts); err != nil {
 			return err
 		}
 
