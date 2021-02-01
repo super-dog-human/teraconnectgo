@@ -34,15 +34,17 @@ func CreateVoiceAndBlankFile(request *http.Request, params *CreateVoiceParam) (d
 	}
 
 	voice := domain.Voice{
+		UserID:      currentUser.ID,
 		LessonID:    lesson.ID,
 		Speeched:    params.Speeched,
 		DurationSec: params.DurationSec,
 	}
 
-	if err = domain.CreateVoice(ctx, &currentUser, &voice); err != nil {
+	if err = domain.CreateVoice(ctx, &voice); err != nil {
 		return response, err
 	}
 
+	lessonID := strconv.FormatInt(lesson.ID, 10)
 	voiceID := strconv.FormatInt(voice.ID, 10)
 
 	mp3FileRequest := domain.FileRequest{
@@ -52,7 +54,8 @@ func CreateVoiceAndBlankFile(request *http.Request, params *CreateVoiceParam) (d
 		ContentType: "audio/mpeg",
 	}
 
-	mp3URL, err := domain.CreateBlankFileToGCS(ctx, voiceID, "voice", mp3FileRequest)
+	filePath := lessonID + "/" + voiceID
+	mp3URL, err := domain.CreateBlankFileToGCS(ctx, filePath, "voice", mp3FileRequest)
 	if err != nil {
 		return response, err
 	}

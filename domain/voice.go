@@ -11,6 +11,7 @@ import (
 // Voice is used for lesson.
 type Voice struct {
 	ID          int64     `json:"id" datastore:"-"`
+	UserID      int64     `json:"userID"`
 	LessonID    int64     `json:"lessonID"`
 	Speeched    float64   `json:"speeched"`
 	DurationSec float64   `json:"durationSec"`
@@ -18,10 +19,11 @@ type Voice struct {
 	IsTexted    bool      `json:"isTexted"`
 	URL         string    `json:"url" datastore:"-"`
 	Created     time.Time `json:"created"`
+	Updated     time.Time `json:"updated"`
 }
 
 // CreateVoice is creats new voice.
-func CreateVoice(ctx context.Context, user *User, voice *Voice) error {
+func CreateVoice(ctx context.Context, voice *Voice) error {
 	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
 	if err != nil {
 		return err
@@ -29,8 +31,7 @@ func CreateVoice(ctx context.Context, user *User, voice *Voice) error {
 
 	voice.Created = time.Now()
 
-	parentKey := datastore.IDKey("User", user.ID, nil)
-	key := datastore.IncompleteKey("Voice", parentKey)
+	key := datastore.IncompleteKey("Voice", nil)
 	putKey, err := client.Put(ctx, key, voice)
 	if err != nil {
 		return err
