@@ -12,5 +12,6 @@
 *.out
 go.sum
 *.DS_Store
-public.pem
-
+*.pem
+*.crt
+*.key
