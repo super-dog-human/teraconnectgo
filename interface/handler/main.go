@@ -47,7 +47,6 @@ func Main(appEnv string) {
 	auth.PATCH("/lessons/:id", patchLesson)
 	auth.DELETE("/lessons/:id", deleteLesson)
 	auth.GET("/lessons/:id/materials", getLessonMaterials)
-	auth.POST("/lessons/:id/materials", postLessonMaterial)
 	auth.PUT("/lessons/:id/materials", putLessonMaterial)
 	auth.PUT("/lessons/:id/packs", putLessonPack)
 	auth.GET("/storage_objects", getStorageObjects)

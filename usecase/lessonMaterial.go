@@ -35,17 +35,3 @@ func CreateLessonMaterial(request *http.Request, lessonID int64, lessonMaterial 
 
 	return nil
 }
-
-func UpdateLessonMaterial(request *http.Request, lessonID int64, lessonMaterial domain.LessonMaterial) error {
-	ctx := request.Context()
-
-	if err := currentUserAccessToLesson(ctx, request, lessonID); err != nil {
-		return err
-	}
-
-	if err := domain.CreateLessonMaterialFileToGCS(ctx, lessonID, lessonMaterial); err != nil {
-		return err
-	}
-
-	return nil
-}
