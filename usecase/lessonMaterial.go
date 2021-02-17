@@ -19,20 +19,40 @@ type CreateLessonMaterialParams struct {
 	Drawings          []domain.LessonDrawing      `json:"drawings"`
 }
 
+type LessonMaterialErrorCode uint
+
+const (
+	LessonMaterialNotAvailable LessonMaterialErrorCode = 1
+	LessonMaterialNotFound     LessonMaterialErrorCode = 2
+)
+
+func (e LessonMaterialErrorCode) Error() string {
+	switch e {
+	case LessonMaterialNotAvailable:
+		return "lesson material not available"
+	case LessonMaterialNotFound:
+		return "lesson material not found"
+	default:
+		return "unknown lesson error"
+	}
+}
+
 func GetLessonMaterial(request *http.Request, lessonID int64) (domain.LessonMaterial, error) {
 	ctx := request.Context()
 
 	var lessonMaterial domain.LessonMaterial
 	if _, err := currentUserAccessToLesson(ctx, request, lessonID); err != nil {
+		return lessonMaterial, LessonMaterialNotAvailable
+	}
+
+	if err := domain.GetLessonMaterial(ctx, lessonID, &lessonMaterial); err != nil {
 		return lessonMaterial, err
 	}
-	/*
-		lessonMaterial, err := domain.GetLessonMaterialFromGCS(ctx, lessonID)
-		if err != nil {
-			return lessonMaterial, err
-		}
 
-	*/
+	if lessonMaterial.LessonID == 0 {
+		return lessonMaterial, LessonMaterialNotFound
+	}
+
 	return lessonMaterial, nil
 }
 
@@ -41,7 +61,7 @@ func CreateLessonMaterial(request *http.Request, lessonID int64, params CreateLe
 
 	userID, err := currentUserAccessToLesson(ctx, request, lessonID)
 	if err != nil {
-		return err
+		return LessonMaterialNotAvailable
 	}
 
 	var lessonMaterial domain.LessonMaterial

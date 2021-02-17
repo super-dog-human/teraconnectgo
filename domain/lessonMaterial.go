@@ -10,6 +10,7 @@ import (
 
 type LessonMaterial struct {
 	UserID            int64                `json:"userID"`
+	LessonID          int64                `json:"LessonID"`
 	AvatarID          int64                `json:"avatarID"`
 	Duration          float32              `json:"duration"`
 	AvatarLightColor  string               `json:"avatarLightColor"`
@@ -73,6 +74,27 @@ type Caption struct {
 	VerticalAlign   string `json:"verticalAlign"`
 }
 
+func GetLessonMaterial(ctx context.Context, lessonID int64, lessonMaterial *LessonMaterial) error {
+	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
+	if err != nil {
+		return err
+	}
+
+	ancestor := datastore.IDKey("Lesson", lessonID, nil)
+	query := datastore.NewQuery("LessonMaterial").Ancestor(ancestor)
+	var lessonMaterials []LessonMaterial
+	if _, err := client.GetAll(ctx, query, &lessonMaterials); err != nil {
+		return err
+	}
+
+	if len(lessonMaterials) > 0 {
+		*lessonMaterial = lessonMaterials[0]
+		lessonMaterial.LessonID = lessonID
+	}
+
+	return nil
+}
+
 func CreateLessonMaterial(ctx context.Context, lessonID int64, lessonMaterial *LessonMaterial) error {
 	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
 	if err != nil {
@@ -91,44 +113,3 @@ func CreateLessonMaterial(ctx context.Context, lessonID int64, lessonMaterial *L
 
 	return nil
 }
-
-/*
-func GetLessonMaterialFromGCS(ctx context.Context, lessonID int64) (LessonMaterial, error) {
-	lessonMaterial := new(LessonMaterial)
-
-	bucketName := infrastructure.MaterialBucketName()
-	bytes, err := infrastructure.GetObjectFromGCS(ctx, bucketName, lessonFilePath(lessonID))
-
-	if err != nil {
-		if err == storage.ErrObjectNotExist {
-			return *lessonMaterial, err
-		}
-		return *lessonMaterial, err
-	}
-
-	if err := json.Unmarshal(bytes, lessonMaterial); err != nil {
-		return *lessonMaterial, err
-	}
-
-	return *lessonMaterial, nil
-}
-
-func CreateLessonMaterialFileToGCS(ctx context.Context, lessonID int64, lessonMaterial LessonMaterial) error {
-	contents, err := json.Marshal(lessonMaterial)
-	if err != nil {
-		return err
-	}
-
-	contentType := "application/json"
-	bucketName := infrastructure.MaterialBucketName()
-	if err := infrastructure.CreateObjectToGCS(ctx, bucketName, lessonFilePath(lessonID), contentType, contents); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func lessonFilePath(lessonID int64) string {
-	return fmt.Sprintf("lesson/%d.json", lessonID)
-}
-*/

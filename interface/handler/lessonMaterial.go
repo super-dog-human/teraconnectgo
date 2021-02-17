@@ -19,10 +19,10 @@ func getLessonMaterials(c echo.Context) error {
 	lessonMaterial, err := usecase.GetLessonMaterial(c.Request(), lessonID)
 	if err != nil {
 		fatalLog(err)
-		lessonErr, ok := err.(usecase.LessonErrorCode)
-		if ok && lessonErr == usecase.LessonNotFound {
+		lessonErr, ok := err.(usecase.LessonMaterialErrorCode)
+		if ok && lessonErr == usecase.LessonMaterialNotFound {
 			return c.JSON(http.StatusNotFound, err.Error())
-		} else if ok && lessonErr == usecase.LessonNotAvailable {
+		} else if ok && lessonErr == usecase.LessonMaterialNotAvailable {
 			return c.JSON(http.StatusForbidden, err.Error())
 		}
 		return c.JSON(http.StatusInternalServerError, err.Error())
@@ -47,10 +47,10 @@ func putLessonMaterial(c echo.Context) error {
 
 	if err := usecase.CreateLessonMaterial(c.Request(), lessonID, *params); err != nil {
 		fatalLog(err)
-		lessonErr, ok := err.(usecase.LessonErrorCode)
-		if ok && lessonErr == usecase.LessonNotFound {
+		lessonErr, ok := err.(usecase.LessonMaterialErrorCode)
+		if ok && lessonErr == usecase.LessonMaterialNotFound {
 			return c.JSON(http.StatusNotFound, err.Error())
-		} else if ok && lessonErr == usecase.LessonNotAvailable {
+		} else if ok && lessonErr == usecase.LessonMaterialNotAvailable {
 			return c.JSON(http.StatusForbidden, err.Error())
 		}
 		return c.JSON(http.StatusInternalServerError, err.Error())
