@@ -38,18 +38,9 @@ func CreateGraphicsAndBlankFiles(request *http.Request, objectRequest domain.Sto
 
 	var signedURLs domain.SignedURLs
 
-	currentUser, err := domain.GetCurrentUser(request)
+	userID, err := currentUserAccessToLesson(ctx, request, objectRequest.LessonID)
 	if err != nil {
 		return signedURLs, err
-	}
-
-	lesson, err := domain.GetLessonByID(ctx, objectRequest.LesonID)
-	if err != nil {
-		return signedURLs, err
-	}
-
-	if lesson.UserID != currentUser.ID {
-		return signedURLs, LessonNotAvailable
 	}
 
 	graphics := make([]*domain.Graphic, len(objectRequest.FileRequests))
@@ -57,12 +48,12 @@ func CreateGraphicsAndBlankFiles(request *http.Request, objectRequest domain.Sto
 
 	for i, fileRequest := range objectRequest.FileRequests {
 		graphic := new(domain.Graphic)
-		graphic.LessonID = objectRequest.LesonID
+		graphic.LessonID = objectRequest.LessonID
 		graphic.FileType = fileRequest.Extension
 		graphics[i] = graphic
 	}
 
-	if err = domain.CreateGraphics(ctx, &currentUser, graphics); err != nil {
+	if err = domain.CreateGraphics(ctx, userID, graphics); err != nil {
 		return signedURLs, err
 	}
 

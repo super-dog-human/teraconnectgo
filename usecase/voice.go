@@ -19,23 +19,14 @@ func CreateVoiceAndBlankFile(request *http.Request, params *CreateVoiceParam) (d
 
 	var response domain.SignedURL
 
-	currentUser, err := domain.GetCurrentUser(request)
+	userID, err := currentUserAccessToLesson(ctx, request, params.LessonID)
 	if err != nil {
 		return response, err
-	}
-
-	lesson, err := domain.GetLessonByID(ctx, params.LessonID)
-	if err != nil {
-		return response, err
-	}
-
-	if lesson.UserID != currentUser.ID {
-		return response, LessonNotAvailable
 	}
 
 	voice := domain.Voice{
-		UserID:      currentUser.ID,
-		LessonID:    lesson.ID,
+		UserID:      userID,
+		LessonID:    params.LessonID,
 		Speeched:    params.Speeched,
 		DurationSec: params.DurationSec,
 	}
@@ -44,7 +35,7 @@ func CreateVoiceAndBlankFile(request *http.Request, params *CreateVoiceParam) (d
 		return response, err
 	}
 
-	lessonID := strconv.FormatInt(lesson.ID, 10)
+	lessonID := strconv.FormatInt(params.LessonID, 10)
 	voiceID := strconv.FormatInt(voice.ID, 10)
 
 	mp3FileRequest := domain.FileRequest{

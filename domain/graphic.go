@@ -109,13 +109,13 @@ func GetGraphicFileTypes(ctx context.Context, graphicIDs []int64) (map[int64]str
 	return graphicFileTypes, nil
 }
 
-func CreateGraphics(ctx context.Context, user *User, graphics []*Graphic) error {
+func CreateGraphics(ctx context.Context, userID int64, graphics []*Graphic) error {
 	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
 	if err != nil {
 		return err
 	}
 
-	parentKey := datastore.IDKey("User", user.ID, nil)
+	parentKey := datastore.IDKey("User", userID, nil)
 
 	keys := make([]*datastore.Key, len(graphics))
 	currentTime := time.Now()
