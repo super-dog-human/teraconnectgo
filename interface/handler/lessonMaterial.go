@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	"github.com/labstack/echo/v4"
-	"github.com/super-dog-human/teraconnectgo/domain"
 	"github.com/super-dog-human/teraconnectgo/usecase"
 )
 
@@ -40,13 +39,13 @@ func putLessonMaterial(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, errMessage)
 	}
 
-	lessonMaterial := new(domain.LessonMaterial)
-	if err := c.Bind(lessonMaterial); err != nil {
+	params := new(usecase.CreateLessonMaterialParams)
+	if err := c.Bind(params); err != nil {
 		fatalLog(err)
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	if err := usecase.CreateLessonMaterial(c.Request(), lessonID, *lessonMaterial); err != nil {
+	if err := usecase.CreateLessonMaterial(c.Request(), lessonID, *params); err != nil {
 		fatalLog(err)
 		lessonErr, ok := err.(usecase.LessonErrorCode)
 		if ok && lessonErr == usecase.LessonNotFound {

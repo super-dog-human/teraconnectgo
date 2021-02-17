@@ -16,6 +16,17 @@ type User struct {
 	Updated    time.Time `json:"-"`
 }
 
+type Position2D struct {
+	X float64 `json:"x"`
+	Y float64 `json:"y"`
+}
+
+type Position3D struct {
+	X float64 `json:"x"`
+	Y float64 `json:"y"`
+	Z float64 `json:"z"`
+}
+
 // LessonReview is review status of lesson by other users.
 type LessonReview struct {
 	ID             int64              `json:"id" datastore:"-"`
@@ -44,96 +55,4 @@ type LessonAuthor struct {
 	Role     string    `json:"role"`
 	Created  time.Time `json:"created"`
 	Updated  time.Time `json:"updated"`
-}
-
-type LessonMaterial struct {
-	DurationSec float64          `json:"durationSec"`
-	Timelines   []LessonTimeline `json:"timelines"`
-	PoseKey     AvatarPose       `json:"poseKey"`
-	FaceKey     AvatarFace       `json:"faceKey"`
-}
-
-type LessonTimeline struct {
-	TimeSec  float64         `json:"timeSec"`
-	Subtitle Subtitle        `json:"subtitle"`
-	Caption  Caption         `json:"caption"`
-	Voice    Voice           `json:"voice"`
-	Graphic  []LessonGraphic `json:"graphics"`
-	Action   AvatarAction    `json:"action"`
-}
-
-type Subtitle struct {
-	DurationSec float64 `json:"durationSec"`
-	Body        string  `json:"body"`
-}
-
-type Caption struct {
-	DurationSec     float64 `json:"durationSec"`
-	Body            string  `json:"body"`
-	HorizontalAlign string  `json:"horizontalAlign"`
-	VerticalAlign   string  `json:"verticalAlign"`
-	SizeVW          uint8   `json:"sizeVW"`
-	BodyColor       string  `json:"bodyColor"`
-	BorderColor     string  `json:"borderColor"`
-}
-
-type LessonGraphic struct {
-	ID              string `json:"id"`
-	FileType        string `json:"fileType"`
-	Action          string `json:"action"`
-	SizePct         uint8  `json:"sizePct"`
-	HorizontalAlign string `json:"horizontalAlign"`
-	VerticalAlign   string `json:"verticalAlign"`
-}
-
-type AvatarAction struct {
-	Action string `json:"action"`
-}
-
-type AvatarFace struct {
-	AllAngry       AvatarWeight `json:"allAngry"`
-	AllFun         AvatarWeight `json:"allFun"`
-	AllJoy         AvatarWeight `json:"allJoy"`
-	AllSorrow      AvatarWeight `json:"allSorrow"`
-	AllSurprised   AvatarWeight `json:"allSurprised"`
-	BrwAngry       AvatarWeight `json:"brwAngry"`
-	BrwFun         AvatarWeight `json:"brwFun"`
-	BrwJoy         AvatarWeight `json:"brwJoy"`
-	BrwSorrow      AvatarWeight `json:"brwSorrow"`
-	BrwSurprised   AvatarWeight `json:"brwSurprised"`
-	EyeAngry       AvatarWeight `json:"eyeAngry"`
-	EyeClose       AvatarWeight `json:"eyeClose"`
-	EyeCloseR      AvatarWeight `json:"eyeCloseR"`
-	EyeCloseL      AvatarWeight `json:"eyeCloseL"`
-	EyeJoy         AvatarWeight `json:"eyeJoy"`
-	EyeJoyR        AvatarWeight `json:"eyeJoyR"`
-	EyeJoyL        AvatarWeight `json:"eyeJoyL"`
-	EyeSorrow      AvatarWeight `json:"eyeSorrow"`
-	EyeSurprised   AvatarWeight `json:"eyeSurprised"`
-	EyeExtra       AvatarWeight `json:"eyeExtra"`
-	MouthUp        AvatarWeight `json:"mouthUp"`
-	MouthDown      AvatarWeight `json:"mouthDown"`
-	MouthAngry     AvatarWeight `json:"mouthAngry"`
-	MouthCorner    AvatarWeight `json:"mouthCorner"`
-	MouthFun       AvatarWeight `json:"mouthFun"`
-	MouthJoy       AvatarWeight `json:"mouthJoy"`
-	MouthSorrow    AvatarWeight `json:"mouthSorrow"`
-	MouthSurprised AvatarWeight `json:"mouthSurprised"`
-	MouthA         AvatarWeight `json:"mouthA"`
-	MouthI         AvatarWeight `json:"mouthI"`
-	MouthU         AvatarWeight `json:"mouthU"`
-	MouthE         AvatarWeight `json:"mouthE"`
-	MouthO         AvatarWeight `json:"mouthO"`
-	Fung1          AvatarWeight `json:"fung1"`
-	Fung1Low       AvatarWeight `json:"fung1Low"`
-	Fung1Up        AvatarWeight `json:"fung1Up"`
-	Fung2          AvatarWeight `json:"fung2"`
-	Fung2Low       AvatarWeight `json:"fung2Low"`
-	Fung2Up        AvatarWeight `json:"fung2Up"`
-	EyeExtraOn     AvatarWeight `json:"eyeExtraOn"`
-}
-
-type AvatarWeight struct {
-	Values []float32 `json:"values"`
-	Times  []float32 `json:"times"`
 }

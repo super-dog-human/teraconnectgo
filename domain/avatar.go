@@ -32,27 +32,6 @@ type AvatarRotation struct {
 	Rotations []float32 `json:"rotations"`
 }
 
-type AvatarPose struct {
-	LeftHands      []LessonRotation `json:"leftHands"`
-	RightHands     []LessonRotation `json:"rightHands"`
-	LeftElbows     []LessonRotation `json:"leftElbows"`
-	RightElbows    []LessonRotation `json:"rightElbows"`
-	LeftShoulders  []LessonRotation `json:"leftShoulders"`
-	RightShoulders []LessonRotation `json:"rightShoulders"`
-	Necks          []LessonRotation `json:"necks"`
-	CoreBodies     []LessonPosition `json:"coreBodies"`
-}
-
-type LessonRotation struct {
-	Rot  []float32 `json:"rot"`
-	Time float32   `json:"time"`
-}
-
-type LessonPosition struct {
-	Pos  []float32 `json:"pos"`
-	Time float32   `json:"time"`
-}
-
 // GetAvatarByIDs gets avatar by id.
 func GetAvatarByIDs(ctx context.Context, id int64) (Avatar, error) {
 	avatar := new(Avatar)
