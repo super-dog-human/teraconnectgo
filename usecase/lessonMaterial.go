@@ -9,7 +9,7 @@ import (
 
 // CreateLessonMaterialParams
 type CreateLessonMaterialParams struct {
-	Duration          float32                     `json:"duration"`
+	DurationSec       float32                     `json:"durationSec"`
 	AvatarID          int64                       `json:"avatarID"`
 	AvatarLightColor  string                      `json:"avatarLightColor"`
 	BackgroundImageID int64                       `json:"backgroundImageID"`
@@ -49,7 +49,7 @@ func GetLessonMaterial(request *http.Request, lessonID int64) (domain.LessonMate
 		return lessonMaterial, err
 	}
 
-	if lessonMaterial.LessonID == 0 {
+	if lessonMaterial.ID == 0 {
 		return lessonMaterial, LessonMaterialNotFound
 	}
 

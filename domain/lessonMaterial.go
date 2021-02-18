@@ -9,11 +9,11 @@ import (
 )
 
 type LessonMaterial struct {
+	ID                int64                `json:"id" datastore:"-"`
 	UserID            int64                `json:"userID"`
-	LessonID          int64                `json:"LessonID"`
 	AvatarID          int64                `json:"avatarID"`
-	DurationSec       float32              `json:"durationSec"`
-	AvatarLightColor  string               `json:"avatarLightColor"`
+	DurationSec       float32              `json:"durationSec" datastore:",noindex"`
+	AvatarLightColor  string               `json:"avatarLightColor" datastore:",noindex"`
 	BackgroundImageID int64                `json:"backgroundImageID"`
 	BackgroundMusicID int64                `json:"backgroundMusicID"`
 	AvatarMovings     []LessonAvatarMoving `json:"avatarMovings"`
@@ -84,13 +84,14 @@ func GetLessonMaterial(ctx context.Context, lessonID int64, lessonMaterial *Less
 	ancestor := datastore.IDKey("Lesson", lessonID, nil)
 	query := datastore.NewQuery("LessonMaterial").Ancestor(ancestor)
 	var lessonMaterials []LessonMaterial
-	if _, err := client.GetAll(ctx, query, &lessonMaterials); err != nil {
+	keys, err := client.GetAll(ctx, query, &lessonMaterials)
+	if err != nil {
 		return err
 	}
 
 	if len(lessonMaterials) > 0 {
 		*lessonMaterial = lessonMaterials[0]
-		lessonMaterial.LessonID = lessonID
+		lessonMaterial.ID = keys[0].ID
 	}
 
 	return nil
