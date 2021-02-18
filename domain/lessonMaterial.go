@@ -12,7 +12,7 @@ type LessonMaterial struct {
 	UserID            int64                `json:"userID"`
 	LessonID          int64                `json:"LessonID"`
 	AvatarID          int64                `json:"avatarID"`
-	Duration          float32              `json:"duration"`
+	DurationSec       float32              `json:"durationSec"`
 	AvatarLightColor  string               `json:"avatarLightColor"`
 	BackgroundImageID int64                `json:"backgroundImageID"`
 	BackgroundMusicID int64                `json:"backgroundMusicID"`
@@ -27,7 +27,7 @@ type LessonMaterial struct {
 
 type LessonAvatarMoving struct {
 	Elapsedtime float32    `json:"elapsedtime"`
-	Duration    float32    `json:"duration"`
+	DurationSec float32    `json:"durationSec"`
 	Position    Position3D `json:"position"`
 }
 
@@ -39,7 +39,7 @@ type LessonGraphic struct {
 
 type LessonDrawing struct {
 	Elapsedtime float32             `json:"elapsedtime"`
-	Duration    float32             `json:"duration"`
+	DurationSec float32             `json:"durationSec"`
 	Action      string              `json:"action"`
 	Stroke      LessonDrawingStroke `json:"strokes"`
 }
@@ -56,7 +56,8 @@ type LessonDrawingStroke struct {
 
 type Speech struct {
 	Elapsedtime float32  `json:"elapsedtime"`
-	Voice       Voice    `json:"voice"`
+	DurationSec float32  `json:"durationSec"`
+	VoiceID     int64    `json:"voiceID"`
 	Subtitle    Subtitle `json:"subtitle"`
 	Caption     Caption  `json:"caption"`
 }
