@@ -13,8 +13,8 @@ type Voice struct {
 	ID          int64     `json:"id" datastore:"-"`
 	UserID      int64     `json:"userID"`
 	LessonID    int64     `json:"lessonID"`
-	Speeched    float64   `json:"speeched"`
-	DurationSec float64   `json:"durationSec"`
+	Elapsedtime float32   `json:"elapsedtime"`
+	DurationSec float32   `json:"durationSec"`
 	Text        string    `json:"text"`
 	IsTexted    bool      `json:"isTexted"`
 	URL         string    `json:"url" datastore:"-"`

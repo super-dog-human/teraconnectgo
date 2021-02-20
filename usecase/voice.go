@@ -9,8 +9,8 @@ import (
 
 type CreateVoiceParam struct {
 	LessonID    int64   `json:"lessonID"`
-	Speeched    float64 `json:"speeched"`
-	DurationSec float64 `json:"durationSec"`
+	Elapsedtime float32 `json:"elapsedtime"`
+	DurationSec float32 `json:"durationSec"`
 }
 
 // CreateVoiceAndBlankFile creats Voice and blank files of mp3 and wav.
@@ -27,7 +27,7 @@ func CreateVoiceAndBlankFile(request *http.Request, params *CreateVoiceParam) (d
 	voice := domain.Voice{
 		UserID:      userID,
 		LessonID:    params.LessonID,
-		Speeched:    params.Speeched,
+		Elapsedtime: params.Elapsedtime,
 		DurationSec: params.DurationSec,
 	}
 
