@@ -38,8 +38,10 @@ func (e LessonErrorCode) Error() string {
 	}
 }
 
-// NewLessonParams is only  used when creating new lesson.
-type NewLessonParams struct {
+// LessonParams is only used when creating new lesson.
+type LessonParams struct {
+	NeedsRecording     bool   `json:"needsRecording"`
+	IsIntroduction     bool   `json:"isIntroduction"`
 	SubjectID          int64  `json:"subjectID"`
 	JapaneseCategoryID int64  `json:"japaneseCategoryID"`
 	Title              string `json:"title"`
@@ -109,7 +111,7 @@ func GetPrivateLesson(request *http.Request, id int64) (domain.Lesson, error) {
 }
 
 // CreateLesson is create the new lesson belongs to subject and category.
-func CreateLesson(request *http.Request, newLesson *NewLessonParams, lesson *domain.Lesson) error {
+func CreateLesson(request *http.Request, newLesson *LessonParams, lesson *domain.Lesson) error {
 	currentUser, err := domain.GetCurrentUser(request)
 	if err != nil {
 		return InvalidLessonParams

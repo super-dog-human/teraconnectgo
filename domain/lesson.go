@@ -10,28 +10,50 @@ import (
 
 // Lesson is the lesson infomation type.
 type Lesson struct {
-	ID             int64     `json:"id" datastore:"-"`
-	SubjectName    string    `json:"subjectName"`
-	CategoryName   string    `json:"categoryName"`
-	AvatarID       int64     `json:"avatarID"`
-	Avatar         Avatar    `json:"avatar" datastore:"-"`
-	Title          string    `json:"title"`
-	Description    string    `json:"description"`
-	DurationSec    float64   `json:"durationSec"`
-	ThumbnailURL   string    `json:"thumbnailURL" datastore:"-"`
-	GraphicIDs     []int64   `json:"graphicIDs"`
-	Graphics       []Graphic `json:"graphics" datastore:"-"`
-	ViewCount      int64     `json:"viewCount"`
-	Version        int64     `json:"version"`
-	ViewKey        string    `json:"-"`
-	IsIntroduction bool      `json:"isIntroduction"`
-	IsPacked       bool      `json:"isPacked"`
-	IsPublic       bool      `json:"isPublic"`
-	UserID         int64     `json:"userID"`
-	SizeInBytes    int64     `json:"sizeInBytes"`
-	Created        time.Time `json:"created"`
-	Updated        time.Time `json:"updated"`
+	ID             int64              `json:"id" datastore:"-"`
+	UserID         int64              `json:"userID"`
+	NeedsRecording bool               `json:"needsRecording"` // 収録画面での収録必要の有無
+	IsEdited       bool               `json:"isEdited"`       // 編集画面から保存されたことがある
+	IsIntroduction bool               `json:"isIntroduction"` // 自己紹介用の授業
+	IsPacked       bool               `json:"isPacked"`       // 公開準備の完了
+	IsPublic       bool               `json:"isPublic"`
+	Reviews        []LessonReview     `json:"reviews"`
+	ReviewStatus   LessonReviewStatus `json:"reviewStatus"`
+	SubjectName    string             `json:"subjectName"`
+	CategoryName   string             `json:"categoryName"`
+	AvatarID       int64              `json:"avatarID"`
+	Avatar         Avatar             `json:"avatar" datastore:"-"`
+	Title          string             `json:"title"`
+	Description    string             `json:"description"`
+	DurationSec    float64            `json:"durationSec"`
+	ThumbnailURL   string             `json:"thumbnailURL" datastore:"-"`
+	GraphicIDs     []int64            `json:"graphicIDs"`
+	Graphics       []Graphic          `json:"graphics" datastore:"-"`
+	ViewCount      int64              `json:"viewCount"`
+	Version        int64              `json:"version"`
+	ViewKey        string             `json:"-"`
+	SizeInBytes    int64              `json:"sizeInBytes"`
+	Created        time.Time          `json:"created"`
+	Updated        time.Time          `json:"updated"`
 }
+
+// LessonReview is review status of lesson by other users.
+type LessonReview struct {
+	ReviewerUserID int64     `json:"userID"`
+	Comment        string    `json:"comment"`
+	Created        time.Time `json:"created"`
+}
+
+// LessonReviewStatus is status of latest lessons' review.
+type LessonReviewStatus int8
+
+const (
+	BeforeReview LessonReviewStatus = 0
+	InReview     LessonReviewStatus = 1
+	Expired      LessonReviewStatus = 2
+	Rejected     LessonReviewStatus = 3
+	Accepted     LessonReviewStatus = 4
+)
 
 func GetLessonByID(ctx context.Context, id int64) (Lesson, error) {
 	lesson := new(Lesson)

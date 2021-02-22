@@ -5,35 +5,36 @@ import (
 	"time"
 
 	"cloud.google.com/go/datastore"
+	"github.com/jinzhu/copier"
 	"github.com/super-dog-human/teraconnectgo/infrastructure"
 )
 
 type LessonMaterial struct {
-	ID                int64                `json:"id" datastore:"-"`
-	UserID            int64                `json:"userID"`
-	AvatarID          int64                `json:"avatarID"`
-	DurationSec       float32              `json:"durationSec" datastore:",noindex"`
-	AvatarLightColor  string               `json:"avatarLightColor" datastore:",noindex"`
-	BackgroundImageID int64                `json:"backgroundImageID"`
-	BackgroundMusicID int64                `json:"backgroundMusicID"`
-	AvatarMovings     []LessonAvatarMoving `json:"avatarMovings"`
-	Graphics          []LessonGraphic      `json:"graphics"`
-	Drawings          []LessonDrawing      `json:"drawings"`
-	Speeches          []Speech             `json:"speeches"`
-	Created           time.Time            `json:"created"`
-	Updated           time.Time            `json:"updated"`
-	//	Status
+	ID                int64           `json:"id" datastore:"-"`
+	Version           uint            `json:"version" datastore:"-"` // 同じLessonを親に持つもののCreatedの昇順をバージョンとする
+	UserID            int64           `json:"userID"`
+	AvatarID          int64           `json:"avatarID"`
+	DurationSec       float32         `json:"durationSec" datastore:",noindex"`
+	AvatarLightColor  string          `json:"avatarLightColor" datastore:",noindex"`
+	BackgroundImageID int64           `json:"backgroundImageID"`
+	BackgroundMusicID int64           `json:"backgroundMusicID"`
+	Avatars           []LessonAvatar  `json:"avatars"`
+	Graphics          []LessonGraphic `json:"graphics"`
+	Drawings          []LessonDrawing `json:"drawings"`
+	Speeches          []LessonSpeech  `json:"speeches"`
+	Created           time.Time       `json:"created"`
+	Updated           time.Time       `json:"updated"`
 }
 
-type LessonAvatarMoving struct {
+type LessonAvatar struct {
 	Elapsedtime float32    `json:"elapsedtime"`
 	DurationSec float32    `json:"durationSec"`
-	Position    Position3D `json:"position"`
+	Moving      Position3D `json:"moving,omitempty"`
 }
 
 type LessonGraphic struct {
-	GraphicID   int64   `json:"graphicID"`
 	Elapsedtime float64 `json:"elapsedtime"`
+	GraphicID   int64   `json:"graphicID"`
 	Action      string  `json:"action"`
 }
 
@@ -46,15 +47,15 @@ type LessonDrawing struct {
 
 type LessonDrawingStroke struct {
 	Clear     bool         `json:"clear"`
-	Width     int32        `json:"width"`
-	Height    int32        `json:"height"`
-	Color     string       `json:"color"`
 	Eraser    bool         `json:"eraser"`
-	LineWidth int32        `json:"lineWidth"`
-	Positions []Position2D `json:"positions"`
+	Width     int32        `json:"width,omitempty"`
+	Height    int32        `json:"height,omitempty"`
+	Color     string       `json:"color,omitempty"`
+	LineWidth int32        `json:"lineWidth,omitempty"`
+	Positions []Position2D `json:"positions,omitempty"`
 }
 
-type Speech struct {
+type LessonSpeech struct {
 	Elapsedtime float32  `json:"elapsedtime"`
 	DurationSec float32  `json:"durationSec"`
 	VoiceID     int64    `json:"voiceID"`
@@ -82,7 +83,7 @@ func GetLessonMaterial(ctx context.Context, lessonID int64, lessonMaterial *Less
 	}
 
 	ancestor := datastore.IDKey("Lesson", lessonID, nil)
-	query := datastore.NewQuery("LessonMaterial").Ancestor(ancestor)
+	query := datastore.NewQuery("LessonMaterial").Ancestor(ancestor).Order("-Created") // 降順
 	var lessonMaterials []LessonMaterial
 	keys, err := client.GetAll(ctx, query, &lessonMaterials)
 	if err != nil {
@@ -92,6 +93,7 @@ func GetLessonMaterial(ctx context.Context, lessonID int64, lessonMaterial *Less
 	if len(lessonMaterials) > 0 {
 		*lessonMaterial = lessonMaterials[0]
 		lessonMaterial.ID = keys[0].ID
+		lessonMaterial.Version = uint(len(lessonMaterials))
 	}
 
 	return nil
@@ -112,6 +114,34 @@ func CreateLessonMaterial(ctx context.Context, lessonID int64, lessonMaterial *L
 	if _, err := client.Put(ctx, key, lessonMaterial); err != nil {
 		return err
 	}
+
+	return nil
+}
+
+func UpdateLessonMaterial(ctx context.Context, id int64, lessonID int64, newLessonMaterial *LessonMaterial) error {
+	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
+	if err != nil {
+		return err
+	}
+
+	_, err = client.RunInTransaction(ctx, func(tx *datastore.Transaction) error {
+		var lessonMaterial LessonMaterial
+
+		ancestor := datastore.IDKey("Lesson", lessonID, nil)
+		key := datastore.IDKey("LessonMaterial", id, ancestor)
+		if err := tx.Get(key, lessonMaterial); err != nil {
+			return nil
+		}
+
+		copier.Copy(&lessonMaterial, &newLessonMaterial)
+		lessonMaterial.Updated = time.Now()
+
+		if _, err := tx.Put(key, lessonMaterial); err != nil {
+			return err
+		}
+
+		return nil
+	})
 
 	return nil
 }

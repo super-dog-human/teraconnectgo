@@ -73,7 +73,7 @@ func getLesson(c echo.Context) error {
 }
 
 func postLesson(c echo.Context) error {
-	params := new(usecase.NewLessonParams)
+	params := new(usecase.LessonParams)
 	lesson := new(domain.Lesson)
 
 	if err := c.Bind(params); err != nil {
