@@ -10,7 +10,7 @@ import (
 )
 
 func getVoices(c echo.Context) error {
-	lessonID, err := strconv.ParseInt(c.QueryParam("lessonID"), 10, 64)
+	lessonID, err := strconv.ParseInt(c.QueryParam("lesson_id"), 10, 64)
 	if err != nil {
 		errMessage := "Invalid ID(s) error"
 		warnLog(errMessage)
