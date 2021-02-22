@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"github.com/super-dog-human/teraconnectgo/domain"
@@ -9,7 +10,23 @@ import (
 )
 
 func getVoices(c echo.Context) error {
-	return c.JSON(http.StatusOK, nil)
+	lessonID, err := strconv.ParseInt(c.QueryParam("lessonID"), 10, 64)
+	if err != nil {
+		errMessage := "Invalid ID(s) error"
+		warnLog(errMessage)
+		return c.JSON(http.StatusBadRequest, errMessage)
+	}
+
+	voices, err := usecase.GetVoices(c.Request(), lessonID)
+	if err != nil {
+		voiceErr, ok := err.(domain.VoiceErrorCode)
+		if ok && voiceErr == domain.VoiceNotFound {
+			return c.JSON(http.StatusNotFound, err.Error())
+		}
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, voices)
 }
 
 func postVoice(c echo.Context) error {

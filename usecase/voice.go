@@ -13,6 +13,22 @@ type CreateVoiceParam struct {
 	DurationSec float32 `json:"durationSec"`
 }
 
+func GetVoices(request *http.Request, lessonID int64) ([]domain.Voice, error) {
+	ctx := request.Context()
+
+	var voices []domain.Voice
+
+	if _, err := currentUserAccessToLesson(ctx, request, lessonID); err != nil {
+		return voices, err
+	}
+
+	if err := domain.GetVoices(ctx, lessonID, &voices); err != nil {
+		return voices, err
+	}
+
+	return voices, nil
+}
+
 // CreateVoiceAndBlankFile creats Voice and blank files of mp3 and wav.
 func CreateVoiceAndBlankFile(request *http.Request, params *CreateVoiceParam) (domain.SignedURL, error) {
 	ctx := request.Context()
@@ -26,12 +42,11 @@ func CreateVoiceAndBlankFile(request *http.Request, params *CreateVoiceParam) (d
 
 	voice := domain.Voice{
 		UserID:      userID,
-		LessonID:    params.LessonID,
 		Elapsedtime: params.Elapsedtime,
 		DurationSec: params.DurationSec,
 	}
 
-	if err = domain.CreateVoice(ctx, &voice); err != nil {
+	if err = domain.CreateVoice(ctx, params.LessonID, &voice); err != nil {
 		return response, err
 	}
 
