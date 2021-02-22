@@ -2,6 +2,8 @@ package domain
 
 import (
 	"context"
+	"fmt"
+	"strconv"
 	"time"
 
 	"cloud.google.com/go/datastore"
@@ -51,13 +53,11 @@ func GetVoices(ctx context.Context, lessonID int64, voices *[]Voice) error {
 		return err
 	}
 
-	for i, voice := range *voices {
-		voice.ID = keys[i].ID
-	}
-
 	if len(*voices) == 0 {
 		return VoiceNotFound
 	}
+
+	storeVoiceURLs(ctx, lessonID, voices, keys)
 
 	return nil
 }
@@ -79,6 +79,25 @@ func CreateVoice(ctx context.Context, lessonID int64, voice *Voice) error {
 	}
 
 	voice.ID = putKey.ID
+
+	return nil
+}
+
+func storeVoiceURLs(ctx context.Context, lessonID int64, voices *[]Voice, keys []*datastore.Key) error {
+	lessonIDString := strconv.FormatInt(lessonID, 10)
+	for i, key := range keys {
+		fileID := strconv.FormatInt(key.ID, 10)
+		filePath := fmt.Sprintf("voice/%s/%s.mp3", lessonIDString, fileID)
+		fileType := "" // this is unnecessary when GET request
+		bucketName := infrastructure.MaterialBucketName()
+		url, err := infrastructure.GetGCSSignedURL(ctx, bucketName, filePath, "GET", fileType)
+		if err != nil {
+			return err
+		}
+
+		(*voices)[i].ID = key.ID
+		(*voices)[i].URL = url
+	}
 
 	return nil
 }
