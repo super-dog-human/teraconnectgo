@@ -19,11 +19,11 @@ func GetVoices(request *http.Request, lessonID int64) ([]domain.Voice, error) {
 	var voices []domain.Voice
 
 	if _, err := currentUserAccessToLesson(ctx, request, lessonID); err != nil {
-		return voices, err
+		return nil, err
 	}
 
 	if err := domain.GetVoices(ctx, lessonID, &voices); err != nil {
-		return voices, err
+		return nil, err
 	}
 
 	return voices, nil
