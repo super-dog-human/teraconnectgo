@@ -9,104 +9,51 @@ import (
 	"github.com/super-dog-human/teraconnectgo/infrastructure"
 )
 
+type GraphicErrorCode uint
+
+const (
+	GraphicNotFound GraphicErrorCode = 1
+)
+
+func (e GraphicErrorCode) Error() string {
+	switch e {
+	case GraphicNotFound:
+		return "graphic not found"
+	default:
+		return "unknown voice error"
+	}
+}
+
 // Graphic is used for lesson.
 type Graphic struct {
-	ID           int64     `json:"id" datastore:"-"`
-	LessonID     int64     `json:"lessonID"`
-	FileType     string    `json:"fileType"`
-	IsPublic     bool      `json:"isPublic"`
-	URL          string    `json:"url" datastore:"-"`
-	ThumbnailURL string    `json:"thumbnailURL" datastore:"-"`
-	Created      time.Time `json:"created"`
+	ID       int64     `json:"id" datastore:"-"`
+	LessonID int64     `json:"lessonID"`
+	FileType string    `json:"fileType"`
+	IsPublic bool      `json:"isPublic"`
+	URL      string    `json:"url" datastore:"-"`
+	Created  time.Time `json:"created"`
 }
 
-func GetGraphicsByIDs(ctx context.Context, ids []int64) ([]Graphic, error) {
-	var graphicKeys []*datastore.Key
-
+func GetGraphicsByLessonID(ctx context.Context, lessonID int64, graphics *[]Graphic) error {
 	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	for _, id := range ids {
-		graphicKeys = append(graphicKeys, datastore.IDKey("Graphic", id, nil))
-	}
+	query := datastore.NewQuery("Graphic").Filter("LessonID =", lessonID)
 
-	graphics := make([]Graphic, len(ids))
-	if err := client.GetMulti(ctx, graphicKeys, graphics); err != nil {
-		return nil, err
-	}
-
-	for i, id := range ids {
-		graphics[i].ID = id
-	}
-
-	return graphics, nil
-}
-
-func GetCurrentUsersGraphics(ctx context.Context, userID int64) ([]Graphic, error) {
-	var graphics []Graphic
-
-	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
+	keys, err := client.GetAll(ctx, query, graphics)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	query := datastore.NewQuery("Graphic").Filter("UserID =", userID)
-	keys, err := client.GetAll(ctx, query, &graphics)
-	if err != nil {
-		return nil, err
+	if len(*graphics) == 0 {
+		return GraphicNotFound
 	}
 
-	storeGraphicThumbnailURL(ctx, &graphics, keys)
+	storeGraphicURL(ctx, graphics, keys)
 
-	return graphics, nil
-}
-
-func GetPublicGraphics(ctx context.Context) ([]Graphic, error) {
-	var graphics []Graphic
-
-	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
-	if err != nil {
-		return nil, err
-	}
-
-	query := datastore.NewQuery("Graphic").Filter("IsPublic =", true)
-	keys, err := client.GetAll(ctx, query, &graphics)
-	if err != nil {
-		return nil, err
-	}
-
-	if err = storeGraphicThumbnailURL(ctx, &graphics, keys); err != nil {
-		return nil, err
-	}
-
-	return graphics, nil
-}
-
-func GetGraphicFileTypes(ctx context.Context, graphicIDs []int64) (map[int64]string, error) {
-	var keys []*datastore.Key
-
-	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
-	if err != nil {
-		return nil, err
-	}
-
-	for _, id := range graphicIDs {
-		keys = append(keys, datastore.IDKey("Graphic", id, nil))
-	}
-
-	graphicFileTypes := map[int64]string{}
-	graphics := make([]Graphic, len(graphicIDs))
-	if err := client.GetMulti(ctx, keys, graphics); err != nil {
-		return nil, err
-	}
-
-	for i, g := range graphics {
-		id := graphicIDs[i]
-		graphicFileTypes[id] = g.FileType
-	}
-	return graphicFileTypes, nil
+	return nil
 }
 
 func CreateGraphics(ctx context.Context, userID int64, graphics []*Graphic) error {
@@ -150,7 +97,7 @@ func DeleteGraphicsInTransaction(tx *datastore.Transaction, ids []int64) error {
 	return nil
 }
 
-func storeGraphicThumbnailURL(ctx context.Context, graphics *[]Graphic, keys []*datastore.Key) error {
+func storeGraphicURL(ctx context.Context, graphics *[]Graphic, keys []*datastore.Key) error {
 	for i, key := range keys {
 		fileID := strconv.FormatInt(key.ID, 10)
 		filePath := storageObjectFilePath("Graphic", fileID, (*graphics)[i].FileType)
@@ -163,7 +110,6 @@ func storeGraphicThumbnailURL(ctx context.Context, graphics *[]Graphic, keys []*
 
 		(*graphics)[i].ID = key.ID
 		(*graphics)[i].URL = url
-		(*graphics)[i].ThumbnailURL = infrastructure.GraphicThumbnailURL(ctx, key.ID, fileType)
 	}
 
 	return nil

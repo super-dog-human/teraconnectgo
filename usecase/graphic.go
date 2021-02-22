@@ -7,28 +7,19 @@ import (
 	"github.com/super-dog-human/teraconnectgo/domain"
 )
 
-// GetAvailableGraphics for fetch graphic object from Cloud Datastore
-func GetAvailableGraphics(request *http.Request) ([]domain.Graphic, error) {
+// GetGraphicsByLessonID is fetching graphics belongs to lesson.
+func GetGraphicsByLessonID(request *http.Request, lessonID int64) ([]domain.Graphic, error) {
 	ctx := request.Context()
 
 	var graphics []domain.Graphic
 
-	currentUser, err := domain.GetCurrentUser(request)
-	if err != nil {
+	if _, err := currentUserAccessToLesson(ctx, request, lessonID); err != nil {
 		return nil, err
 	}
 
-	usersGraphics, err := domain.GetCurrentUsersGraphics(ctx, currentUser.ID)
-	if err != nil {
+	if err := domain.GetGraphicsByLessonID(ctx, lessonID, &graphics); err != nil {
 		return nil, err
 	}
-	graphics = append(graphics, usersGraphics...)
-
-	publicGraphics, err := domain.GetPublicGraphics(ctx)
-	if err != nil {
-		return nil, err
-	}
-	graphics = append(graphics, publicGraphics...)
 
 	return graphics, nil
 }

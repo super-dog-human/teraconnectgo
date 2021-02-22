@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"github.com/super-dog-human/teraconnectgo/domain"
@@ -9,14 +10,19 @@ import (
 )
 
 func getGraphics(c echo.Context) error {
-	// TODO pagination.
-	graphics, err := usecase.GetAvailableGraphics(c.Request())
+	lessonID, err := strconv.ParseInt(c.QueryParam("lessonID"), 10, 64)
+	if err != nil {
+		errMessage := "Invalid ID(s) error"
+		warnLog(errMessage)
+		return c.JSON(http.StatusBadRequest, errMessage)
+	}
+
+	graphics, err := usecase.GetGraphicsByLessonID(c.Request(), lessonID)
 
 	if err != nil {
 		fatalLog(err)
-		authErr, ok := err.(domain.AuthErrorCode)
-		if ok && authErr == domain.UserNotFound {
-			// when token is valid but user account not exists.
+		graphicErr, ok := err.(domain.GraphicErrorCode)
+		if ok && graphicErr == domain.GraphicNotFound {
 			return c.JSON(http.StatusNotFound, err.Error())
 		}
 		return c.JSON(http.StatusInternalServerError, err.Error())
