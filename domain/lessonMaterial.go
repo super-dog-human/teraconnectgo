@@ -46,8 +46,7 @@ type LessonDrawing struct {
 }
 
 type LessonDrawingStroke struct {
-	Clear     bool         `json:"clear"`
-	Eraser    bool         `json:"eraser"`
+	Eraser    bool         `json:"eraser,omitempty"`
 	Width     int32        `json:"width,omitempty"`
 	Height    int32        `json:"height,omitempty"`
 	Color     string       `json:"color,omitempty"`
