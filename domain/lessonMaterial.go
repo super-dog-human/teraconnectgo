@@ -17,13 +17,19 @@ type LessonMaterial struct {
 	DurationSec       float32         `json:"durationSec" datastore:",noindex"`
 	AvatarLightColor  string          `json:"avatarLightColor" datastore:",noindex"`
 	BackgroundImageID int64           `json:"backgroundImageID"`
-	BackgroundMusicID int64           `json:"backgroundMusicID"`
+	Musics            []LessonMusic   `json:"musics"`
 	Avatars           []LessonAvatar  `json:"avatars"`
 	Graphics          []LessonGraphic `json:"graphics"`
 	Drawings          []LessonDrawing `json:"drawings"`
 	Speeches          []LessonSpeech  `json:"speeches"`
 	Created           time.Time       `json:"created"`
 	Updated           time.Time       `json:"updated"`
+}
+
+type LessonMusic struct {
+	Elapsedtime       float32 `json:"elapsedtime"`
+	Action            string  `json:"action"`
+	BackGroundMusicID int64   `json:"backgroundMusicID"`
 }
 
 type LessonAvatar struct {
@@ -41,8 +47,15 @@ type LessonGraphic struct {
 type LessonDrawing struct {
 	Elapsedtime float32             `json:"elapsedtime"`
 	DurationSec float32             `json:"durationSec"`
-	Action      string              `json:"action"`
-	Stroke      LessonDrawingStroke `json:"strokes"`
+	Action      string              `json:"action"` // draw/clear/show/hide
+	Units       []LessonDrawingUnit `json:"units"`
+}
+
+type LessonDrawingUnit struct {
+	Elapsedtime float32             `json:"elapsedtime"`
+	DurationSec float32             `json:"durationSec"`
+	Action      string              `json:"action"` //draw/undo
+	Stroke      LessonDrawingStroke `json:"stroke"`
 }
 
 type LessonDrawingStroke struct {

@@ -13,7 +13,7 @@ type LessonMaterialParams struct {
 	AvatarID          int64                  `json:"avatarID"`
 	AvatarLightColor  string                 `json:"avatarLightColor"`
 	BackgroundImageID int64                  `json:"backgroundImageID"`
-	BackgroundMusicID int64                  `json:"backgroundMusicID"`
+	Musics            []domain.LessonMusic   `json:"musics"`
 	Avatars           []domain.LessonAvatar  `json:"avatars"`
 	Graphics          []domain.LessonGraphic `json:"graphics"`
 	Drawings          []domain.LessonDrawing `json:"drawings"`
