@@ -40,7 +40,7 @@ func GetGraphicsByLessonID(ctx context.Context, lessonID int64, graphics *[]Grap
 		return err
 	}
 
-	query := datastore.NewQuery("Graphic").Filter("LessonID =", lessonID)
+	query := datastore.NewQuery("Graphic").Filter("LessonID =", lessonID).Order("Created")
 
 	keys, err := client.GetAll(ctx, query, graphics)
 	if err != nil {
