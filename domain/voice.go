@@ -2,6 +2,8 @@ package domain
 
 import (
 	"context"
+	"fmt"
+	"strconv"
 	"time"
 
 	"cloud.google.com/go/datastore"
@@ -31,8 +33,30 @@ type Voice struct {
 	DurationSec float32   `json:"durationSec"`
 	Text        string    `json:"text"`
 	IsTexted    bool      `json:"isTexted"`
+	URL         string    `json:"url,omitempty" datastore:"-"`
 	Created     time.Time `json:"created"`
 	Updated     time.Time `json:"updated"`
+}
+
+// GetVoice is get voice entities belongs to lesson.
+func GetVoice(ctx context.Context, lessonID int64, voice *Voice) error {
+	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
+	if err != nil {
+		return err
+	}
+
+	ancestor := datastore.IDKey("Lesson", lessonID, nil)
+	key := datastore.IDKey("Voice", voice.ID, ancestor)
+	if err := client.Get(ctx, key, voice); err != nil {
+		if err == datastore.ErrNoSuchEntity {
+			return VoiceNotFound
+		}
+		return err
+	}
+
+	storeVoiceURL(ctx, lessonID, voice)
+
+	return nil
 }
 
 // GetVoices is get voice entities belongs to lesson.
@@ -54,7 +78,11 @@ func GetVoices(ctx context.Context, lessonID int64, voices *[]Voice) error {
 		return VoiceNotFound
 	}
 
-	storeVoiceURLs(ctx, lessonID, voices, keys)
+	for i, key := range keys {
+		(*voices)[i].ID = key.ID
+	}
+
+	// 複数のVoice取得時、署名付きURLは時間がかかりすぎるので発行しない
 
 	return nil
 }
@@ -80,24 +108,19 @@ func CreateVoice(ctx context.Context, lessonID int64, voice *Voice) error {
 	return nil
 }
 
-func storeVoiceURLs(ctx context.Context, lessonID int64, voices *[]Voice, keys []*datastore.Key) error {
-	//	lessonIDString := strconv.FormatInt(lessonID, 10)
-	for i, key := range keys {
-		/*
-			fileID := strconv.FormatInt(key.ID, 10)
-			filePath := fmt.Sprintf("voice/%s/%s.mp3", lessonIDString, fileID)
-			fileType := "" // this is unnecessary when GET request
-			bucketName := infrastructure.MaterialBucketName()
+func storeVoiceURL(ctx context.Context, lessonID int64, voice *Voice) error {
+	lessonIDString := strconv.FormatInt(lessonID, 10)
 
-			url, err := infrastructure.GetGCSSignedURL(ctx, bucketName, filePath, "GET", fileType)
-			if err != nil {
-				return err
-			}
-		*/
+	fileID := strconv.FormatInt(voice.ID, 10)
+	filePath := fmt.Sprintf("voice/%s/%s.mp3", lessonIDString, fileID)
+	bucketName := infrastructure.MaterialBucketName()
 
-		(*voices)[i].ID = key.ID
-		//		(*voices)[i].URL = url
+	url, err := infrastructure.GetGCSSignedURL(ctx, bucketName, filePath, "GET", "")
+	if err != nil {
+		return err
 	}
+
+	voice.URL = url
 
 	return nil
 }

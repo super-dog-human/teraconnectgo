@@ -41,6 +41,7 @@ func Main(appEnv string) {
 	auth.POST("/avatars", postAvatars)
 	auth.GET("/graphics", getGraphics)
 	auth.POST("/graphics", postGraphics)
+	auth.GET("/voices/:id", getVoice)
 	auth.GET("/voices", getVoices)
 	auth.POST("/voice", postVoice)
 	auth.POST("/synthesis_voice", postSynthesisVoice)

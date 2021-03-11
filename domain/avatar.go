@@ -9,6 +9,21 @@ import (
 	"github.com/super-dog-human/teraconnectgo/infrastructure"
 )
 
+type AvatarErrorCode uint
+
+const (
+	AvatarNotFound AvatarErrorCode = 1
+)
+
+func (e AvatarErrorCode) Error() string {
+	switch e {
+	case AvatarNotFound:
+		return "avatar not found"
+	default:
+		return "unknown avatar error"
+	}
+}
+
 // Avatar is used for lesson.
 type Avatar struct {
 	ID       int64        `json:"id" datastore:"-"`
@@ -44,7 +59,7 @@ func GetAvatarByIDs(ctx context.Context, id int64) (Avatar, error) {
 	key := datastore.IDKey("Avatar", id, nil)
 	if err := client.Get(ctx, key, avatar); err != nil {
 		if err == datastore.ErrNoSuchEntity {
-			return *avatar, err
+			return *avatar, AvatarNotFound
 		}
 		return *avatar, err
 	}

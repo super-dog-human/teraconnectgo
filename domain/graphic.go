@@ -20,7 +20,7 @@ func (e GraphicErrorCode) Error() string {
 	case GraphicNotFound:
 		return "graphic not found"
 	default:
-		return "unknown voice error"
+		return "unknown graphic error"
 	}
 }
 
