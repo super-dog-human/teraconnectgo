@@ -22,15 +22,14 @@ func CreateSynthesisVoice(ctx context.Context, params *CreateSynthesisVoiceParam
 
 	bucketName := infrastructure.MaterialBucketName()
 	filePath := fmt.Sprintf("voice/%d/%d.mp3", params.LessonID, voiceID)
-	contentType := "audio/mpeg"
 
 	g.Go(func() error {
-		return createSynthesizedVoice(ctx, params, bucketName, filePath, contentType)
+		return createSynthesizedVoice(ctx, params, bucketName, filePath)
 	})
 
 	var url string
 	g.Go(func() error {
-		return getSignedURLOfVoiceFile(ctx, params.LessonID, voiceID, bucketName, filePath, contentType, &url)
+		return getSignedURLOfVoiceFile(ctx, params.LessonID, voiceID, bucketName, filePath, &url)
 	})
 
 	if err := g.Wait(); err != nil {
@@ -40,7 +39,7 @@ func CreateSynthesisVoice(ctx context.Context, params *CreateSynthesisVoiceParam
 	return url, nil
 }
 
-func createSynthesizedVoice(ctx context.Context, params *CreateSynthesisVoiceParam, bucketName, filePath, contentType string) error {
+func createSynthesizedVoice(ctx context.Context, params *CreateSynthesisVoiceParam, bucketName, filePath string) error {
 	client, err := texttospeech.NewClient(ctx)
 	if err != nil {
 		return err
@@ -67,15 +66,15 @@ func createSynthesizedVoice(ctx context.Context, params *CreateSynthesisVoicePar
 		return err
 	}
 
-	if err := infrastructure.CreateFileToGCS(ctx, bucketName, filePath, contentType, resp.AudioContent); err != nil {
+	if err := infrastructure.CreateFileToGCS(ctx, bucketName, filePath, "audio/mpeg", resp.AudioContent); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func getSignedURLOfVoiceFile(ctx context.Context, lessonID int64, voiceID int64, bucketName, filePath, contentType string, url *string) error {
-	result, err := infrastructure.GetGCSSignedURL(ctx, bucketName, filePath, "GET", contentType)
+func getSignedURLOfVoiceFile(ctx context.Context, lessonID int64, voiceID int64, bucketName, filePath string, url *string) error {
+	result, err := infrastructure.GetGCSSignedURL(ctx, bucketName, filePath, "GET", "")
 	if err != nil {
 		return err
 	}
