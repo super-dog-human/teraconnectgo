@@ -9,14 +9,16 @@ import (
 
 // LessonMaterialParams
 type LessonMaterialParams struct {
-	DurationSec       float32                `json:"durationSec"`
-	AvatarID          int64                  `json:"avatarID"`
-	AvatarLightColor  string                 `json:"avatarLightColor"`
-	BackgroundImageID int64                  `json:"backgroundImageID"`
-	Musics            []domain.LessonMusic   `json:"musics"`
-	Avatars           []domain.LessonAvatar  `json:"avatars"`
-	Graphics          []domain.LessonGraphic `json:"graphics"`
-	Drawings          []domain.LessonDrawing `json:"drawings"`
+	DurationSec          float32                     `json:"durationSec"`
+	AvatarID             int64                       `json:"avatarID"`
+	AvatarLightColor     string                      `json:"avatarLightColor"`
+	BackgroundImageID    int64                       `json:"backgroundImageID"`
+	VoiceSynthesisConfig domain.VoiceSynthesisConfig `json:"voiceSynthesisConfig"`
+	Avatars              []domain.LessonAvatar       `json:"avatars"`
+	Graphics             []domain.LessonGraphic      `json:"graphics"`
+	Drawings             []domain.LessonDrawing      `json:"drawings"`
+	Musics               []domain.LessonMusic        `json:"musics"`
+	Speeches             []domain.LessonSpeech       `json:"speeches"`
 }
 
 type LessonMaterialErrorCode uint

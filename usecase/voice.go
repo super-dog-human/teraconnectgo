@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/super-dog-human/teraconnectgo/domain"
+	"github.com/super-dog-human/teraconnectgo/infrastructure"
 )
 
 type CreateVoiceParam struct {
@@ -29,11 +30,11 @@ func GetVoices(request *http.Request, lessonID int64) ([]domain.Voice, error) {
 	return voices, nil
 }
 
-// CreateVoiceAndBlankFile creats Voice and blank files of mp3 and wav.
-func CreateVoiceAndBlankFile(request *http.Request, params *CreateVoiceParam) (domain.SignedURL, error) {
+// CreateVoiceAndBlankFile creates Voice and blank files of mp3 and wav.
+func CreateVoiceAndBlankFile(request *http.Request, params *CreateVoiceParam) (infrastructure.SignedURL, error) {
 	ctx := request.Context()
 
-	var response domain.SignedURL
+	var response infrastructure.SignedURL
 
 	userID, err := currentUserAccessToLesson(ctx, request, params.LessonID)
 	if err != nil {
@@ -53,7 +54,7 @@ func CreateVoiceAndBlankFile(request *http.Request, params *CreateVoiceParam) (d
 	lessonID := strconv.FormatInt(params.LessonID, 10)
 	voiceID := strconv.FormatInt(voice.ID, 10)
 
-	mp3FileRequest := domain.FileRequest{
+	mp3FileRequest := infrastructure.FileRequest{
 		ID:          voiceID,
 		Entity:      "voice",
 		Extension:   "mp3",
@@ -61,7 +62,7 @@ func CreateVoiceAndBlankFile(request *http.Request, params *CreateVoiceParam) (d
 	}
 
 	filePath := lessonID + "/" + voiceID
-	mp3URL, err := domain.CreateBlankFileToGCS(ctx, filePath, "voice", mp3FileRequest)
+	mp3URL, err := infrastructure.CreateBlankFileToGCS(ctx, filePath, "voice", mp3FileRequest)
 	if err != nil {
 		return response, err
 	}

@@ -9,6 +9,20 @@ import (
 	"github.com/super-dog-human/teraconnectgo/infrastructure"
 )
 
+type UserProviderID struct {
+	ID string
+}
+
+// User is application registrated user
+type User struct {
+	ID         int64     `json:"id" datastore:"-"`
+	ProviderID string    `json:"-"`
+	Name       string    `json:"name"`
+	Email      string    `json:"email"`
+	Created    time.Time `json:"-"`
+	Updated    time.Time `json:"-"`
+}
+
 // UserErrorCode is user error code.
 type UserErrorCode uint
 

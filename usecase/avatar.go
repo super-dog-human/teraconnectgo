@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/super-dog-human/teraconnectgo/domain"
+	"github.com/super-dog-human/teraconnectgo/infrastructure"
 )
 
 // GetAvailableAvatars for fetch avatar object from Cloud Datastore
@@ -33,17 +34,17 @@ func GetAvailableAvatars(request *http.Request) ([]domain.Avatar, error) {
 	return avatars, nil
 }
 
-func CreateAvatarsAndBlankFile(request *http.Request, objectRequest domain.StorageObjectRequest) (domain.SignedURLs, error) {
+func CreateAvatarsAndBlankFile(request *http.Request, objectRequest infrastructure.StorageObjectRequest) (infrastructure.SignedURLs, error) {
 	ctx := request.Context()
 
-	var signedURLs domain.SignedURLs
+	var signedURLs infrastructure.SignedURLs
 
 	currentUser, err := domain.GetCurrentUser(request)
 	if err != nil {
 		return signedURLs, err
 	}
 
-	urls := make([]domain.SignedURL, len(objectRequest.FileRequests))
+	urls := make([]infrastructure.SignedURL, len(objectRequest.FileRequests))
 
 	for i, fileRequest := range objectRequest.FileRequests {
 		avatar := new(domain.Avatar)
@@ -53,14 +54,14 @@ func CreateAvatarsAndBlankFile(request *http.Request, objectRequest domain.Stora
 		}
 
 		fileID := strconv.FormatInt(avatar.ID, 10)
-		url, err := domain.CreateBlankFileToGCS(ctx, fileID, "avatar", fileRequest)
+		url, err := infrastructure.CreateBlankFileToGCS(ctx, fileID, "avatar", fileRequest)
 		if err != nil {
 			return signedURLs, err
 		}
-		urls[i] = domain.SignedURL{FileID: fileID, SignedURL: url}
+		urls[i] = infrastructure.SignedURL{FileID: fileID, SignedURL: url}
 
 	}
 
-	signedURLs = domain.SignedURLs{SignedURLs: urls}
+	signedURLs = infrastructure.SignedURLs{SignedURLs: urls}
 	return signedURLs, nil
 }

@@ -2,8 +2,6 @@ package domain
 
 import (
 	"context"
-	"fmt"
-	"strconv"
 	"time"
 
 	"cloud.google.com/go/datastore"
@@ -33,7 +31,6 @@ type Voice struct {
 	DurationSec float32   `json:"durationSec"`
 	Text        string    `json:"text"`
 	IsTexted    bool      `json:"isTexted"`
-	URL         string    `json:"url" datastore:"-"`
 	Created     time.Time `json:"created"`
 	Updated     time.Time `json:"updated"`
 }
@@ -62,7 +59,7 @@ func GetVoices(ctx context.Context, lessonID int64, voices *[]Voice) error {
 	return nil
 }
 
-// CreateVoice is creats new voice.
+// CreateVoice is creates new voice.
 func CreateVoice(ctx context.Context, lessonID int64, voice *Voice) error {
 	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
 	if err != nil {
@@ -84,19 +81,22 @@ func CreateVoice(ctx context.Context, lessonID int64, voice *Voice) error {
 }
 
 func storeVoiceURLs(ctx context.Context, lessonID int64, voices *[]Voice, keys []*datastore.Key) error {
-	lessonIDString := strconv.FormatInt(lessonID, 10)
+	//	lessonIDString := strconv.FormatInt(lessonID, 10)
 	for i, key := range keys {
-		fileID := strconv.FormatInt(key.ID, 10)
-		filePath := fmt.Sprintf("voice/%s/%s.mp3", lessonIDString, fileID)
-		fileType := "" // this is unnecessary when GET request
-		bucketName := infrastructure.MaterialBucketName()
-		url, err := infrastructure.GetGCSSignedURL(ctx, bucketName, filePath, "GET", fileType)
-		if err != nil {
-			return err
-		}
+		/*
+			fileID := strconv.FormatInt(key.ID, 10)
+			filePath := fmt.Sprintf("voice/%s/%s.mp3", lessonIDString, fileID)
+			fileType := "" // this is unnecessary when GET request
+			bucketName := infrastructure.MaterialBucketName()
+
+			url, err := infrastructure.GetGCSSignedURL(ctx, bucketName, filePath, "GET", fileType)
+			if err != nil {
+				return err
+			}
+		*/
 
 		(*voices)[i].ID = key.ID
-		(*voices)[i].URL = url
+		//		(*voices)[i].URL = url
 	}
 
 	return nil

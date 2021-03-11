@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/super-dog-human/teraconnectgo/domain"
+	"github.com/super-dog-human/teraconnectgo/infrastructure"
 )
 
 // GetGraphicsByLessonID is fetching graphics belongs to lesson.
@@ -24,10 +25,10 @@ func GetGraphicsByLessonID(request *http.Request, lessonID int64) ([]domain.Grap
 	return graphics, nil
 }
 
-func CreateGraphicsAndBlankFiles(request *http.Request, objectRequest domain.StorageObjectRequest) (domain.SignedURLs, error) {
+func CreateGraphicsAndBlankFiles(request *http.Request, objectRequest infrastructure.StorageObjectRequest) (infrastructure.SignedURLs, error) {
 	ctx := request.Context()
 
-	var signedURLs domain.SignedURLs
+	var signedURLs infrastructure.SignedURLs
 
 	userID, err := currentUserAccessToLesson(ctx, request, objectRequest.LessonID)
 	if err != nil {
@@ -35,7 +36,7 @@ func CreateGraphicsAndBlankFiles(request *http.Request, objectRequest domain.Sto
 	}
 
 	graphics := make([]*domain.Graphic, len(objectRequest.FileRequests))
-	urls := make([]domain.SignedURL, len(objectRequest.FileRequests))
+	urls := make([]infrastructure.SignedURL, len(objectRequest.FileRequests))
 
 	for i, fileRequest := range objectRequest.FileRequests {
 		graphic := new(domain.Graphic)
@@ -50,12 +51,12 @@ func CreateGraphicsAndBlankFiles(request *http.Request, objectRequest domain.Sto
 
 	for i, fileRequest := range objectRequest.FileRequests {
 		fileID := strconv.FormatInt(graphics[i].ID, 10)
-		url, err := domain.CreateBlankFileToGCS(ctx, fileID, "graphic", fileRequest)
+		url, err := infrastructure.CreateBlankFileToGCS(ctx, fileID, "graphic", fileRequest)
 		if err != nil {
 			return signedURLs, err
 		}
-		urls[i] = domain.SignedURL{FileID: fileID, SignedURL: url}
+		urls[i] = infrastructure.SignedURL{FileID: fileID, SignedURL: url}
 	}
 
-	return domain.SignedURLs{SignedURLs: urls}, nil
+	return infrastructure.SignedURLs{SignedURLs: urls}, nil
 }

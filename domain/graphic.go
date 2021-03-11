@@ -100,7 +100,7 @@ func DeleteGraphicsInTransaction(tx *datastore.Transaction, ids []int64) error {
 func storeGraphicURL(ctx context.Context, graphics *[]Graphic, keys []*datastore.Key) error {
 	for i, key := range keys {
 		fileID := strconv.FormatInt(key.ID, 10)
-		filePath := storageObjectFilePath("Graphic", fileID, (*graphics)[i].FileType)
+		filePath := infrastructure.StorageObjectFilePath("Graphic", fileID, (*graphics)[i].FileType)
 		fileType := "" // this is unnecessary when GET request
 		bucketName := infrastructure.MaterialBucketName()
 		url, err := infrastructure.GetGCSSignedURL(ctx, bucketName, filePath, "GET", fileType)

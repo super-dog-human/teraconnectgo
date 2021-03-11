@@ -38,7 +38,7 @@ func UploadLessonZipToGCS(ctx context.Context, lessonID int64, zip *bytes.Buffer
 	zipFilePath := fmt.Sprintf("lesson/%d.zip", lessonID)
 	contentType := "application/zip"
 	bucketName := infrastructure.MaterialBucketName()
-	if err := infrastructure.CreateObjectToGCS(ctx, bucketName, zipFilePath, contentType, zip.Bytes()); err != nil {
+	if err := infrastructure.CreateFileToGCS(ctx, bucketName, zipFilePath, contentType, zip.Bytes()); err != nil {
 		return err
 	}
 
@@ -51,7 +51,7 @@ func addGraphicsToZip(ctx context.Context, usedGraphicIDs []int64, graphicFileTy
 		filePathInGCS := fmt.Sprintf("graphic/%d.%s", graphicID, fileType)
 		bucketName := infrastructure.MaterialBucketName()
 
-		objectBytes, err := infrastructure.GetObjectFromGCS(ctx, bucketName, filePathInGCS)
+		objectBytes, err := infrastructure.GetFileFromGCS(ctx, bucketName, filePathInGCS)
 		if err != nil {
 			return err
 		}
@@ -77,7 +77,7 @@ func addVoiceToZip(ctx context.Context, voiceTexts []RawVoiceText, id int64, zip
 		filePathInGCS := fmt.Sprintf("voice/%d/%s.ogg", id, voiceText.FileID)
 		bucketName := infrastructure.MaterialBucketName()
 
-		objectBytes, err := infrastructure.GetObjectFromGCS(ctx, bucketName, filePathInGCS)
+		objectBytes, err := infrastructure.GetFileFromGCS(ctx, bucketName, filePathInGCS)
 		if err != nil {
 			return err
 		}
@@ -101,7 +101,7 @@ func addVoiceToZip(ctx context.Context, voiceTexts []RawVoiceText, id int64, zip
 func addLessonJSONToZip(ctx context.Context, id int64, zipWriter *zip.Writer) error {
 	filePathInGCS := fmt.Sprintf("lesson/%d.json", id)
 	bucketName := infrastructure.MaterialBucketName()
-	jsonBytes, err := infrastructure.GetObjectFromGCS(ctx, bucketName, filePathInGCS)
+	jsonBytes, err := infrastructure.GetFileFromGCS(ctx, bucketName, filePathInGCS)
 	if err != nil {
 		return err
 	}

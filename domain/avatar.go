@@ -113,7 +113,7 @@ func createAvatarPublicURLs(id int64) string {
 
 func createAvatarSignedURLs(ctx context.Context, id int64) (string, error) {
 	fileID := strconv.FormatInt(id, 10)
-	filePath := storageObjectFilePath("Avatar", fileID, "vrm")
+	filePath := infrastructure.StorageObjectFilePath("Avatar", fileID, "vrm")
 	bucketName := infrastructure.MaterialBucketName()
 
 	url, err := infrastructure.GetGCSSignedURL(ctx, bucketName, filePath, "GET", "")
@@ -124,7 +124,7 @@ func createAvatarSignedURLs(ctx context.Context, id int64) (string, error) {
 	return url, nil
 }
 
-// CreateAvatar creats a new avatar belongs to user.
+// CreateAvatar creates a new avatar belongs to user.
 func CreateAvatar(ctx context.Context, avatar *Avatar, user *User) error {
 	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
 	if err != nil {

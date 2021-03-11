@@ -6,6 +6,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/super-dog-human/teraconnectgo/domain"
+	"github.com/super-dog-human/teraconnectgo/infrastructure"
 	"github.com/super-dog-human/teraconnectgo/usecase"
 )
 
@@ -38,7 +39,7 @@ func getGraphics(c echo.Context) error {
 }
 
 func postGraphics(c echo.Context) error {
-	objectRequest := new(domain.StorageObjectRequest)
+	objectRequest := new(infrastructure.StorageObjectRequest)
 	if err := c.Bind(objectRequest); err != nil {
 		fatalLog(err)
 		authErr, ok := err.(domain.AuthErrorCode)

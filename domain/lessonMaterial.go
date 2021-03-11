@@ -10,20 +10,21 @@ import (
 )
 
 type LessonMaterial struct {
-	ID                int64           `json:"id" datastore:"-"`
-	Version           uint            `json:"version" datastore:"-"` // 同じLessonを親に持つもののCreatedの昇順をバージョンとする
-	UserID            int64           `json:"userID"`
-	AvatarID          int64           `json:"avatarID"`
-	DurationSec       float32         `json:"durationSec" datastore:",noindex"`
-	AvatarLightColor  string          `json:"avatarLightColor" datastore:",noindex"`
-	BackgroundImageID int64           `json:"backgroundImageID"`
-	Musics            []LessonMusic   `json:"musics"`
-	Avatars           []LessonAvatar  `json:"avatars"`
-	Graphics          []LessonGraphic `json:"graphics"`
-	Drawings          []LessonDrawing `json:"drawings"`
-	Speeches          []LessonSpeech  `json:"speeches"`
-	Created           time.Time       `json:"created"`
-	Updated           time.Time       `json:"updated"`
+	ID                   int64                `json:"id" datastore:"-"`
+	Version              uint                 `json:"version" datastore:"-"` // 同じLessonを親に持つもののCreatedの昇順をバージョンとする
+	UserID               int64                `json:"userID"`
+	AvatarID             int64                `json:"avatarID"`
+	DurationSec          float32              `json:"durationSec" datastore:",noindex"`
+	AvatarLightColor     string               `json:"avatarLightColor" datastore:",noindex"`
+	BackgroundImageID    int64                `json:"backgroundImageID"`
+	VoiceSynthesisConfig VoiceSynthesisConfig `json:"voiceSynthesisConfig"`
+	Avatars              []LessonAvatar       `json:"avatars"`
+	Graphics             []LessonGraphic      `json:"graphics"`
+	Drawings             []LessonDrawing      `json:"drawings"`
+	Musics               []LessonMusic        `json:"musics"`
+	Speeches             []LessonSpeech       `json:"speeches"`
+	Created              time.Time            `json:"created"`
+	Updated              time.Time            `json:"updated"`
 }
 
 type LessonMusic struct {
@@ -68,11 +69,13 @@ type LessonDrawingStroke struct {
 }
 
 type LessonSpeech struct {
-	Elapsedtime float32  `json:"elapsedtime"`
-	DurationSec float32  `json:"durationSec"`
-	VoiceID     int64    `json:"voiceID"`
-	Subtitle    Subtitle `json:"subtitle"`
-	Caption     Caption  `json:"caption"`
+	Elapsedtime     float32              `json:"elapsedtime"`
+	DurationSec     float32              `json:"durationSec"`
+	VoiceID         int64                `json:"voiceID"`
+	Subtitle        Subtitle             `json:"subtitle"`
+	Caption         Caption              `json:"caption"`
+	IsSynthesis     bool                 `json:"isSynthesis"`
+	SynthesisConfig VoiceSynthesisConfig `json:"synthesisConfig"`
 }
 
 type Subtitle struct {

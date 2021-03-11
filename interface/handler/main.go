@@ -43,6 +43,7 @@ func Main(appEnv string) {
 	auth.POST("/graphics", postGraphics)
 	auth.GET("/voices", getVoices)
 	auth.POST("/voice", postVoice)
+	auth.POST("/synthesis_voice", postSynthesisVoice)
 	auth.POST("/lessons", postLesson)
 	auth.PATCH("/lessons/:id", patchLesson)
 	auth.DELETE("/lessons/:id", deleteLesson)
@@ -50,7 +51,6 @@ func Main(appEnv string) {
 	auth.POST("/lessons/:lessonID/materials", postLessonMaterial)
 	auth.PATCH("/lessons/:lessonID/materials/:id", patchLessonMaterial)
 	auth.PUT("/lessons/:id/packs", putLessonPack)
-	auth.GET("/storage_objects", getStorageObjects)
 
 	port := os.Getenv("PORT")
 	if port == "" {

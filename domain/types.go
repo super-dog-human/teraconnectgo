@@ -1,21 +1,5 @@
 package domain
 
-import "time"
-
-type UserProviderID struct {
-	ID string
-}
-
-// User is application registrated user
-type User struct {
-	ID         int64     `json:"id" datastore:"-"`
-	ProviderID string    `json:"-"`
-	Name       string    `json:"name"`
-	Email      string    `json:"email"`
-	Created    time.Time `json:"-"`
-	Updated    time.Time `json:"-"`
-}
-
 type Position2D struct {
 	X float64 `json:"x"`
 	Y float64 `json:"y"`
@@ -27,12 +11,12 @@ type Position3D struct {
 	Z float64 `json:"z"`
 }
 
-// LessonAuthor is author of lesson.
-type LessonAuthor struct {
-	ID       int64     `json:"id" datastore:"-"`
-	LessonID int64     `json:"lessonID"`
-	UserID   int64     `json:"userID"`
-	Role     string    `json:"role"`
-	Created  time.Time `json:"created"`
-	Updated  time.Time `json:"updated"`
+// VoiceSynthesisConfig is synthesis voice settings. used from SynthesisVoice params and LessonSpeech.
+// https://github.com/googleapis/go-genproto/blob/master/googleapis/cloud/texttospeech/v1beta1/cloud_tts.pb.go#L663
+type VoiceSynthesisConfig struct {
+	LanguageCode string  `json:"languageCode"` // ja-JP/en-US
+	Name         string  `json:"name"`         // ja-JP-Wavenet-A~D/en-US-Wavenet-A~J
+	SpeakingRate float64 `json:"speakingRate"` // 0.25 ~ 4.0
+	Pitch        float64 `json:"pitch"`        // -20.0 ~ 20.0
+	VolumeGainDb float64 `json:"volumeGainDb"` // -5.0 ~ 10.0
 }

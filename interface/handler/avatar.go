@@ -5,6 +5,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/super-dog-human/teraconnectgo/domain"
+	"github.com/super-dog-human/teraconnectgo/infrastructure"
 	"github.com/super-dog-human/teraconnectgo/usecase"
 )
 
@@ -30,7 +31,7 @@ func getAvatars(c echo.Context) error {
 }
 
 func postAvatars(c echo.Context) error {
-	objectRequest := new(domain.StorageObjectRequest)
+	objectRequest := new(infrastructure.StorageObjectRequest)
 	if err := c.Bind(objectRequest); err != nil {
 		fatalLog(err)
 		authErr, ok := err.(domain.AuthErrorCode)

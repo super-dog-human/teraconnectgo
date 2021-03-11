@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"context"
 	"encoding/base64"
+	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"cloud.google.com/go/storage"
@@ -12,6 +14,31 @@ import (
 	"golang.org/x/oauth2/google"
 	iam "google.golang.org/api/iam/v1"
 )
+
+type SignedURL struct {
+	FileID    string `json:"fileID"`
+	SignedURL string `json:"signedURL"`
+}
+
+type SignedURLs struct {
+	SignedURLs []SignedURL `json:"signedURLs"`
+}
+
+type StorageObjectRequest struct {
+	LessonID     int64         `json:"lessonID"`
+	FileRequests []FileRequest `json:"fileRequests"`
+}
+
+type FileRequest struct {
+	ID          string `json:"id"`
+	Entity      string `json:"entity"`
+	Extension   string `json:"extension"`
+	ContentType string `json:"contentType"`
+}
+
+type EntityBelongToFile struct {
+	UserID int64
+}
 
 var iamService *iam.Service
 
@@ -31,8 +58,8 @@ func init() {
 	}
 }
 
-// CreateObjectToGCS creates object to GCS.
-func CreateObjectToGCS(ctx context.Context, bucketName, filePath, contentType string, contents []byte) error {
+// CreateFileToGCS creates object to GCS.
+func CreateFileToGCS(ctx context.Context, bucketName, filePath, contentType string, contents []byte) error {
 	client, err := storage.NewClient(ctx)
 	if err != nil {
 		return err
@@ -56,8 +83,24 @@ func CreateObjectToGCS(ctx context.Context, bucketName, filePath, contentType st
 	return nil
 }
 
-// GetObjectFromGCS gets object from GCS.
-func GetObjectFromGCS(ctx context.Context, bucketName, filePath string) ([]byte, error) {
+func CreateBlankFileToGCS(ctx context.Context, fileID string, fileEntity string, fileRequest FileRequest) (string, error) {
+	filePath := StorageObjectFilePath(fileEntity, fileID, fileRequest.Extension)
+	bucketName := MaterialBucketName()
+
+	if err := CreateFileToGCS(ctx, bucketName, filePath, fileRequest.ContentType, nil); err != nil {
+		return "", err
+	}
+
+	url, err := GetGCSSignedURL(ctx, bucketName, filePath, "PUT", fileRequest.ContentType)
+	if err != nil {
+		return "", err
+	}
+
+	return url, err
+}
+
+// GetFileFromGCS gets object from GCS.
+func GetFileFromGCS(ctx context.Context, bucketName, filePath string) ([]byte, error) {
 	client, err := storage.NewClient(ctx)
 	if err != nil {
 		return nil, err
@@ -129,4 +172,8 @@ func GetPublicBackGroundImageURL(id string) string {
 // GetPublicBackGroundMusicURL returns public audio file URL in GCS.
 func GetPublicBackGroundMusicURL(id string) string {
 	return "https://storage.googleapis.com/" + PublicBucketName() + "/audio/bgm/" + id + ".mp3"
+}
+
+func StorageObjectFilePath(entity string, id string, extension string) string {
+	return fmt.Sprintf("%s/%s.%s", strings.ToLower(entity), id, extension)
 }
