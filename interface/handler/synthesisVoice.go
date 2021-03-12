@@ -20,11 +20,11 @@ func postSynthesisVoice(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 
-	signedURL, err := usecase.CreateSynthesisVoice(c.Request(), param)
+	voice, err := usecase.CreateSynthesisVoice(c.Request(), param)
 	if err != nil {
 		fatalLog(err)
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, signedURL)
+	return c.JSON(http.StatusOK, voice)
 }
