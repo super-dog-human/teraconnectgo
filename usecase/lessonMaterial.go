@@ -70,6 +70,14 @@ func CreateLessonMaterial(request *http.Request, lessonID int64, params LessonMa
 	copier.Copy(&lessonMaterial, &params)
 	lessonMaterial.UserID = userID
 
+	if lessonMaterial.VoiceSynthesisConfig.LanguageCode == "" {
+		lessonMaterial.VoiceSynthesisConfig.LanguageCode = "ja-JP"
+	}
+
+	if lessonMaterial.VoiceSynthesisConfig.Name == "" {
+		lessonMaterial.VoiceSynthesisConfig.Name = "ja-JP-Wavenet-A"
+	}
+
 	if err := domain.CreateLessonMaterial(ctx, lessonID, &lessonMaterial); err != nil {
 		return err
 	}
