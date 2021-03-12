@@ -33,6 +33,7 @@ type Voice struct {
 	DurationSec float32   `json:"durationSec"`
 	Text        string    `json:"text"`
 	IsTexted    bool      `json:"isTexted"`
+	IsSynthesis bool      `json:"-"`
 	URL         string    `json:"url,omitempty" datastore:"-"`
 	Created     time.Time `json:"created"`
 	Updated     time.Time `json:"updated"`
@@ -67,7 +68,7 @@ func GetVoices(ctx context.Context, lessonID int64, voices *[]Voice) error {
 	}
 
 	ancestor := datastore.IDKey("Lesson", lessonID, nil)
-	query := datastore.NewQuery("Voice").Ancestor(ancestor).Order("Elapsedtime")
+	query := datastore.NewQuery("Voice").Filter("IsSynthesis =", false).Ancestor(ancestor).Order("Elapsedtime")
 
 	keys, err := client.GetAll(ctx, query, voices)
 	if err != nil {

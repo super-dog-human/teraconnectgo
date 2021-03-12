@@ -20,7 +20,8 @@ func CreateSynthesisVoice(request *http.Request, params *domain.CreateSynthesisV
 	}
 
 	voice := domain.Voice{
-		UserID: userID,
+		UserID:      userID,
+		IsSynthesis: true,
 	}
 
 	// ID採番のためだけにVoiceを作成する
