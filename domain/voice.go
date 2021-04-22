@@ -29,7 +29,7 @@ func (e VoiceErrorCode) Error() string {
 type Voice struct {
 	ID          int64     `json:"id" datastore:"-"`
 	UserID      int64     `json:"userID"`
-	Elapsedtime float32   `json:"elapsedtime"`
+	ElapsedTime float32   `json:"elapsedTime"`
 	DurationSec float32   `json:"durationSec"`
 	Text        string    `json:"text"`
 	IsTexted    bool      `json:"isTexted"`
@@ -68,7 +68,7 @@ func GetVoices(ctx context.Context, lessonID int64, voices *[]Voice) error {
 	}
 
 	ancestor := datastore.IDKey("Lesson", lessonID, nil)
-	query := datastore.NewQuery("Voice").Filter("IsSynthesis =", false).Ancestor(ancestor).Order("Elapsedtime")
+	query := datastore.NewQuery("Voice").Filter("IsSynthesis =", false).Ancestor(ancestor).Order("ElapsedTime")
 
 	keys, err := client.GetAll(ctx, query, voices)
 	if err != nil {

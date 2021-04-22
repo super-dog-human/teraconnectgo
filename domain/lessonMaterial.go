@@ -27,33 +27,27 @@ type LessonMaterial struct {
 	Updated              time.Time            `json:"updated"`
 }
 
-type LessonMusic struct {
-	Elapsedtime       float32 `json:"elapsedtime"`
-	Action            string  `json:"action"`
-	BackGroundMusicID int64   `json:"backgroundMusicID"`
-}
-
 type LessonAvatar struct {
-	Elapsedtime float32    `json:"elapsedtime"`
+	ElapsedTime float32    `json:"elapsedTime"`
 	DurationSec float32    `json:"durationSec"`
 	Moving      Position3D `json:"moving,omitempty"`
 }
 
 type LessonGraphic struct {
-	Elapsedtime float64 `json:"elapsedtime"`
+	ElapsedTime float64 `json:"elapsedTime"`
 	GraphicID   int64   `json:"graphicID"`
 	Action      string  `json:"action"`
 }
 
 type LessonDrawing struct {
-	Elapsedtime float32             `json:"elapsedtime"`
+	ElapsedTime float32             `json:"elapsedTime"`
 	DurationSec float32             `json:"durationSec"`
 	Action      string              `json:"action"` // draw/clear/show/hide
 	Units       []LessonDrawingUnit `json:"units"`
 }
 
 type LessonDrawingUnit struct {
-	Elapsedtime float32             `json:"elapsedtime"`
+	ElapsedTime float32             `json:"elapsedTime"`
 	DurationSec float32             `json:"durationSec"`
 	Action      string              `json:"action"` //draw/undo
 	Stroke      LessonDrawingStroke `json:"stroke"`
@@ -68,18 +62,20 @@ type LessonDrawingStroke struct {
 	Positions []Position2D `json:"positions,omitempty"`
 }
 
+type LessonMusic struct {
+	ElapsedTime       float32 `json:"elapsedTime"`
+	Action            string  `json:"action"`
+	BackGroundMusicID int64   `json:"backgroundMusicID"`
+}
+
 type LessonSpeech struct {
-	Elapsedtime     float32              `json:"elapsedtime"`
+	ElapsedTime     float32              `json:"elapsedTime"`
 	DurationSec     float32              `json:"durationSec"`
 	VoiceID         int64                `json:"voiceID"`
-	Subtitle        Subtitle             `json:"subtitle"`
+	Subtitle        string               `json:"subtitle"`
 	Caption         Caption              `json:"caption"`
 	IsSynthesis     bool                 `json:"isSynthesis"`
 	SynthesisConfig VoiceSynthesisConfig `json:"synthesisConfig"`
-}
-
-type Subtitle struct {
-	Body string `json:"body"`
 }
 
 type Caption struct {

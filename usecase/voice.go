@@ -10,7 +10,7 @@ import (
 
 type CreateVoiceParam struct {
 	LessonID    int64   `json:"lessonID"`
-	Elapsedtime float32 `json:"elapsedtime"`
+	ElapsedTime float32 `json:"elapsedTime"`
 	DurationSec float32 `json:"durationSec"`
 }
 
@@ -60,7 +60,7 @@ func CreateVoiceAndBlankFile(request *http.Request, params *CreateVoiceParam) (i
 
 	voice := domain.Voice{
 		UserID:      userID,
-		Elapsedtime: params.Elapsedtime,
+		ElapsedTime: params.ElapsedTime,
 		DurationSec: params.DurationSec,
 	}
 
