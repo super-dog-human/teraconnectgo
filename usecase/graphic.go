@@ -1,9 +1,11 @@
 package usecase
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
+	"cloud.google.com/go/storage"
 	"github.com/super-dog-human/teraconnectgo/domain"
 	"github.com/super-dog-human/teraconnectgo/infrastructure"
 )
@@ -59,4 +61,31 @@ func CreateGraphicsAndBlankFiles(request *http.Request, objectRequest infrastruc
 	}
 
 	return infrastructure.SignedURLs{SignedURLs: urls}, nil
+}
+
+func DeleteGraphic(request *http.Request, id int64) error {
+	ctx := request.Context()
+
+	currentUser, err := domain.GetCurrentUser(request)
+	if err != nil {
+		return err
+	}
+
+	graphic, err := domain.GetGraphicByID(ctx, id, currentUser.ID)
+	if err != nil {
+		return err
+	}
+
+	if err := domain.DeleteGraphicByID(ctx, graphic.ID, currentUser.ID); err != nil {
+		return err
+	}
+
+	if err := domain.DeleteGraphicFileByID(ctx, graphic); err != nil {
+		if ok := errors.Is(err, storage.ErrObjectNotExist); ok {
+			return nil // 削除しようとするファイルが存在しなくてもエラーにしない
+		}
+		return err
+	}
+
+	return nil
 }

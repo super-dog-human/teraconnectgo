@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -56,4 +57,26 @@ func postGraphics(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, signedURLs)
+}
+
+func deleteGraphic(c echo.Context) error {
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		errMessage := "Invalid ID(s) error"
+		warnLog(errMessage)
+		return c.JSON(http.StatusBadRequest, errMessage)
+	}
+
+	err = usecase.DeleteGraphic(c.Request(), id)
+	if err != nil {
+		fatalLog(err)
+
+		if ok := errors.Is(err, domain.GraphicNotFound); ok {
+			return c.JSON(http.StatusNotFound, err.Error())
+		}
+
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, "the graphic has deleted.")
 }

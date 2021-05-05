@@ -34,6 +34,29 @@ type Graphic struct {
 	Created  time.Time `json:"created"`
 }
 
+func GetGraphicByID(ctx context.Context, id int64, userID int64) (Graphic, error) {
+	graphic := new(Graphic)
+
+	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
+	if err != nil {
+		return *graphic, err
+	}
+
+	ancestor := datastore.IDKey("User", userID, nil)
+	key := datastore.IDKey("Graphic", id, ancestor)
+
+	if err := client.Get(ctx, key, graphic); err != nil {
+		if err == datastore.ErrNoSuchEntity {
+			return *graphic, GraphicNotFound
+		}
+		return *graphic, err
+	}
+
+	graphic.ID = id
+
+	return *graphic, nil
+}
+
 func GetGraphicsByLessonID(ctx context.Context, lessonID int64, graphics *[]Graphic) error {
 	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
 	if err != nil {
@@ -78,6 +101,33 @@ func CreateGraphics(ctx context.Context, userID int64, graphics []*Graphic) erro
 
 	for i, graphic := range graphics {
 		graphic.ID = putKeys[i].ID
+	}
+
+	return nil
+}
+
+func DeleteGraphicByID(ctx context.Context, id int64, userID int64) error {
+	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
+	if err != nil {
+		return err
+	}
+
+	ancestor := datastore.IDKey("User", userID, nil)
+	key := datastore.IDKey("Graphic", id, ancestor)
+	if err := client.Delete(ctx, key); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func DeleteGraphicFileByID(ctx context.Context, graphic Graphic) error {
+	bucketName := infrastructure.MaterialBucketName()
+	fileID := strconv.FormatInt(graphic.ID, 10)
+	filePath := infrastructure.StorageObjectFilePath("Graphic", fileID, graphic.FileType)
+
+	if err := infrastructure.DeleteObjectFromGCS(ctx, bucketName, filePath); err != nil {
+		return err
 	}
 
 	return nil

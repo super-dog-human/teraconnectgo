@@ -148,8 +148,8 @@ func GetGCSSignedURL(ctx context.Context, bucket string, key string, method stri
 	return url, nil
 }
 
-// DeleteObjectsFromGCS deletes object in GCS.
-func DeleteObjectsFromGCS(ctx context.Context, bucketName string, filePath string) error {
+// DeleteObjectFromGCS deletes object in GCS.
+func DeleteObjectFromGCS(ctx context.Context, bucketName string, filePath string) error {
 	client, err := storage.NewClient(ctx)
 	if err != nil {
 		return err
