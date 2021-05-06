@@ -11,6 +11,27 @@ import (
 	"github.com/super-dog-human/teraconnectgo/usecase"
 )
 
+func getGraphic(c echo.Context) error {
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		errMessage := "Invalid ID(s) error"
+		warnLog(errMessage)
+		return c.JSON(http.StatusBadRequest, errMessage)
+	}
+
+	graphic, err := usecase.GetGraphicByID(c.Request(), id)
+	if err != nil {
+		if ok := errors.Is(err, domain.GraphicNotFound); ok {
+			warnLog(err)
+			return c.JSON(http.StatusNotFound, err.Error())
+		}
+		fatalLog(err)
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, graphic)
+}
+
 func getGraphics(c echo.Context) error {
 	lessonID, err := strconv.ParseInt(c.QueryParam("lesson_id"), 10, 64)
 	if err != nil {

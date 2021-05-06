@@ -10,11 +10,37 @@ import (
 	"github.com/super-dog-human/teraconnectgo/infrastructure"
 )
 
-// GetGraphicsByLessonID is fetching graphics belongs to lesson.
-func GetGraphicsByLessonID(request *http.Request, lessonID int64) ([]domain.Graphic, error) {
+// GetGraphicByID is fetching a graphic by id.
+func GetGraphicByID(request *http.Request, id int64) (domain.Graphic, error) {
 	ctx := request.Context()
 
-	var graphics []domain.Graphic
+	var graphic domain.Graphic
+
+	currentUser, err := domain.GetCurrentUser(request)
+	if err != nil {
+		return graphic, err
+	}
+
+	graphic, err = domain.GetGraphicByID(ctx, id, currentUser.ID)
+	if err != nil {
+		return graphic, err
+	}
+
+	url, err := domain.StoreGraphicURL(ctx, &graphic)
+	if err != nil {
+		return graphic, err
+	}
+
+	graphic.URL = url
+
+	return graphic, nil
+}
+
+// GetGraphicsByLessonID is fetching graphics belongs to lesson.
+func GetGraphicsByLessonID(request *http.Request, lessonID int64) ([]*domain.Graphic, error) {
+	ctx := request.Context()
+
+	var graphics []*domain.Graphic
 
 	if _, err := currentUserAccessToLesson(ctx, request, lessonID); err != nil {
 		return nil, err

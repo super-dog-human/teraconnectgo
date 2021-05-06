@@ -39,6 +39,7 @@ func Main(appEnv string) {
 	auth.DELETE("/users", deleteUser)
 	auth.GET("/avatars", getAvatars)
 	auth.POST("/avatars", postAvatars)
+	auth.GET("/graphics/:id", getGraphic)
 	auth.GET("/graphics", getGraphics)
 	auth.POST("/graphics", postGraphics)
 	auth.DELETE("/graphics/:id", deleteGraphic)

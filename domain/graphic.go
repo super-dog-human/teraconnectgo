@@ -57,7 +57,7 @@ func GetGraphicByID(ctx context.Context, id int64, userID int64) (Graphic, error
 	return *graphic, nil
 }
 
-func GetGraphicsByLessonID(ctx context.Context, lessonID int64, graphics *[]Graphic) error {
+func GetGraphicsByLessonID(ctx context.Context, lessonID int64, graphics *[]*Graphic) error {
 	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
 	if err != nil {
 		return err
@@ -74,7 +74,14 @@ func GetGraphicsByLessonID(ctx context.Context, lessonID int64, graphics *[]Grap
 		return GraphicNotFound
 	}
 
-	storeGraphicURL(ctx, graphics, keys)
+	for i, graphic := range *graphics {
+		graphic.ID = keys[i].ID
+		url, err := StoreGraphicURL(ctx, graphic)
+		if err != nil {
+			return err
+		}
+		graphic.URL = url
+	}
 
 	return nil
 }
@@ -147,20 +154,16 @@ func DeleteGraphicsInTransaction(tx *datastore.Transaction, ids []int64) error {
 	return nil
 }
 
-func storeGraphicURL(ctx context.Context, graphics *[]Graphic, keys []*datastore.Key) error {
-	for i, key := range keys {
-		fileID := strconv.FormatInt(key.ID, 10)
-		filePath := infrastructure.StorageObjectFilePath("Graphic", fileID, (*graphics)[i].FileType)
-		fileType := "" // this is unnecessary when GET request
-		bucketName := infrastructure.MaterialBucketName()
-		url, err := infrastructure.GetGCSSignedURL(ctx, bucketName, filePath, "GET", fileType)
-		if err != nil {
-			return err
-		}
+func StoreGraphicURL(ctx context.Context, graphic *Graphic) (string, error) {
+	fileID := strconv.FormatInt(graphic.ID, 10)
+	filePath := infrastructure.StorageObjectFilePath("Graphic", fileID, graphic.FileType)
+	fileType := "" // this is unnecessary when GET request
+	bucketName := infrastructure.MaterialBucketName()
+	url, err := infrastructure.GetGCSSignedURL(ctx, bucketName, filePath, "GET", fileType)
 
-		(*graphics)[i].ID = key.ID
-		(*graphics)[i].URL = url
+	if err != nil {
+		return "", err
 	}
 
-	return nil
+	return url, nil
 }
