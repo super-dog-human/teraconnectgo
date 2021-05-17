@@ -55,8 +55,6 @@ type LessonDrawingUnit struct {
 
 type LessonDrawingStroke struct {
 	Eraser    bool         `json:"eraser,omitempty"`
-	Width     int32        `json:"width,omitempty"`
-	Height    int32        `json:"height,omitempty"`
 	Color     string       `json:"color,omitempty"`
 	LineWidth int32        `json:"lineWidth,omitempty"`
 	Positions []Position2D `json:"positions,omitempty"`
