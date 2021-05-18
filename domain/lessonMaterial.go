@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"strconv"
 	"time"
 
 	"cloud.google.com/go/datastore"
@@ -17,6 +18,7 @@ type LessonMaterial struct {
 	DurationSec          float32              `json:"durationSec" datastore:",noindex"`
 	AvatarLightColor     string               `json:"avatarLightColor" datastore:",noindex"`
 	BackgroundImageID    int64                `json:"backgroundImageID"`
+	BackgroundImageURL   string               `json:"backgroundImageURL" datastore:"-"`
 	VoiceSynthesisConfig VoiceSynthesisConfig `json:"voiceSynthesisConfig"`
 	Avatars              []LessonAvatar       `json:"avatars"`
 	Graphics             []LessonGraphic      `json:"graphics"`
@@ -103,6 +105,7 @@ func GetLessonMaterial(ctx context.Context, lessonID int64, lessonMaterial *Less
 		*lessonMaterial = lessonMaterials[0]
 		lessonMaterial.ID = keys[0].ID
 		lessonMaterial.Version = uint(len(lessonMaterials))
+		lessonMaterial.BackgroundImageURL = infrastructure.GetPublicBackGroundImageURL(strconv.FormatInt(lessonMaterial.BackgroundImageID, 10))
 	}
 
 	return nil
