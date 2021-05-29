@@ -23,6 +23,7 @@ type LessonMaterial struct {
 	Avatars              []LessonAvatar       `json:"avatars"`
 	Graphics             []LessonGraphic      `json:"graphics"`
 	Drawings             []LessonDrawing      `json:"drawings"`
+	Embeddings           []LessonEmbedding    `json:"embeddings"`
 	Musics               []LessonMusic        `json:"musics"`
 	Speeches             []LessonSpeech       `json:"speeches"`
 	Created              time.Time            `json:"created"`
@@ -46,6 +47,12 @@ type LessonDrawing struct {
 	DurationSec float32             `json:"durationSec"`
 	Action      string              `json:"action"` // draw/clear/show/hide
 	Units       []LessonDrawingUnit `json:"units"`
+}
+
+type LessonEmbedding struct {
+	Action      string `json:"action"` // show/hide
+	ContentID   string `json:"contentID"`
+	ServiceName string `json:"type"`
 }
 
 type LessonDrawingUnit struct {
