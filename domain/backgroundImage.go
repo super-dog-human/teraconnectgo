@@ -32,7 +32,7 @@ func GetAllBackgroundImages(ctx context.Context) ([]BackgroundImage, error) {
 
 	for i, key := range keys {
 		images[i].ID = key.ID
-		images[i].URL = infrastructure.GetPublicBackGroundImageURL(strconv.FormatInt(key.ID, 10))
+		images[i].URL = infrastructure.GetPublicBackgroundImageURL(strconv.FormatInt(key.ID, 10))
 	}
 
 	return images, nil

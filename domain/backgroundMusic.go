@@ -32,7 +32,7 @@ func GetAllBackgroundMusics(ctx context.Context) ([]BackgroundMusic, error) {
 
 	for i, key := range keys {
 		musics[i].ID = key.ID
-		musics[i].URL = infrastructure.GetPublicBackGroundMusicURL(strconv.FormatInt(key.ID, 10))
+		musics[i].URL = infrastructure.GetPublicBackgroundMusicURL(strconv.FormatInt(key.ID, 10))
 	}
 
 	return musics, nil

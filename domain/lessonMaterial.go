@@ -50,9 +50,10 @@ type LessonDrawing struct {
 }
 
 type LessonEmbedding struct {
-	Action      string `json:"action"` // show/hide
-	ContentID   string `json:"contentID"`
-	ServiceName string `json:"type"`
+	ElapsedTime float32 `json:"elapsedTime"`
+	Action      string  `json:"action"` // show/hide
+	ContentID   string  `json:"contentID"`
+	ServiceName string  `json:"type"`
 }
 
 type LessonDrawingUnit struct {
@@ -72,7 +73,7 @@ type LessonDrawingStroke struct {
 type LessonMusic struct {
 	ElapsedTime       float32 `json:"elapsedTime"`
 	Action            string  `json:"action"`
-	BackGroundMusicID int64   `json:"backgroundMusicID"`
+	BackgroundMusicID int64   `json:"backgroundMusicID"`
 }
 
 type LessonSpeech struct {
@@ -112,7 +113,7 @@ func GetLessonMaterial(ctx context.Context, lessonID int64, lessonMaterial *Less
 		*lessonMaterial = lessonMaterials[0]
 		lessonMaterial.ID = keys[0].ID
 		lessonMaterial.Version = uint(len(lessonMaterials))
-		lessonMaterial.BackgroundImageURL = infrastructure.GetPublicBackGroundImageURL(strconv.FormatInt(lessonMaterial.BackgroundImageID, 10))
+		lessonMaterial.BackgroundImageURL = infrastructure.GetPublicBackgroundImageURL(strconv.FormatInt(lessonMaterial.BackgroundImageID, 10))
 	}
 
 	return nil
