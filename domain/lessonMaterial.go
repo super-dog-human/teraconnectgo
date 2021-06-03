@@ -74,6 +74,9 @@ type LessonMusic struct {
 	ElapsedTime       float32 `json:"elapsedTime"`
 	Action            string  `json:"action"` // start/stop
 	BackgroundMusicID int64   `json:"backgroundMusicID"`
+	Volume            float32 `json:"volume"`
+	IsFading          bool    `json:"isFading"`
+	IsLoop            bool    `json:"isLoop"`
 }
 
 type LessonSpeech struct {
