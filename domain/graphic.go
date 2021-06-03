@@ -76,7 +76,7 @@ func GetGraphicsByLessonID(ctx context.Context, lessonID int64, graphics *[]*Gra
 
 	for i, graphic := range *graphics {
 		graphic.ID = keys[i].ID
-		url, err := StoreGraphicURL(ctx, graphic)
+		url, err := GetGraphicSignedURL(ctx, graphic)
 		if err != nil {
 			return err
 		}
@@ -154,7 +154,7 @@ func DeleteGraphicsInTransaction(tx *datastore.Transaction, ids []int64) error {
 	return nil
 }
 
-func StoreGraphicURL(ctx context.Context, graphic *Graphic) (string, error) {
+func GetGraphicSignedURL(ctx context.Context, graphic *Graphic) (string, error) {
 	fileID := strconv.FormatInt(graphic.ID, 10)
 	filePath := infrastructure.StorageObjectFilePath("Graphic", fileID, graphic.FileType)
 	fileType := "" // this is unnecessary when GET request

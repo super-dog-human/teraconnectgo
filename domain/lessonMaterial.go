@@ -72,7 +72,7 @@ type LessonDrawingStroke struct {
 
 type LessonMusic struct {
 	ElapsedTime       float32 `json:"elapsedTime"`
-	Action            string  `json:"action"`
+	Action            string  `json:"action"` // start/stop
 	BackgroundMusicID int64   `json:"backgroundMusicID"`
 }
 

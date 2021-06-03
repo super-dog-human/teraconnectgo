@@ -26,7 +26,7 @@ func GetGraphicByID(request *http.Request, id int64) (domain.Graphic, error) {
 		return graphic, err
 	}
 
-	url, err := domain.StoreGraphicURL(ctx, &graphic)
+	url, err := domain.GetGraphicSignedURL(ctx, &graphic)
 	if err != nil {
 		return graphic, err
 	}
