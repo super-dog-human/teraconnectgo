@@ -47,8 +47,8 @@ type AvatarRotation struct {
 	Rotations []float32 `json:"rotations"`
 }
 
-// GetAvatarByIDs gets avatar by id.
-func GetAvatarByIDs(ctx context.Context, id int64) (Avatar, error) {
+// GetPublicAvatarByID gets avatar by id.
+func GetPublicAvatarByID(ctx context.Context, id int64) (Avatar, error) {
 	avatar := new(Avatar)
 
 	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
@@ -60,11 +60,42 @@ func GetAvatarByIDs(ctx context.Context, id int64) (Avatar, error) {
 	if err := client.Get(ctx, key, avatar); err != nil {
 		if err == datastore.ErrNoSuchEntity {
 			return *avatar, AvatarNotFound
+		} else {
+			return *avatar, err
 		}
+	}
+
+	avatar.ID = id
+	avatar.URL = createAvatarPublicURLs(id)
+
+	return *avatar, nil
+}
+
+func GetCurrentUsersAvatarByID(ctx context.Context, id int64, userID int64) (Avatar, error) {
+	avatar := new(Avatar)
+
+	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
+	if err != nil {
+		return *avatar, err
+	}
+
+	ancestor := datastore.IDKey("User", userID, nil)
+	key := datastore.IDKey("Avatar", id, ancestor)
+	if err := client.Get(ctx, key, avatar); err != nil {
+		if err == datastore.ErrNoSuchEntity {
+			return *avatar, AvatarNotFound
+		} else {
+			return *avatar, err
+		}
+	}
+
+	url, err := createAvatarSignedURLs(ctx, id)
+	if err != nil {
 		return *avatar, err
 	}
 
 	avatar.ID = id
+	avatar.URL = url
 
 	return *avatar, nil
 }

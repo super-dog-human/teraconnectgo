@@ -88,15 +88,13 @@ func GetPublicLesson(request *http.Request, id int64) (domain.Lesson, error) {
 }
 
 func GetPrivateLesson(request *http.Request, id int64) (domain.Lesson, error) {
-	ctx := request.Context()
-
 	currentUser, err := domain.GetCurrentUser(request)
 	if err != nil {
 		lesson := new(domain.Lesson)
 		return *lesson, err
 	}
 
-	lesson, err := getLessonByIDWithResources(ctx, id)
+	lesson, err := getLessonByIDWithResources(request, id)
 	if err == datastore.ErrNoSuchEntity {
 		return lesson, LessonNotFound
 	} else if err != nil {
@@ -229,7 +227,10 @@ func DeleteOwnLessonByID(request *http.Request, id int64) error {
 	return nil
 }
 
-func getLessonByIDWithResources(ctx context.Context, id int64) (domain.Lesson, error) {
+func getLessonByIDWithResources(request *http.Request, id int64) (domain.Lesson, error) {
+	var lesson domain.Lesson
+
+	ctx := request.Context()
 	lesson, err := domain.GetLessonByID(ctx, id)
 
 	if err != nil {
@@ -240,10 +241,23 @@ func getLessonByIDWithResources(ctx context.Context, id int64) (domain.Lesson, e
 	}
 
 	if lesson.AvatarID != 0 {
-		avatar, err := domain.GetAvatarByIDs(ctx, lesson.AvatarID)
+		avatar, err := domain.GetPublicAvatarByID(ctx, lesson.AvatarID)
 		if err != nil {
-			return lesson, err
+			if ok := errors.Is(err, domain.AvatarNotFound); ok {
+				currentUser, err := domain.GetCurrentUser(request)
+				if err != nil {
+					return lesson, err
+				}
+
+				avatar, err = domain.GetCurrentUsersAvatarByID(ctx, lesson.AvatarID, currentUser.ID)
+				if err != nil {
+					return lesson, err
+				}
+			} else {
+				return lesson, err
+			}
 		}
+
 		lesson.Avatar = avatar
 	}
 
