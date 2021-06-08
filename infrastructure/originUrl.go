@@ -8,6 +8,6 @@ func OriginURL() string {
 	case "staging":
 		return "https://teraconnect-staging.an.r.appspot.com"
 	default:
-		return "https://lvh.me:3000"
+		return "https://dev.teraconnect.org:3000"
 	}
 }
