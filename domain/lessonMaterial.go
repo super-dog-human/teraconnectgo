@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/datastore"
-	"github.com/jinzhu/copier"
+	"github.com/imdario/mergo"
 	"github.com/super-dog-human/teraconnectgo/infrastructure"
 )
 
@@ -19,13 +19,13 @@ type LessonMaterial struct {
 	AvatarLightColor     string               `json:"avatarLightColor" datastore:",noindex"`
 	BackgroundImageID    int64                `json:"backgroundImageID"`
 	BackgroundImageURL   string               `json:"backgroundImageURL" datastore:"-"`
-	VoiceSynthesisConfig VoiceSynthesisConfig `json:"voiceSynthesisConfig"`
-	Avatars              []LessonAvatar       `json:"avatars"`
-	Graphics             []LessonGraphic      `json:"graphics"`
-	Drawings             []LessonDrawing      `json:"drawings"`
-	Embeddings           []LessonEmbedding    `json:"embeddings"`
-	Musics               []LessonMusic        `json:"musics"`
-	Speeches             []LessonSpeech       `json:"speeches"`
+	VoiceSynthesisConfig VoiceSynthesisConfig `json:"voiceSynthesisConfig" datastore:",noindex"`
+	Avatars              []LessonAvatar       `json:"avatars" datastore:",noindex"`
+	Graphics             []LessonGraphic      `json:"graphics" datastore:",noindex"`
+	Drawings             []LessonDrawing      `json:"drawings" datastore:",noindex"`
+	Embeddings           []LessonEmbedding    `json:"embeddings" datastore:",noindex"`
+	Musics               []LessonMusic        `json:"musics" datastore:",noindex"`
+	Speeches             []LessonSpeech       `json:"speeches" datastore:",noindex"`
 	Created              time.Time            `json:"created"`
 	Updated              time.Time            `json:"updated"`
 }
@@ -90,7 +90,7 @@ type LessonSpeech struct {
 }
 
 type Caption struct {
-	SizeVW          uint8  `json:"sizeVW"`
+	SizeVW          int8   `json:"sizeVW"`
 	Body            string `json:"body"`
 	BodyColor       string `json:"bodyColor"`
 	BorderColor     string `json:"borderColor"`
@@ -105,7 +105,7 @@ func GetLessonMaterial(ctx context.Context, lessonID int64, lessonMaterial *Less
 	}
 
 	ancestor := datastore.IDKey("Lesson", lessonID, nil)
-	query := datastore.NewQuery("LessonMaterial").Ancestor(ancestor).Order("-Created") // 降順
+	query := datastore.NewQuery("LessonMaterial").Ancestor(ancestor).Order("-Created").Limit(1) // 降順
 	var lessonMaterials []LessonMaterial
 	keys, err := client.GetAll(ctx, query, &lessonMaterials)
 	if err != nil {
@@ -148,23 +148,30 @@ func UpdateLessonMaterial(ctx context.Context, id int64, lessonID int64, newLess
 	}
 
 	_, err = client.RunInTransaction(ctx, func(tx *datastore.Transaction) error {
-		var lessonMaterial LessonMaterial
-
 		ancestor := datastore.IDKey("Lesson", lessonID, nil)
 		key := datastore.IDKey("LessonMaterial", id, ancestor)
-		if err := tx.Get(key, lessonMaterial); err != nil {
-			return nil
+		var lessonMaterial LessonMaterial
+		if err := tx.Get(key, &lessonMaterial); err != nil {
+			return err
 		}
 
-		copier.Copy(&lessonMaterial, &newLessonMaterial)
-		lessonMaterial.Updated = time.Now()
+		if err := mergo.Merge(newLessonMaterial, lessonMaterial); err != nil {
+			return err
+		}
 
-		if _, err := tx.Put(key, lessonMaterial); err != nil {
+		newLessonMaterial.Created = lessonMaterial.Created
+		newLessonMaterial.Updated = time.Now()
+
+		if _, err := tx.Put(key, newLessonMaterial); err != nil {
 			return err
 		}
 
 		return nil
 	})
+
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

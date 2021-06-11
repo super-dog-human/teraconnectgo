@@ -15,8 +15,9 @@ type LessonMaterialParams struct {
 	BackgroundImageID    int64                       `json:"backgroundImageID"`
 	VoiceSynthesisConfig domain.VoiceSynthesisConfig `json:"voiceSynthesisConfig"`
 	Avatars              []domain.LessonAvatar       `json:"avatars"`
-	Graphics             []domain.LessonGraphic      `json:"graphics"`
 	Drawings             []domain.LessonDrawing      `json:"drawings"`
+	Embeddings           []domain.LessonEmbedding    `json:"embeddings"`
+	Graphics             []domain.LessonGraphic      `json:"graphics"`
 	Musics               []domain.LessonMusic        `json:"musics"`
 	Speeches             []domain.LessonSpeech       `json:"speeches"`
 }
