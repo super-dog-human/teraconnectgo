@@ -97,25 +97,20 @@ type Caption struct {
 	VerticalAlign   string `json:"verticalAlign"`
 }
 
-func GetLessonMaterial(ctx context.Context, lessonID int64, lessonMaterial *LessonMaterial) error {
+func GetLessonMaterial(ctx context.Context, id int64, lessonID int64, lessonMaterial *LessonMaterial) error {
 	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
 	if err != nil {
 		return err
 	}
 
 	ancestor := datastore.IDKey("Lesson", lessonID, nil)
-	query := datastore.NewQuery("LessonMaterial").Ancestor(ancestor).Order("-Created").Limit(1) // 降順
-	var lessonMaterials []LessonMaterial
-	keys, err := client.GetAll(ctx, query, &lessonMaterials)
-	if err != nil {
+	key := datastore.IDKey("LessonMaterial", id, ancestor)
+	if err := client.Get(ctx, key, lessonMaterial); err != nil {
 		return err
 	}
 
-	if len(lessonMaterials) > 0 {
-		*lessonMaterial = lessonMaterials[0]
-		lessonMaterial.ID = keys[0].ID
-		lessonMaterial.BackgroundImageURL = infrastructure.GetPublicBackgroundImageURL(strconv.FormatInt(lessonMaterial.BackgroundImageID, 10))
-	}
+	lessonMaterial.ID = id
+	lessonMaterial.BackgroundImageURL = infrastructure.GetPublicBackgroundImageURL(strconv.FormatInt(lessonMaterial.BackgroundImageID, 10))
 
 	return nil
 }

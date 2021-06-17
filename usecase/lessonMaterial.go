@@ -3,6 +3,7 @@ package usecase
 import (
 	"net/http"
 
+	"cloud.google.com/go/datastore"
 	"github.com/jinzhu/copier"
 	"github.com/super-dog-human/teraconnectgo/domain"
 )
@@ -40,7 +41,7 @@ func (e LessonMaterialErrorCode) Error() string {
 	}
 }
 
-func GetLessonMaterial(request *http.Request, lessonID int64) (domain.LessonMaterial, error) {
+func GetLessonMaterial(request *http.Request, id int64, lessonID int64) (domain.LessonMaterial, error) {
 	ctx := request.Context()
 
 	var lessonMaterial domain.LessonMaterial
@@ -48,12 +49,12 @@ func GetLessonMaterial(request *http.Request, lessonID int64) (domain.LessonMate
 		return lessonMaterial, LessonMaterialNotAvailable
 	}
 
-	if err := domain.GetLessonMaterial(ctx, lessonID, &lessonMaterial); err != nil {
-		return lessonMaterial, err
-	}
-
-	if lessonMaterial.ID == 0 {
-		return lessonMaterial, LessonMaterialNotFound
+	if err := domain.GetLessonMaterial(ctx, id, lessonID, &lessonMaterial); err != nil {
+		if err == datastore.ErrNoSuchEntity {
+			return lessonMaterial, LessonMaterialNotFound
+		} else {
+			return lessonMaterial, LessonMaterialNotAvailable
+		}
 	}
 
 	return lessonMaterial, nil

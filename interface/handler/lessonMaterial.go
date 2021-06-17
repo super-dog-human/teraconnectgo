@@ -9,14 +9,21 @@ import (
 )
 
 func getLessonMaterials(c echo.Context) error {
-	lessonID, err := strconv.ParseInt(c.Param("lessonID"), 10, 64)
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
-		errMessage := "Invalid ID(s) error"
+		errMessage := "Invalid ID error"
 		warnLog(errMessage)
 		return c.JSON(http.StatusBadRequest, errMessage)
 	}
 
-	lessonMaterial, err := usecase.GetLessonMaterial(c.Request(), lessonID)
+	lessonID, err := strconv.ParseInt(c.Param("lessonID"), 10, 64)
+	if err != nil {
+		errMessage := "Invalid ID error"
+		warnLog(errMessage)
+		return c.JSON(http.StatusBadRequest, errMessage)
+	}
+
+	lessonMaterial, err := usecase.GetLessonMaterial(c.Request(), id, lessonID)
 	if err != nil {
 		fatalLog(err)
 		lessonErr, ok := err.(usecase.LessonMaterialErrorCode)
