@@ -4,9 +4,23 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/jinzhu/copier"
 	"github.com/labstack/echo/v4"
+	"github.com/super-dog-human/teraconnectgo/domain"
 	"github.com/super-dog-human/teraconnectgo/usecase"
 )
+
+type getLessonMaterialShortResponse struct {
+	AvatarID             int64                       `json:"avatarID"`
+	AvatarLightColor     string                      `json:"avatarLightColor"`
+	BackgroundImageID    int64                       `json:"backgroundImageID"`
+	BackgroundImageURL   string                      `json:"backgroundImageURL"`
+	VoiceSynthesisConfig domain.VoiceSynthesisConfig `json:"voiceSynthesisConfig"`
+}
+
+type postMaterialResponse struct {
+	MaterialID int64 `json:"materialID"`
+}
 
 func getLessonMaterials(c echo.Context) error {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
@@ -35,7 +49,15 @@ func getLessonMaterials(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, lessonMaterial)
+	isShort := c.Request().URL.Query().Get("is_short")
+	if isShort == "true" {
+		var response getLessonMaterialShortResponse
+		copier.Copy(&response, lessonMaterial)
+		return c.JSON(http.StatusOK, response)
+
+	} else {
+		return c.JSON(http.StatusOK, lessonMaterial)
+	}
 }
 
 func postLessonMaterial(c echo.Context) error {
@@ -64,12 +86,7 @@ func postLessonMaterial(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	response := struct {
-		ID int64 `json:"materialID"`
-	}{
-		id,
-	}
-
+	response := postMaterialResponse{id}
 	return c.JSON(http.StatusCreated, response)
 }
 
