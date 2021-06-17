@@ -45,7 +45,8 @@ func postLessonMaterial(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	if err := usecase.CreateLessonMaterial(c.Request(), lessonID, *params); err != nil {
+	id, err := usecase.CreateLessonMaterial(c.Request(), lessonID, *params)
+	if err != nil {
 		fatalLog(err)
 		lessonErr, ok := err.(usecase.LessonMaterialErrorCode)
 		if ok && lessonErr == usecase.LessonMaterialNotFound {
@@ -56,7 +57,13 @@ func postLessonMaterial(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusCreated, "succeeded")
+	response := struct {
+		ID int64 `json:"materialID"`
+	}{
+		id,
+	}
+
+	return c.JSON(http.StatusCreated, response)
 }
 
 func patchLessonMaterial(c echo.Context) error {

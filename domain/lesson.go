@@ -12,6 +12,7 @@ import (
 type Lesson struct {
 	ID             int64              `json:"id" datastore:"-"`
 	UserID         int64              `json:"userID"`
+	MaterialID     int64              `json:"materialID"`
 	NeedsRecording bool               `json:"needsRecording"` // 収録画面での収録必要の有無
 	IsEdited       bool               `json:"isEdited"`       // 編集画面から保存されたことがある
 	IsIntroduction bool               `json:"isIntroduction"` // 自己紹介用の授業

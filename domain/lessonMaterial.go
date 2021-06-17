@@ -12,7 +12,6 @@ import (
 
 type LessonMaterial struct {
 	ID                   int64                `json:"id" datastore:"-"`
-	Version              uint                 `json:"version" datastore:"-"` // 同じLessonを親に持つもののCreatedの昇順をバージョンとする
 	UserID               int64                `json:"userID"`
 	AvatarID             int64                `json:"avatarID"`
 	DurationSec          float32              `json:"durationSec" datastore:",noindex"`
@@ -115,7 +114,6 @@ func GetLessonMaterial(ctx context.Context, lessonID int64, lessonMaterial *Less
 	if len(lessonMaterials) > 0 {
 		*lessonMaterial = lessonMaterials[0]
 		lessonMaterial.ID = keys[0].ID
-		lessonMaterial.Version = uint(len(lessonMaterials))
 		lessonMaterial.BackgroundImageURL = infrastructure.GetPublicBackgroundImageURL(strconv.FormatInt(lessonMaterial.BackgroundImageID, 10))
 	}
 
@@ -134,9 +132,12 @@ func CreateLessonMaterial(ctx context.Context, lessonID int64, lessonMaterial *L
 
 	ancestor := datastore.IDKey("Lesson", lessonID, nil)
 	key := datastore.IncompleteKey("LessonMaterial", ancestor)
-	if _, err := client.Put(ctx, key, lessonMaterial); err != nil {
+	putKey, err := client.Put(ctx, key, lessonMaterial)
+	if err != nil {
 		return err
 	}
+
+	lessonMaterial.ID = putKey.ID
 
 	return nil
 }

@@ -59,12 +59,12 @@ func GetLessonMaterial(request *http.Request, lessonID int64) (domain.LessonMate
 	return lessonMaterial, nil
 }
 
-func CreateLessonMaterial(request *http.Request, lessonID int64, params LessonMaterialParams) error {
+func CreateLessonMaterial(request *http.Request, lessonID int64, params LessonMaterialParams) (int64, error) {
 	ctx := request.Context()
 
 	userID, err := currentUserAccessToLesson(ctx, request, lessonID)
 	if err != nil {
-		return LessonMaterialNotAvailable
+		return 0, LessonMaterialNotAvailable
 	}
 
 	var lessonMaterial domain.LessonMaterial
@@ -80,10 +80,21 @@ func CreateLessonMaterial(request *http.Request, lessonID int64, params LessonMa
 	}
 
 	if err := domain.CreateLessonMaterial(ctx, lessonID, &lessonMaterial); err != nil {
-		return err
+		return 0, err
 	}
 
-	return nil
+	lesson, err := domain.GetLessonByID(ctx, lessonID)
+	if err != nil {
+		return 0, err
+	}
+
+	lesson.MaterialID = lessonMaterial.ID
+
+	if err = domain.UpdateLesson(ctx, &lesson); err != nil {
+		return 0, err
+	}
+
+	return lessonMaterial.ID, nil
 }
 
 func UpdateLessonMaterial(request *http.Request, id int64, lessonID int64, params LessonMaterialParams) error {
