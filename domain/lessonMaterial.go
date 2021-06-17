@@ -25,8 +25,8 @@ type LessonMaterial struct {
 	Embeddings           []LessonEmbedding    `json:"embeddings" datastore:",noindex"`
 	Musics               []LessonMusic        `json:"musics" datastore:",noindex"`
 	Speeches             []LessonSpeech       `json:"speeches" datastore:",noindex"`
-	Created              time.Time            `json:"created"`
-	Updated              time.Time            `json:"updated"`
+	Created              time.Time            `json:"created" datastore:",noindex"`
+	Updated              time.Time            `json:"updated" datastore:",noindex"`
 }
 
 type LessonAvatar struct {
