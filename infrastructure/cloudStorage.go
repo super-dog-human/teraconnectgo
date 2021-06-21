@@ -123,7 +123,7 @@ func GetFileFromGCS(ctx context.Context, bucketName, filePath string) ([]byte, e
 
 // GetGCSSignedURL generates signed-URL for GCS object.
 func GetGCSSignedURL(ctx context.Context, bucket string, key string, method string, contentType string) (string, error) {
-	expire := time.Now().AddDate(0, 0, 1) // expire after a day.
+	expire := time.Now().AddDate(0, 0, 3) // expire after 3 days.
 	url, err := storage.SignedURL(bucket, key, &storage.SignedURLOptions{
 		GoogleAccessID: ServiceAccountName(),
 		SignBytes: func(b []byte) ([]byte, error) {
