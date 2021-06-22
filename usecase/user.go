@@ -123,17 +123,6 @@ func UnsubscribeCurrentUser(request *http.Request) error {
 		return err
 	}
 
-	lessons, err := domain.GetLessonsByUserID(ctx, currentUser.ID)
-	if err != nil {
-		return err
-	}
-
-	for _, lesson := range lessons {
-		if err := deleteLessonAndRecources(ctx, lesson); err != nil {
-			return err
-		}
-	}
-
 	if err = domain.DeleteUser(ctx, currentUser.ID); err != nil {
 		return err
 	}

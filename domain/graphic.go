@@ -140,20 +140,6 @@ func DeleteGraphicFileByID(ctx context.Context, graphic Graphic) error {
 	return nil
 }
 
-func DeleteGraphicsInTransaction(tx *datastore.Transaction, ids []int64) error {
-	var graphicKeys []*datastore.Key
-
-	for _, id := range ids {
-		graphicKeys = append(graphicKeys, datastore.IDKey("Graphic", id, nil))
-	}
-
-	if err := tx.DeleteMulti(graphicKeys); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func GetGraphicSignedURL(ctx context.Context, graphic *Graphic) (string, error) {
 	fileID := strconv.FormatInt(graphic.ID, 10)
 	filePath := infrastructure.StorageObjectFilePath("Graphic", fileID, graphic.FileType)

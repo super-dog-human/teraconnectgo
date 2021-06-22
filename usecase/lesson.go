@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"io"
 	"log"
@@ -14,7 +13,6 @@ import (
 	"github.com/jinzhu/copier"
 	"github.com/pkg/errors"
 	"github.com/super-dog-human/teraconnectgo/domain"
-	"github.com/super-dog-human/teraconnectgo/infrastructure"
 )
 
 type LessonErrorCode uint
@@ -200,33 +198,6 @@ func UpdateLesson(id int64, request *http.Request) (domain.Lesson, error) {
 	return lesson, nil
 }
 
-func DeleteOwnLessonByID(request *http.Request, id int64) error {
-	ctx := request.Context()
-
-	currentUser, err := domain.GetCurrentUser(request)
-	if err != nil {
-		return err
-	}
-
-	lesson, err := domain.GetLessonByID(ctx, id)
-	if err != nil {
-		if err == datastore.ErrNoSuchEntity {
-			return LessonNotFound
-		}
-		return err
-	}
-
-	if currentUser.ID != lesson.UserID {
-		return LessonNotAvailable
-	}
-
-	if err := deleteLessonAndRecources(ctx, lesson); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func getLessonByIDWithResources(request *http.Request, id int64) (domain.Lesson, error) {
 	var lesson domain.Lesson
 
@@ -262,31 +233,4 @@ func getLessonByIDWithResources(request *http.Request, id int64) (domain.Lesson,
 	}
 
 	return lesson, nil
-}
-
-func deleteLessonAndRecources(ctx context.Context, lesson domain.Lesson) error {
-	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
-	if err != nil {
-		return err
-	}
-
-	_, err = client.RunInTransaction(ctx, func(tx *datastore.Transaction) error {
-		if err := domain.DeleteAvatarInTransaction(tx, lesson.AvatarID); err != nil {
-			return err
-		}
-
-		if err := domain.DeleteGraphicsInTransaction(tx, lesson.GraphicIDs); err != nil {
-			return err
-		}
-
-		// TODO remove files in GCS
-
-		if err := domain.DeleteLessonInTransactionByID(tx, lesson.ID); err != nil {
-			return err
-		}
-
-		return nil
-	})
-
-	return err
 }

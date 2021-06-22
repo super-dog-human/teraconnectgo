@@ -193,12 +193,3 @@ func CreateAvatar(ctx context.Context, avatar *Avatar, user *User) error {
 
 	return nil
 }
-
-func DeleteAvatarInTransaction(tx *datastore.Transaction, id int64) error {
-	key := datastore.IDKey("Avatar", id, nil)
-	if err := tx.Delete(key); err != nil {
-		return err
-	}
-
-	return nil
-}

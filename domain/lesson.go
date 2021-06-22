@@ -125,12 +125,3 @@ func UpdateLesson(ctx context.Context, lesson *Lesson) error {
 
 	return nil
 }
-
-func DeleteLessonInTransactionByID(tx *datastore.Transaction, id int64) error {
-	key := datastore.IDKey("Lesson", id, nil)
-	if err := tx.Delete(key); err != nil {
-		return err
-	}
-
-	return nil
-}

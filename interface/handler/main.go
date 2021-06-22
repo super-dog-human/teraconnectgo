@@ -50,7 +50,6 @@ func Main(appEnv string) {
 	auth.POST("/synthesis_voice", postSynthesisVoice)
 	auth.POST("/lessons", postLesson)
 	auth.PATCH("/lessons/:id", patchLesson)
-	auth.DELETE("/lessons/:id", deleteLesson)
 	auth.GET("/lessons/:lessonID/materials/:id", getLessonMaterials)
 	auth.POST("/lessons/:lessonID/materials", postLessonMaterial)
 	auth.PATCH("/lessons/:lessonID/materials/:id", patchLessonMaterial)
