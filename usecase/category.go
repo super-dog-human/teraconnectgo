@@ -9,7 +9,7 @@ import (
 
 // GetCategories return categories by the subject.
 func GetCategories(request *http.Request) ([]domain.Category, error) {
-	queryString := request.URL.Query().Get("subjectID")
+	queryString := request.URL.Query().Get("subject_id")
 	subjectID, err := strconv.ParseInt(queryString, 10, 64)
 
 	if err != nil {
