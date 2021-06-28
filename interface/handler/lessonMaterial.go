@@ -91,16 +91,16 @@ func postLessonMaterial(c echo.Context) error {
 }
 
 func patchLessonMaterial(c echo.Context) error {
-	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	lessonID, err := strconv.ParseInt(c.Param("lessonID"), 10, 64)
 	if err != nil {
-		errMessage := "Invalid ID error"
+		errMessage := "Invalid lessonID error"
 		warnLog(errMessage)
 		return c.JSON(http.StatusBadRequest, errMessage)
 	}
 
-	lessonID, err := strconv.ParseInt(c.Param("lessonID"), 10, 64)
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
-		errMessage := "Invalid lessonID error"
+		errMessage := "Invalid ID error"
 		warnLog(errMessage)
 		return c.JSON(http.StatusBadRequest, errMessage)
 	}

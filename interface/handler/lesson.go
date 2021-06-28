@@ -73,7 +73,7 @@ func getLesson(c echo.Context) error {
 }
 
 func postLesson(c echo.Context) error {
-	params := new(usecase.LessonParams)
+	params := new(usecase.NewLessonParams)
 	lesson := new(domain.Lesson)
 
 	if err := c.Bind(params); err != nil {
@@ -95,15 +95,31 @@ func postLesson(c echo.Context) error {
 }
 
 func patchLesson(c echo.Context) error {
-	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	id, err := strconv.ParseInt(c.Param("lessonID"), 10, 64)
 	if err != nil {
-		errMessage := "Invalid ID(s) error"
+		errMessage := "Invalid lessonID error"
 		warnLog(errMessage)
 		return c.JSON(http.StatusBadRequest, errMessage)
 	}
 
-	lesson, err := usecase.UpdateLesson(id, c.Request())
+	materialID, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
+		errMessage := "Invalid ID error"
+		warnLog(errMessage)
+		return c.JSON(http.StatusBadRequest, errMessage)
+	}
+
+	lessonParams := new(usecase.PatchLessonParams)
+	if err := c.Bind(lessonParams); err != nil {
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+
+	materialParams := new(usecase.PatchLessonMaterialParams)
+	if err := c.Bind(materialParams); err != nil {
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+
+	if err := usecase.UpdateLessonWithMaterial(id, materialID, c.Request(), lessonParams, materialParams); err != nil {
 		fatalLog(err)
 		LessonErr, ok := err.(usecase.LessonErrorCode)
 		if ok && LessonErr == usecase.LessonNotFound {
@@ -114,5 +130,5 @@ func patchLesson(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, lesson)
+	return c.JSON(http.StatusOK, "")
 }

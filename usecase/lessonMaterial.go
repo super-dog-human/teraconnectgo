@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"errors"
 	"net/http"
 
 	"cloud.google.com/go/datastore"
@@ -45,7 +46,8 @@ func GetLessonMaterial(request *http.Request, id int64, lessonID int64) (domain.
 	ctx := request.Context()
 
 	var lessonMaterial domain.LessonMaterial
-	if _, err := currentUserAccessToLesson(ctx, request, lessonID); err != nil {
+	userID, err := currentUserAccessToLesson(ctx, request, lessonID)
+	if err != nil {
 		return lessonMaterial, LessonMaterialNotAvailable
 	}
 
@@ -55,6 +57,22 @@ func GetLessonMaterial(request *http.Request, id int64, lessonID int64) (domain.
 		} else {
 			return lessonMaterial, LessonMaterialNotAvailable
 		}
+	}
+
+	if lessonMaterial.AvatarID != 0 {
+		avatar, err := domain.GetPublicAvatarByID(ctx, lessonMaterial.AvatarID)
+		if err != nil {
+			if ok := errors.Is(err, domain.AvatarNotFound); ok {
+				avatar, err = domain.GetCurrentUsersAvatarByID(ctx, lessonMaterial.AvatarID, userID)
+				if err != nil {
+					return lessonMaterial, err
+				}
+			} else {
+				return lessonMaterial, err
+			}
+		}
+
+		lessonMaterial.Avatar = avatar
 	}
 
 	return lessonMaterial, nil

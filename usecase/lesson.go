@@ -1,13 +1,9 @@
 package usecase
 
 import (
-	"bytes"
-	"encoding/json"
-	"io"
 	"log"
 	"net/http"
 	"reflect"
-	"strings"
 
 	"cloud.google.com/go/datastore"
 	"github.com/jinzhu/copier"
@@ -36,13 +32,29 @@ func (e LessonErrorCode) Error() string {
 	}
 }
 
-// LessonParams is only used when creating new lesson.
-type LessonParams struct {
+// NewLessonParams is only used when creating new lesson.
+type NewLessonParams struct {
 	NeedsRecording     bool   `json:"needsRecording"`
 	IsIntroduction     bool   `json:"isIntroduction"`
 	SubjectID          int64  `json:"subjectID"`
 	JapaneseCategoryID int64  `json:"japaneseCategoryID"`
 	Title              string `json:"title"`
+}
+
+type PatchLessonParams struct {
+	SubjectID          int64                     `json:"subjectID"`
+	JapaneseCategoryID int64                     `json:"japaneseCategoryID"`
+	Status             domain.LessonStatus       `json:"status"`
+	Title              string                    `json:"title"`
+	Description        string                    `json:"description"`
+	References         []domain.LessonReferences `json:"feferences"`
+}
+
+type PatchLessonMaterialParams struct {
+	BackgroundImageID    int64                       `json:"backgroundImageID"`
+	AvatarID             int64                       `json:"avatarID"`
+	AvatarLightColor     string                      `json:"avatarLightColor"`
+	VoiceSynthesisConfig domain.VoiceSynthesisConfig `json:"voiceSynthesisConfig"`
 }
 
 // GetLessonsByConditions for search lessons
@@ -78,7 +90,7 @@ func GetPublicLesson(request *http.Request, id int64) (domain.Lesson, error) {
 		return lesson, err
 	}
 
-	if lesson.IsPublic {
+	if lesson.Status == domain.Limited {
 		return lesson, nil
 	}
 
@@ -92,7 +104,8 @@ func GetPrivateLesson(request *http.Request, id int64) (domain.Lesson, error) {
 		return *lesson, err
 	}
 
-	lesson, err := getLessonByIDWithResources(request, id)
+	ctx := request.Context()
+	lesson, err := domain.GetLessonByID(ctx, id)
 	if err == datastore.ErrNoSuchEntity {
 		return lesson, LessonNotFound
 	} else if err != nil {
@@ -107,7 +120,7 @@ func GetPrivateLesson(request *http.Request, id int64) (domain.Lesson, error) {
 }
 
 // CreateLesson is create the new lesson belongs to subject and category.
-func CreateLesson(request *http.Request, newLesson *LessonParams, lesson *domain.Lesson) error {
+func CreateLesson(request *http.Request, newLesson *NewLessonParams, lesson *domain.Lesson) error {
 	currentUser, err := domain.GetCurrentUser(request)
 	if err != nil {
 		return InvalidLessonParams
@@ -125,7 +138,7 @@ func CreateLesson(request *http.Request, newLesson *LessonParams, lesson *domain
 	category, err := domain.GetJapaneseCategory(ctx, newLesson.JapaneseCategoryID, newLesson.SubjectID)
 	if err != nil {
 		log.Printf("category %v\n", newLesson.JapaneseCategoryID)
-		log.Printf("%v\n", errors.WithStack(err.(error)).Error())
+		log.Printf("%v\n", errors.WithStack(err).Error())
 		return InvalidLessonParams
 	}
 
@@ -140,97 +153,44 @@ func CreateLesson(request *http.Request, newLesson *LessonParams, lesson *domain
 	return nil
 }
 
-func UpdateLesson(id int64, request *http.Request) (domain.Lesson, error) {
+func UpdateLessonWithMaterial(id int64, materialID int64, request *http.Request, lessonParams *PatchLessonParams, materialParams *PatchLessonMaterialParams) error {
 	ctx := request.Context()
 
 	currentUser, err := domain.GetCurrentUser(request)
 	if err != nil {
-		lesson := new(domain.Lesson)
-		return *lesson, err
+		return err
 	}
 
 	lesson, err := domain.GetLessonByID(ctx, id)
 	if err != nil {
 		if err == datastore.ErrNoSuchEntity {
-			return lesson, LessonNotFound
+			return LessonNotFound
 		}
-		return lesson, err
+		return err
 	}
 
-	// TODO allow permitted users for authoring
 	if lesson.UserID != currentUser.ID {
-		return lesson, InvalidLessonParams
+		return InvalidLessonParams
 	}
 
-	buf := new(bytes.Buffer)
-	io.Copy(buf, request.Body)
+	var newLesson domain.Lesson
+	var newLessonMaterial domain.LessonMaterial
 
-	var f interface{}
-	if err := json.Unmarshal(buf.Bytes(), &f); err != nil {
-		return lesson, InvalidLessonParams
+	var blankLessonParams PatchLessonParams
+	if !reflect.DeepEqual(*lessonParams, blankLessonParams) {
+		copier.Copy(&newLesson, *lessonParams)
+		newLesson.ID = id
 	}
 
-	updateLesson := f.(map[string]interface{})
-	mutable := reflect.ValueOf(lesson).Elem()
-	for key, lessonField := range updateLesson {
-		structKey := strings.Title(key)
-		switch v := lessonField.(type) {
-		case []interface{}:
-			array := make([]string, len(v)) // TODO support not string in array types. use reflect.TypeOf(v[0])
-			mutable.FieldByName(structKey).Set(reflect.ValueOf(array))
-			for i := range v {
-				mutable.FieldByName(structKey).Index(i).Set(reflect.ValueOf(v[i]))
-			}
-		default:
-			if structKey == "ViewCount" || structKey == "Version" {
-				intValue := int64(v.(float64))
-				mutable.FieldByName(structKey).SetInt(intValue)
-			} else {
-				mutable.FieldByName(structKey).Set(reflect.ValueOf(v))
-			}
-		}
+	var blankMaterialParams PatchLessonParams
+	if !reflect.DeepEqual(*materialParams, blankMaterialParams) {
+		copier.Copy(&newLessonMaterial, *materialParams)
+		newLessonMaterial.ID = materialID
 	}
 
-	if err = domain.UpdateLesson(ctx, &lesson); err != nil {
-		return lesson, err
+	if err := domain.UpdateLessonAndMaterial(ctx, &newLesson, &newLessonMaterial); err != nil {
+		return err
 	}
 
-	return lesson, nil
-}
-
-func getLessonByIDWithResources(request *http.Request, id int64) (domain.Lesson, error) {
-	var lesson domain.Lesson
-
-	ctx := request.Context()
-	lesson, err := domain.GetLessonByID(ctx, id)
-
-	if err != nil {
-		if err == datastore.ErrNoSuchEntity {
-			return lesson, LessonNotFound
-		}
-		return lesson, err
-	}
-
-	if lesson.AvatarID != 0 {
-		avatar, err := domain.GetPublicAvatarByID(ctx, lesson.AvatarID)
-		if err != nil {
-			if ok := errors.Is(err, domain.AvatarNotFound); ok {
-				currentUser, err := domain.GetCurrentUser(request)
-				if err != nil {
-					return lesson, err
-				}
-
-				avatar, err = domain.GetCurrentUsersAvatarByID(ctx, lesson.AvatarID, currentUser.ID)
-				if err != nil {
-					return lesson, err
-				}
-			} else {
-				return lesson, err
-			}
-		}
-
-		lesson.Avatar = avatar
-	}
-
-	return lesson, nil
+	return nil
 }

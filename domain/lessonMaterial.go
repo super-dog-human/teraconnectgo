@@ -14,6 +14,7 @@ type LessonMaterial struct {
 	ID                   int64                `json:"id" datastore:"-"`
 	UserID               int64                `json:"userID"`
 	AvatarID             int64                `json:"avatarID"`
+	Avatar               Avatar               `json:"avatar" datastore:"-"`
 	DurationSec          float32              `json:"durationSec" datastore:",noindex"`
 	AvatarLightColor     string               `json:"avatarLightColor" datastore:",noindex"`
 	BackgroundImageID    int64                `json:"backgroundImageID"`
@@ -144,28 +145,31 @@ func UpdateLessonMaterial(ctx context.Context, id int64, lessonID int64, newLess
 	}
 
 	_, err = client.RunInTransaction(ctx, func(tx *datastore.Transaction) error {
-		ancestor := datastore.IDKey("Lesson", lessonID, nil)
-		key := datastore.IDKey("LessonMaterial", id, ancestor)
-		var lessonMaterial LessonMaterial
-		if err := tx.Get(key, &lessonMaterial); err != nil {
-			return err
-		}
-
-		if err := mergo.Merge(newLessonMaterial, lessonMaterial); err != nil {
-			return err
-		}
-
-		newLessonMaterial.Created = lessonMaterial.Created
-		newLessonMaterial.Updated = time.Now()
-
-		if _, err := tx.Put(key, newLessonMaterial); err != nil {
-			return err
-		}
-
-		return nil
+		return UpdateLessonMaterialInTransaction(tx, id, lessonID, newLessonMaterial)
 	})
 
 	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func UpdateLessonMaterialInTransaction(tx *datastore.Transaction, id int64, lessonID int64, newLessonMaterial *LessonMaterial) error {
+	ancestor := datastore.IDKey("Lesson", lessonID, nil)
+	key := datastore.IDKey("LessonMaterial", id, ancestor)
+	var lessonMaterial LessonMaterial
+	if err := tx.Get(key, &lessonMaterial); err != nil {
+		return err
+	}
+
+	if err := mergo.Merge(newLessonMaterial, lessonMaterial); err != nil {
+		return err
+	}
+
+	newLessonMaterial.Updated = time.Now()
+
+	if _, err := tx.Put(key, newLessonMaterial); err != nil {
 		return err
 	}
 
