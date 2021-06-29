@@ -167,6 +167,7 @@ func UpdateLessonMaterialInTransaction(tx *datastore.Transaction, id int64, less
 		return err
 	}
 
+	newLessonMaterial.Created = lessonMaterial.Created
 	newLessonMaterial.Updated = time.Now()
 
 	if _, err := tx.Put(key, newLessonMaterial); err != nil {
