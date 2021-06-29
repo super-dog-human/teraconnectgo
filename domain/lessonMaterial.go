@@ -36,30 +36,17 @@ type LessonAvatar struct {
 	Moving      Position3D `json:"moving,omitempty"`
 }
 
-type LessonGraphic struct {
-	ElapsedTime float64 `json:"elapsedTime"`
-	GraphicID   int64   `json:"graphicID"`
-	Action      string  `json:"action"`
-}
-
 type LessonDrawing struct {
 	ElapsedTime float32             `json:"elapsedTime"`
 	DurationSec float32             `json:"durationSec"`
-	Action      string              `json:"action"` // draw/clear/show/hide
+	Action      DrawingAction       `json:"action"`
 	Units       []LessonDrawingUnit `json:"units"`
-}
-
-type LessonEmbedding struct {
-	ElapsedTime float32 `json:"elapsedTime"`
-	Action      string  `json:"action"` // show/hide
-	ContentID   string  `json:"contentID"`
-	ServiceName string  `json:"type"`
 }
 
 type LessonDrawingUnit struct {
 	ElapsedTime float32             `json:"elapsedTime"`
 	DurationSec float32             `json:"durationSec"`
-	Action      string              `json:"action"` //draw/undo
+	Action      DrawingUnitAction   `json:"action"`
 	Stroke      LessonDrawingStroke `json:"stroke"`
 }
 
@@ -70,13 +57,26 @@ type LessonDrawingStroke struct {
 	Positions []Position2D `json:"positions,omitempty"`
 }
 
+type LessonEmbedding struct {
+	ElapsedTime float32         `json:"elapsedTime"`
+	Action      EmbeddingAction `json:"action"`
+	ContentID   string          `json:"contentID"`
+	ServiceName string          `json:"type"`
+}
+
+type LessonGraphic struct {
+	ElapsedTime float64        `json:"elapsedTime"`
+	GraphicID   int64          `json:"graphicID"`
+	Action      GraphicActrion `json:"action"`
+}
+
 type LessonMusic struct {
-	ElapsedTime       float32 `json:"elapsedTime"`
-	Action            string  `json:"action"` // start/stop
-	BackgroundMusicID int64   `json:"backgroundMusicID"`
-	Volume            float32 `json:"volume"`
-	IsFading          bool    `json:"isFading"`
-	IsLoop            bool    `json:"isLoop"`
+	ElapsedTime       float32     `json:"elapsedTime"`
+	Action            MusicAction `json:"action"`
+	BackgroundMusicID int64       `json:"backgroundMusicID"`
+	Volume            float32     `json:"volume"`
+	IsFading          bool        `json:"isFading"`
+	IsLoop            bool        `json:"isLoop"`
 }
 
 type LessonSpeech struct {

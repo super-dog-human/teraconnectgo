@@ -90,7 +90,7 @@ func GetPublicLesson(request *http.Request, id int64) (domain.Lesson, error) {
 		return lesson, err
 	}
 
-	if lesson.Status == domain.Limited {
+	if lesson.Status == domain.LessonStatusLimited {
 		return lesson, nil
 	}
 

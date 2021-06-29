@@ -2,8 +2,6 @@ package domain
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 	"reflect"
 	"time"
 
@@ -36,52 +34,6 @@ type Lesson struct {
 	Created        time.Time          `json:"created"`
 	Updated        time.Time          `json:"updated"`
 	Published      time.Time          `json:"published"`
-}
-
-type LessonStatus int8
-
-const (
-	Draft   LessonStatus = 0
-	Limited LessonStatus = 1
-	Public  LessonStatus = 2
-)
-
-func (r LessonStatus) String() string {
-	switch r {
-	case Draft:
-		return "draft"
-	case Limited:
-		return "limited"
-	case Public:
-		return "public"
-	default:
-		return "unknown"
-	}
-}
-
-func (r LessonStatus) MarshalJSON() ([]byte, error) {
-	return json.Marshal(r.String())
-}
-
-func (s *LessonStatus) UnmarshalJSON(data []byte) error {
-	var str string
-	if err := json.Unmarshal(data, &str); err != nil {
-		return fmt.Errorf("data should be a string, got %s", data)
-	}
-
-	var status LessonStatus
-	switch str {
-	case "draft":
-		status = Draft
-	case "limited":
-		status = Limited
-	case "public":
-		status = Public
-	default:
-		return fmt.Errorf("invalid LessonStatus %s", str)
-	}
-	*s = status
-	return nil
 }
 
 // LessonReferences is link to another web page.
@@ -137,7 +89,7 @@ func CreateLesson(ctx context.Context, lesson *Lesson) error {
 	}
 
 	currentTime := time.Now()
-	lesson.Status = Draft
+	lesson.Status = LessonStatusDraft
 	lesson.Created = currentTime
 	lesson.Updated = currentTime
 
@@ -211,7 +163,7 @@ func updateLessonInTransaction(tx *datastore.Transaction, newLesson *Lesson) err
 	}
 
 	currentTime := time.Now()
-	if lesson.Status != Public && newLesson.Status == Public {
+	if lesson.Status != LessonStatusPublic && newLesson.Status == LessonStatusPublic {
 		newLesson.Published = currentTime
 	}
 	newLesson.Updated = currentTime
