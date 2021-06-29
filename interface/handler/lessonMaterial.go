@@ -12,6 +12,7 @@ import (
 
 type getLessonMaterialShortResponse struct {
 	AvatarID             int64                       `json:"avatarID"`
+	Avatar               domain.Avatar               `json:"avatar"`
 	AvatarLightColor     string                      `json:"avatarLightColor"`
 	BackgroundImageID    int64                       `json:"backgroundImageID"`
 	BackgroundImageURL   string                      `json:"backgroundImageURL"`
