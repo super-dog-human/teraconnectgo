@@ -19,6 +19,8 @@ type Lesson struct {
 	IsEdited       bool               `json:"isEdited"`       // 編集画面から保存されたことがある
 	IsIntroduction bool               `json:"isIntroduction"` // 自己紹介用の授業
 	IsPacked       bool               `json:"isPacked"`       // 公開準備の完了
+	HasThumbnail   bool               `json:"hasThumbnail"`
+	ThumbnailURL   string             `json:"thumbnailURL" datastore:"-"`
 	Status         LessonStatus       `json:"status"`
 	References     []LessonReferences `json:"feferences"`
 	Reviews        []LessonReview     `json:"reviews"`
@@ -27,7 +29,6 @@ type Lesson struct {
 	Title          string             `json:"title"`
 	Description    string             `json:"description"`
 	DurationSec    float64            `json:"durationSec"`
-	ThumbnailURL   string             `json:"thumbnailURL" datastore:"-"`
 	ViewCount      int64              `json:"viewCount"`
 	ViewKey        string             `json:"-"`
 	SizeInBytes    int64              `json:"sizeInBytes"`
@@ -61,7 +62,12 @@ func GetLessonByID(ctx context.Context, id int64) (Lesson, error) {
 	if err := client.Get(ctx, key, lesson); err != nil {
 		return *lesson, err
 	}
+
 	lesson.ID = id
+
+	if err = SetLessonThumbnailURL(ctx, lesson); err != nil {
+		return *lesson, err
+	}
 
 	return *lesson, nil
 }
@@ -75,8 +81,16 @@ func GetLessonsByUserID(ctx context.Context, userID int64) ([]Lesson, error) {
 	}
 
 	query := datastore.NewQuery("Lesson").Filter("UserID =", userID).Order("-Created")
-	if _, err := client.GetAll(ctx, query, &lessons); err != nil {
+	keys, err := client.GetAll(ctx, query, &lessons)
+	if err != nil {
 		return nil, err
+	}
+
+	for i, key := range keys {
+		lessons[i].ID = key.ID
+		if err := SetLessonThumbnailURL(ctx, &lessons[i]); err != nil {
+			return nil, err
+		}
 	}
 
 	return lessons, nil
