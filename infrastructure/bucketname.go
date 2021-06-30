@@ -12,18 +12,6 @@ func MaterialBucketName() string {
 	}
 }
 
-// ThumbnailBucketName is return bucket name each environments.
-func ThumbnailBucketName() string {
-	switch AppEnv() {
-	case "production":
-		return "teraconn_thumbnail"
-	case "staging":
-		return "teraconn_thumbnail_staging"
-	default:
-		return "teraconn_thumbnail_development"
-	}
-}
-
 // PublicBucketName is return public bucket name each environments.
 func PublicBucketName() string {
 	switch AppEnv() {
