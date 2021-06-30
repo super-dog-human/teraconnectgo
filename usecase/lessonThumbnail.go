@@ -13,7 +13,7 @@ func CreateLessonThumbnailBlankFile(request *http.Request, id int64) (string, er
 	isPublic := request.URL.Query().Get("is_public") == "true"
 	url, err := domain.CreateLessonThumbnailBlankFile(ctx, id, isPublic)
 	if err != nil {
-		return "", nil
+		return "", err
 	}
 
 	return url, nil
