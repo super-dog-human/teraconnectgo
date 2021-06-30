@@ -36,6 +36,7 @@ func Main(appEnv string) {
 	auth.POST("/users", postUser)
 	auth.PATCH("/users", patchUser)
 	auth.DELETE("/users", deleteUser)
+	auth.GET("/users/me/lessons", getCurrentUserLessons)
 	auth.GET("/avatars", getAvatars)
 	auth.POST("/avatars", postAvatars)
 	auth.GET("/background_musics", getBackgroundMusics)

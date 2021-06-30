@@ -74,7 +74,7 @@ func GetLessonsByUserID(ctx context.Context, userID int64) ([]Lesson, error) {
 		return nil, err
 	}
 
-	query := datastore.NewQuery("Lesson").Filter("UserID =", userID)
+	query := datastore.NewQuery("Lesson").Filter("UserID =", userID).Order("-Created")
 	if _, err := client.GetAll(ctx, query, &lessons); err != nil {
 		return nil, err
 	}

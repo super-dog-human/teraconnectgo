@@ -119,6 +119,22 @@ func GetPrivateLesson(request *http.Request, id int64) (domain.Lesson, error) {
 	return lesson, nil
 }
 
+func GetCurrentUserLessons(request *http.Request) ([]domain.Lesson, error) {
+	ctx := request.Context()
+
+	currentUser, err := domain.GetCurrentUser(request)
+	if err != nil {
+		return nil, err
+	}
+
+	lessons, err := domain.GetLessonsByUserID(ctx, currentUser.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return lessons, nil
+}
+
 // CreateLesson is create the new lesson belongs to subject and category.
 func CreateLesson(request *http.Request, newLesson *NewLessonParams, lesson *domain.Lesson) error {
 	currentUser, err := domain.GetCurrentUser(request)

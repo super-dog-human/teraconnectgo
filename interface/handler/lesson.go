@@ -72,6 +72,21 @@ func getLesson(c echo.Context) error {
 	return c.JSON(http.StatusOK, lesson)
 }
 
+func getCurrentUserLessons(c echo.Context) error {
+	lessons, err := usecase.GetCurrentUserLessons(c.Request())
+
+	if err != nil {
+		fatalLog(err)
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+
+	if len(lessons) == 0 {
+		return c.JSON(http.StatusNotFound, "lesson doesn't exist.")
+	}
+
+	return c.JSON(http.StatusOK, lessons)
+}
+
 func postLesson(c echo.Context) error {
 	params := new(usecase.NewLessonParams)
 	lesson := new(domain.Lesson)
