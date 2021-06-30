@@ -1,13 +1,12 @@
 package usecase
 
 import (
-	"log"
+	"context"
 	"net/http"
 	"reflect"
 
 	"cloud.google.com/go/datastore"
 	"github.com/jinzhu/copier"
-	"github.com/pkg/errors"
 	"github.com/super-dog-human/teraconnectgo/domain"
 )
 
@@ -147,21 +146,11 @@ func CreateLesson(request *http.Request, newLesson *NewLessonParams, lesson *dom
 
 	ctx := request.Context()
 
-	subject, err := domain.GetSubject(ctx, newLesson.SubjectID)
-	if err != nil {
-		return InvalidLessonParams
-	}
-
-	category, err := domain.GetJapaneseCategory(ctx, newLesson.JapaneseCategoryID, newLesson.SubjectID)
-	if err != nil {
-		log.Printf("category %v\n", newLesson.JapaneseCategoryID)
-		log.Printf("%v\n", errors.WithStack(err).Error())
+	if err := setCategoryAndSubject(ctx, newLesson.SubjectID, newLesson.JapaneseCategoryID, lesson); err != nil {
 		return InvalidLessonParams
 	}
 
 	lesson.UserID = currentUser.ID
-	lesson.SubjectName = subject.JapaneseName
-	lesson.CategoryName = category.Name
 
 	if err = domain.CreateLesson(ctx, lesson); err != nil {
 		return err
@@ -199,6 +188,12 @@ func UpdateLessonWithMaterial(id int64, materialID int64, request *http.Request,
 		newLesson.ID = id
 	}
 
+	if lessonParams.SubjectID != 0 && lessonParams.JapaneseCategoryID != 0 {
+		if err = setCategoryAndSubject(ctx, lessonParams.SubjectID, lessonParams.JapaneseCategoryID, &lesson); err != nil {
+			return err
+		}
+	}
+
 	var blankMaterialParams PatchLessonParams
 	if !reflect.DeepEqual(*materialParams, blankMaterialParams) {
 		copier.Copy(&newLessonMaterial, *materialParams)
@@ -208,6 +203,23 @@ func UpdateLessonWithMaterial(id int64, materialID int64, request *http.Request,
 	if err := domain.UpdateLessonAndMaterial(ctx, &newLesson, &newLessonMaterial); err != nil {
 		return err
 	}
+
+	return nil
+}
+
+func setCategoryAndSubject(ctx context.Context, subjectID int64, japaneseCategoryID int64, lesson *domain.Lesson) error {
+	subject, err := domain.GetSubject(ctx, subjectID)
+	if err != nil {
+		return err
+	}
+
+	category, err := domain.GetJapaneseCategory(ctx, japaneseCategoryID, subjectID)
+	if err != nil {
+		return err
+	}
+
+	lesson.SubjectName = subject.JapaneseName
+	lesson.CategoryName = category.Name
 
 	return nil
 }
