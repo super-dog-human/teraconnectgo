@@ -99,6 +99,22 @@ func CreateBlankFileToGCS(ctx context.Context, fileID string, fileEntity string,
 	return url, err
 }
 
+func CreateBlankFileToPublicGCS(ctx context.Context, fileID string, fileEntity string, fileRequest FileRequest) (string, error) {
+	filePath := StorageObjectFilePath(fileEntity, fileID, fileRequest.Extension)
+	bucketName := PublicBucketName()
+
+	if err := CreateFileToGCS(ctx, bucketName, filePath, fileRequest.ContentType, nil); err != nil {
+		return "", err
+	}
+
+	url, err := GetGCSSignedURL(ctx, bucketName, filePath, "PUT", fileRequest.ContentType)
+	if err != nil {
+		return "", err
+	}
+
+	return url, err
+}
+
 // GetFileFromGCS gets object from GCS.
 func GetFileFromGCS(ctx context.Context, bucketName, filePath string) ([]byte, error) {
 	client, err := storage.NewClient(ctx)
