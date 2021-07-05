@@ -42,6 +42,8 @@ type NewLessonParams struct {
 }
 
 type PatchLessonParams struct {
+	PrevLessonID       int64                     `json:"prevLessonID"`
+	NextLessonID       int64                     `json:"nextLessonID"`
 	SubjectID          int64                     `json:"subjectID"`
 	JapaneseCategoryID int64                     `json:"japaneseCategoryID"`
 	Status             domain.LessonStatus       `json:"status"`

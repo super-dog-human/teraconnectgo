@@ -15,6 +15,8 @@ type Lesson struct {
 	ID             int64              `json:"id" datastore:"-"`
 	UserID         int64              `json:"userID"`
 	MaterialID     int64              `json:"materialID"`
+	PrevLessonID   int64              `json:"prevLessonID"`
+	NextLessonID   int64              `json:"nextLessonID"`
 	NeedsRecording bool               `json:"needsRecording"` // 収録画面での収録必要の有無
 	IsEdited       bool               `json:"isEdited"`       // 編集画面から保存されたことがある
 	IsIntroduction bool               `json:"isIntroduction"` // 自己紹介用の授業
