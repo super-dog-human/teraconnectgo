@@ -26,7 +26,7 @@ type Lesson struct {
 	HasThumbnail         bool               `json:"hasThumbnail"`
 	ThumbnailURL         string             `json:"thumbnailURL" datastore:"-"`
 	Status               LessonStatus       `json:"status"`
-	References           []LessonReferences `json:"feferences"`
+	References           []LessonReferences `json:"references"`
 	Reviews              []LessonReview     `json:"reviews"`
 	SubjectID            int64              `json:"subjectID"`
 	SubjectName          string             `json:"subjectName"`

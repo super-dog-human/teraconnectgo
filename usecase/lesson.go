@@ -49,7 +49,7 @@ type PatchLessonParams struct {
 	Status             domain.LessonStatus       `json:"status"`
 	Title              string                    `json:"title"`
 	Description        string                    `json:"description"`
-	References         []domain.LessonReferences `json:"feferences"`
+	References         []domain.LessonReferences `json:"references"`
 }
 
 type PatchLessonMaterialParams struct {
