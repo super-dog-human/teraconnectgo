@@ -92,6 +92,10 @@ func GetPublicLesson(request *http.Request, id int64) (domain.Lesson, error) {
 		return lesson, err
 	}
 
+	if err = setRelationLessonTitle(ctx, &lesson); err != nil {
+		return lesson, err
+	}
+
 	if lesson.Status == domain.LessonStatusLimited {
 		return lesson, nil
 	}
@@ -116,6 +120,10 @@ func GetPrivateLesson(request *http.Request, id int64) (domain.Lesson, error) {
 
 	if lesson.UserID != currentUser.ID {
 		return lesson, InvalidLessonParams
+	}
+
+	if err = setRelationLessonTitle(ctx, &lesson); err != nil {
+		return lesson, err
 	}
 
 	return lesson, nil
@@ -209,6 +217,32 @@ func UpdateLessonWithMaterial(id int64, materialID int64, request *http.Request,
 	return nil
 }
 
+func setRelationLessonTitle(ctx context.Context, lesson *domain.Lesson) error {
+	if lesson.PrevLessonID != 0 {
+		lesson, err := domain.GetLessonByID(ctx, lesson.PrevLessonID)
+		if err != nil {
+			if err == datastore.ErrNoSuchEntity {
+				return nil // 授業が見つからなかった場合もエラーにしない
+			}
+			return err
+		}
+		lesson.PrevLessonTitle = lesson.Title
+	}
+
+	if lesson.NextLessonID != 0 {
+		lesson, err := domain.GetLessonByID(ctx, lesson.PrevLessonID)
+		if err != nil {
+			if err == datastore.ErrNoSuchEntity {
+				return nil // 授業が見つからなかった場合もエラーにしない
+			}
+			return err
+		}
+		lesson.NextLessonTitle = lesson.Title
+	}
+
+	return nil
+}
+
 func setCategoryAndSubject(ctx context.Context, subjectID int64, japaneseCategoryID int64, lesson *domain.Lesson) error {
 	subject, err := domain.GetSubject(ctx, subjectID)
 	if err != nil {
@@ -221,7 +255,7 @@ func setCategoryAndSubject(ctx context.Context, subjectID int64, japaneseCategor
 	}
 
 	lesson.SubjectName = subject.JapaneseName
-	lesson.CategoryName = category.Name
+	lesson.JapaneseCategoryName = category.Name
 
 	return nil
 }

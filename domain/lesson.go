@@ -12,31 +12,35 @@ import (
 
 // Lesson is the lesson infomation type.
 type Lesson struct {
-	ID             int64              `json:"id" datastore:"-"`
-	UserID         int64              `json:"userID"`
-	MaterialID     int64              `json:"materialID"`
-	PrevLessonID   int64              `json:"prevLessonID"`
-	NextLessonID   int64              `json:"nextLessonID"`
-	NeedsRecording bool               `json:"needsRecording"` // 収録画面での収録必要の有無
-	IsEdited       bool               `json:"isEdited"`       // 編集画面から保存されたことがある
-	IsIntroduction bool               `json:"isIntroduction"` // 自己紹介用の授業
-	IsPacked       bool               `json:"isPacked"`       // 公開準備の完了
-	HasThumbnail   bool               `json:"hasThumbnail"`
-	ThumbnailURL   string             `json:"thumbnailURL" datastore:"-"`
-	Status         LessonStatus       `json:"status"`
-	References     []LessonReferences `json:"feferences"`
-	Reviews        []LessonReview     `json:"reviews"`
-	SubjectName    string             `json:"subjectName"`
-	CategoryName   string             `json:"categoryName"`
-	Title          string             `json:"title"`
-	Description    string             `json:"description"`
-	DurationSec    float64            `json:"durationSec"`
-	ViewCount      int64              `json:"viewCount"`
-	ViewKey        string             `json:"-"`
-	SizeInBytes    int64              `json:"sizeInBytes"`
-	Created        time.Time          `json:"created"`
-	Updated        time.Time          `json:"updated"`
-	Published      time.Time          `json:"published"`
+	ID                   int64              `json:"id" datastore:"-"`
+	UserID               int64              `json:"userID"`
+	MaterialID           int64              `json:"materialID"`
+	PrevLessonID         int64              `json:"prevLessonID"`
+	PrevLessonTitle      string             `json:"prevLessonTitle" datastore:"-"`
+	NextLessonID         int64              `json:"nextLessonID"`
+	NextLessonTitle      string             `json:"nextLessonTitle" datastore:"-"`
+	NeedsRecording       bool               `json:"needsRecording"` // 収録画面での収録必要の有無
+	IsEdited             bool               `json:"isEdited"`       // 編集画面から保存されたことがある
+	IsIntroduction       bool               `json:"isIntroduction"` // 自己紹介用の授業
+	IsPacked             bool               `json:"isPacked"`       // 公開準備の完了
+	HasThumbnail         bool               `json:"hasThumbnail"`
+	ThumbnailURL         string             `json:"thumbnailURL" datastore:"-"`
+	Status               LessonStatus       `json:"status"`
+	References           []LessonReferences `json:"feferences"`
+	Reviews              []LessonReview     `json:"reviews"`
+	SubjectID            int64              `json:"subjectID"`
+	SubjectName          string             `json:"subjectName"`
+	JapaneseCategoryID   int64              `json:"japaneseCategoryID"`
+	JapaneseCategoryName string             `json:"japaneseCategoryName"`
+	Title                string             `json:"title"`
+	Description          string             `json:"description"`
+	DurationSec          float64            `json:"durationSec"`
+	ViewCount            int64              `json:"viewCount"`
+	ViewKey              string             `json:"-"`
+	SizeInBytes          int64              `json:"sizeInBytes"`
+	Created              time.Time          `json:"created"`
+	Updated              time.Time          `json:"updated"`
+	Published            time.Time          `json:"published"`
 }
 
 // LessonReferences is link to another web page.
