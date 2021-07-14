@@ -41,6 +41,11 @@ type NewLessonParams struct {
 	Title              string `json:"title"`
 }
 
+type PatchLessonAndMaterialParams struct {
+	PatchLessonParams
+	PatchLessonMaterialParams
+}
+
 type PatchLessonParams struct {
 	PrevLessonID       int64                     `json:"prevLessonID"`
 	NextLessonID       int64                     `json:"nextLessonID"`
@@ -169,7 +174,7 @@ func CreateLesson(request *http.Request, newLesson *NewLessonParams, lesson *dom
 	return nil
 }
 
-func UpdateLessonWithMaterial(id int64, materialID int64, request *http.Request, lessonParams *PatchLessonParams, materialParams *PatchLessonMaterialParams) error {
+func UpdateLessonWithMaterial(id int64, request *http.Request, params *PatchLessonAndMaterialParams) error {
 	ctx := request.Context()
 
 	currentUser, err := domain.GetCurrentUser(request)
@@ -189,12 +194,18 @@ func UpdateLessonWithMaterial(id int64, materialID int64, request *http.Request,
 		return InvalidLessonParams
 	}
 
+	var lessonParams PatchLessonParams
+	var materialParams PatchLessonMaterialParams
+
+	copier.Copy(&lessonParams, *params)
+	copier.Copy(&materialParams, *params)
+
 	var newLesson domain.Lesson
 	var newLessonMaterial domain.LessonMaterial
 
 	var blankLessonParams PatchLessonParams
-	if !reflect.DeepEqual(*lessonParams, blankLessonParams) {
-		copier.Copy(&newLesson, *lessonParams)
+	if !reflect.DeepEqual(lessonParams, blankLessonParams) {
+		copier.Copy(&newLesson, lessonParams)
 		newLesson.ID = id
 	}
 
@@ -205,9 +216,9 @@ func UpdateLessonWithMaterial(id int64, materialID int64, request *http.Request,
 	}
 
 	var blankMaterialParams PatchLessonParams
-	if !reflect.DeepEqual(*materialParams, blankMaterialParams) {
-		copier.Copy(&newLessonMaterial, *materialParams)
-		newLessonMaterial.ID = materialID
+	if !reflect.DeepEqual(materialParams, blankMaterialParams) {
+		copier.Copy(&newLessonMaterial, materialParams)
+		newLessonMaterial.ID = lesson.MaterialID
 	}
 
 	if err := domain.UpdateLessonAndMaterial(ctx, &newLesson, &newLessonMaterial); err != nil {

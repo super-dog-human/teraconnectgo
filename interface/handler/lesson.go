@@ -110,31 +110,19 @@ func postLesson(c echo.Context) error {
 }
 
 func patchLesson(c echo.Context) error {
-	id, err := strconv.ParseInt(c.Param("lessonID"), 10, 64)
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
 		errMessage := "Invalid lessonID error"
 		warnLog(errMessage)
 		return c.JSON(http.StatusBadRequest, errMessage)
 	}
 
-	materialID, err := strconv.ParseInt(c.Param("id"), 10, 64)
-	if err != nil {
-		errMessage := "Invalid ID error"
-		warnLog(errMessage)
-		return c.JSON(http.StatusBadRequest, errMessage)
-	}
-
-	lessonParams := new(usecase.PatchLessonParams)
-	if err := c.Bind(lessonParams); err != nil {
+	params := new(usecase.PatchLessonAndMaterialParams)
+	if err := c.Bind(params); err != nil {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 
-	materialParams := new(usecase.PatchLessonMaterialParams)
-	if err := c.Bind(materialParams); err != nil {
-		return c.JSON(http.StatusBadRequest, err.Error())
-	}
-
-	if err := usecase.UpdateLessonWithMaterial(id, materialID, c.Request(), lessonParams, materialParams); err != nil {
+	if err := usecase.UpdateLessonWithMaterial(id, c.Request(), params); err != nil {
 		fatalLog(err)
 		LessonErr, ok := err.(usecase.LessonErrorCode)
 		if ok && LessonErr == usecase.LessonNotFound {
