@@ -46,7 +46,7 @@ type Lesson struct {
 // LessonReferences is link to another web page.
 type LessonReferences struct {
 	Name string `json:"name"`
-	ISBN int64  `json:"isbn"`
+	ISBN string `json:"isbn"` // ISBN13を想定
 }
 
 // LessonReview is review status of lesson by other users.
