@@ -230,7 +230,7 @@ func setRelationLessonTitle(ctx context.Context, lesson *domain.Lesson) error {
 	}
 
 	if lesson.NextLessonID != 0 {
-		lesson, err := domain.GetLessonByID(ctx, lesson.PrevLessonID)
+		lesson, err := domain.GetLessonByID(ctx, lesson.NextLessonID)
 		if err != nil {
 			if err == datastore.ErrNoSuchEntity {
 				return nil // 授業が見つからなかった場合もエラーにしない
