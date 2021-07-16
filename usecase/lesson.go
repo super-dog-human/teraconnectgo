@@ -206,7 +206,6 @@ func UpdateLessonWithMaterial(id int64, request *http.Request, params *PatchLess
 	var blankLessonParams PatchLessonParams
 	if !reflect.DeepEqual(lessonParams, blankLessonParams) {
 		copier.Copy(&newLesson, lessonParams)
-		newLesson.ID = id
 	}
 
 	if lessonParams.SubjectID != 0 && lessonParams.JapaneseCategoryID != 0 {
@@ -218,10 +217,9 @@ func UpdateLessonWithMaterial(id int64, request *http.Request, params *PatchLess
 	var blankMaterialParams PatchLessonParams
 	if !reflect.DeepEqual(materialParams, blankMaterialParams) {
 		copier.Copy(&newLessonMaterial, materialParams)
-		newLessonMaterial.ID = lesson.MaterialID
 	}
 
-	if err := domain.UpdateLessonAndMaterial(ctx, &newLesson, &newLessonMaterial); err != nil {
+	if err := domain.UpdateLessonAndMaterial(ctx, id, lesson.MaterialID, &newLesson, &newLessonMaterial); err != nil {
 		return err
 	}
 

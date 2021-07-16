@@ -140,7 +140,7 @@ func UpdateLesson(ctx context.Context, lesson *Lesson) error {
 	return nil
 }
 
-func UpdateLessonAndMaterial(ctx context.Context, lesson *Lesson, lessonMaterial *LessonMaterial) error {
+func UpdateLessonAndMaterial(ctx context.Context, lessonID int64, lessonMaterialID int64, lesson *Lesson, lessonMaterial *LessonMaterial) error {
 	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
 	if err != nil {
 		return err
@@ -149,6 +149,7 @@ func UpdateLessonAndMaterial(ctx context.Context, lesson *Lesson, lessonMaterial
 	_, err = client.RunInTransaction(ctx, func(tx *datastore.Transaction) error {
 		var blankLesson Lesson
 		if !reflect.DeepEqual(*lesson, blankLesson) {
+			lesson.ID = lessonID
 			if err := updateLessonInTransaction(tx, lesson); err != nil {
 				return err
 			}
@@ -156,7 +157,7 @@ func UpdateLessonAndMaterial(ctx context.Context, lesson *Lesson, lessonMaterial
 
 		var blankLessonMaterial LessonMaterial
 		if !reflect.DeepEqual(*lessonMaterial, blankLessonMaterial) {
-			if err := UpdateLessonMaterialInTransaction(tx, lessonMaterial.ID, lesson.ID, lessonMaterial); err != nil {
+			if err := UpdateLessonMaterialInTransaction(tx, lessonMaterialID, lessonID, lessonMaterial); err != nil {
 				return err
 			}
 		}
