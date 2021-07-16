@@ -186,7 +186,10 @@ func updateLessonInTransaction(tx *datastore.Transaction, newLesson *Lesson) err
 	currentTime := time.Now()
 	if lesson.Status != LessonStatusPublic && newLesson.Status == LessonStatusPublic {
 		newLesson.Published = currentTime
+	} else {
+		newLesson.Published = lesson.Published
 	}
+	newLesson.Created = lesson.Created
 	newLesson.Updated = currentTime
 
 	if _, err := tx.Put(key, newLesson); err != nil {
