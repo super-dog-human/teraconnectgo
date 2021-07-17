@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/jinzhu/copier"
 	"github.com/labstack/echo/v4"
@@ -17,6 +18,8 @@ type getLessonMaterialShortResponse struct {
 	BackgroundImageID    int64                       `json:"backgroundImageID"`
 	BackgroundImageURL   string                      `json:"backgroundImageURL"`
 	VoiceSynthesisConfig domain.VoiceSynthesisConfig `json:"voiceSynthesisConfig"`
+	Created              time.Time                   `json:"created"`
+	Updated              time.Time                   `json:"updated"`
 }
 
 type postMaterialResponse struct {
