@@ -35,7 +35,6 @@ func (e LessonErrorCode) Error() string {
 type NewLessonParams struct {
 	NeedsRecording     bool   `json:"needsRecording"`
 	IsIntroduction     bool   `json:"isIntroduction"`
-	HasThumbnail       bool   `json:"hasThumbnail"`
 	SubjectID          int64  `json:"subjectID"`
 	JapaneseCategoryID int64  `json:"japaneseCategoryID"`
 	Title              string `json:"title"`
@@ -52,6 +51,7 @@ type PatchLessonParams struct {
 	SubjectID          int64                     `json:"subjectID"`
 	JapaneseCategoryID int64                     `json:"japaneseCategoryID"`
 	Status             domain.LessonStatus       `json:"status"`
+	HasThumbnail       bool                      `json:"hasThumbnail"`
 	Title              string                    `json:"title"`
 	Description        string                    `json:"description"`
 	References         []domain.LessonReferences `json:"references"`
