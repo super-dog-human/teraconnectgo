@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/json"
 	"net/http"
 	"strconv"
 
@@ -117,12 +118,12 @@ func patchLesson(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, errMessage)
 	}
 
-	params := new(usecase.PatchLessonAndMaterialParams)
-	if err := c.Bind(params); err != nil {
+	var params map[string]interface{}
+	if err := json.NewDecoder(c.Request().Body).Decode(&params); err != nil {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 
-	if err := usecase.UpdateLessonWithMaterial(id, c.Request(), params); err != nil {
+	if err := usecase.UpdateLessonWithMaterial(id, c.Request(), &params); err != nil {
 		fatalLog(err)
 		LessonErr, ok := err.(usecase.LessonErrorCode)
 		if ok && LessonErr == usecase.LessonNotFound {
@@ -133,5 +134,5 @@ func patchLesson(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, "")
+	return c.JSON(http.StatusOK, "updated.")
 }

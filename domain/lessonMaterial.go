@@ -144,22 +144,10 @@ func UpdateLessonMaterial(ctx context.Context, id int64, lessonID int64, newLess
 		return err
 	}
 
-	_, err = client.RunInTransaction(ctx, func(tx *datastore.Transaction) error {
-		return UpdateLessonMaterialInTransaction(tx, id, lessonID, newLessonMaterial)
-	})
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func UpdateLessonMaterialInTransaction(tx *datastore.Transaction, id int64, lessonID int64, newLessonMaterial *LessonMaterial) error {
 	ancestor := datastore.IDKey("Lesson", lessonID, nil)
 	key := datastore.IDKey("LessonMaterial", id, ancestor)
-	var lessonMaterial LessonMaterial
-	if err := tx.Get(key, &lessonMaterial); err != nil {
+	lessonMaterial := new(LessonMaterial)
+	if err := client.Get(ctx, key, lessonMaterial); err != nil {
 		return err
 	}
 
@@ -170,7 +158,29 @@ func UpdateLessonMaterialInTransaction(tx *datastore.Transaction, id int64, less
 	newLessonMaterial.Created = lessonMaterial.Created
 	newLessonMaterial.Updated = time.Now()
 
-	if _, err := tx.Put(key, newLessonMaterial); err != nil {
+	if _, err := client.Put(ctx, key, newLessonMaterial); err != nil {
+		return err
+	}
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func updateLessonMaterialInTransaction(tx *datastore.Transaction, id int64, lessonID int64, jsonBody *map[string]interface{}, targetFields *[]string) error {
+	ancestor := datastore.IDKey("Lesson", lessonID, nil)
+	key := datastore.IDKey("LessonMaterial", id, ancestor)
+	lessonMaterial := new(LessonMaterial)
+	if err := tx.Get(key, lessonMaterial); err != nil {
+		return err
+	}
+
+	MergeJsonToStruct(jsonBody, lessonMaterial, targetFields)
+	lessonMaterial.Updated = time.Now()
+
+	if _, err := tx.Put(key, lessonMaterial); err != nil {
 		return err
 	}
 

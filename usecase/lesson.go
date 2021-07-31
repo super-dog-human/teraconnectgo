@@ -3,7 +3,6 @@ package usecase
 import (
 	"context"
 	"net/http"
-	"reflect"
 
 	"cloud.google.com/go/datastore"
 	"github.com/jinzhu/copier"
@@ -31,37 +30,13 @@ func (e LessonErrorCode) Error() string {
 	}
 }
 
-// NewLessonParams is only used when creating new lesson.
+// NewLessonParamsは、Lessonの新規作成時、リクエストボディをbindするために使用されます。
 type NewLessonParams struct {
 	NeedsRecording     bool   `json:"needsRecording"`
 	IsIntroduction     bool   `json:"isIntroduction"`
 	SubjectID          int64  `json:"subjectID"`
 	JapaneseCategoryID int64  `json:"japaneseCategoryID"`
 	Title              string `json:"title"`
-}
-
-type PatchLessonAndMaterialParams struct {
-	PatchLessonParams
-	PatchLessonMaterialParams
-}
-
-type PatchLessonParams struct {
-	PrevLessonID       int64                    `json:"prevLessonID"`
-	NextLessonID       int64                    `json:"nextLessonID"`
-	SubjectID          int64                    `json:"subjectID"`
-	JapaneseCategoryID int64                    `json:"japaneseCategoryID"`
-	Status             domain.LessonStatus      `json:"status"`
-	HasThumbnail       bool                     `json:"hasThumbnail"`
-	Title              string                   `json:"title"`
-	Description        string                   `json:"description"`
-	References         []domain.LessonReference `json:"references"`
-}
-
-type PatchLessonMaterialParams struct {
-	BackgroundImageID    int64                       `json:"backgroundImageID"`
-	AvatarID             int64                       `json:"avatarID"`
-	AvatarLightColor     string                      `json:"avatarLightColor"`
-	VoiceSynthesisConfig domain.VoiceSynthesisConfig `json:"voiceSynthesisConfig"`
 }
 
 // GetLessonsByConditions for search lessons
@@ -161,10 +136,6 @@ func CreateLesson(request *http.Request, newLesson *NewLessonParams, lesson *dom
 
 	ctx := request.Context()
 
-	if err := setCategoryAndSubject(ctx, newLesson.SubjectID, newLesson.JapaneseCategoryID, lesson); err != nil {
-		return InvalidLessonParams
-	}
-
 	lesson.UserID = currentUser.ID
 
 	if err = domain.CreateLesson(ctx, lesson); err != nil {
@@ -174,7 +145,7 @@ func CreateLesson(request *http.Request, newLesson *NewLessonParams, lesson *dom
 	return nil
 }
 
-func UpdateLessonWithMaterial(id int64, request *http.Request, params *PatchLessonAndMaterialParams) error {
+func UpdateLessonWithMaterial(id int64, request *http.Request, params *map[string]interface{}) error {
 	ctx := request.Context()
 
 	currentUser, err := domain.GetCurrentUser(request)
@@ -194,32 +165,9 @@ func UpdateLessonWithMaterial(id int64, request *http.Request, params *PatchLess
 		return InvalidLessonParams
 	}
 
-	var lessonParams PatchLessonParams
-	var materialParams PatchLessonMaterialParams
-
-	copier.Copy(&lessonParams, *params)
-	copier.Copy(&materialParams, *params)
-
-	var newLesson domain.Lesson
-	var newLessonMaterial domain.LessonMaterial
-
-	var blankLessonParams PatchLessonParams
-	if !reflect.DeepEqual(lessonParams, blankLessonParams) {
-		copier.Copy(&newLesson, lessonParams)
-	}
-
-	if lessonParams.SubjectID != 0 && lessonParams.JapaneseCategoryID != 0 {
-		if err = setCategoryAndSubject(ctx, lessonParams.SubjectID, lessonParams.JapaneseCategoryID, &lesson); err != nil {
-			return err
-		}
-	}
-
-	var blankMaterialParams PatchLessonParams
-	if !reflect.DeepEqual(materialParams, blankMaterialParams) {
-		copier.Copy(&newLessonMaterial, materialParams)
-	}
-
-	if err := domain.UpdateLessonAndMaterial(ctx, id, lesson.MaterialID, &newLesson, &newLessonMaterial); err != nil {
+	lessonFields := []string{"PrevLessonID", "NextLessonID", "SubjectID", "JapaneseCategoryID", "Status", "HasThumbnail", "Title", "Description", "References"}
+	lessonMaterialFields := []string{"BackgroundImageID", "AvatarID", "AvatarLightColor", "VoiceSynthesisConfig"}
+	if err := domain.UpdateLessonAndMaterial(ctx, &lesson, params, &lessonFields, &lessonMaterialFields); err != nil {
 		return err
 	}
 
@@ -248,23 +196,6 @@ func setRelationLessonTitle(ctx context.Context, lesson *domain.Lesson) error {
 		}
 		lesson.NextLessonTitle = lesson.Title
 	}
-
-	return nil
-}
-
-func setCategoryAndSubject(ctx context.Context, subjectID int64, japaneseCategoryID int64, lesson *domain.Lesson) error {
-	subject, err := domain.GetSubject(ctx, subjectID)
-	if err != nil {
-		return err
-	}
-
-	category, err := domain.GetJapaneseCategory(ctx, japaneseCategoryID, subjectID)
-	if err != nil {
-		return err
-	}
-
-	lesson.SubjectName = subject.JapaneseName
-	lesson.JapaneseCategoryName = category.Name
 
 	return nil
 }

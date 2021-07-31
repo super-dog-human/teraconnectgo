@@ -2,11 +2,9 @@ package domain
 
 import (
 	"context"
-	"reflect"
 	"time"
 
 	"cloud.google.com/go/datastore"
-	"github.com/imdario/mergo"
 	"github.com/super-dog-human/teraconnectgo/infrastructure"
 )
 
@@ -108,6 +106,10 @@ func CreateLesson(ctx context.Context, lesson *Lesson) error {
 		return err
 	}
 
+	if err := setCategoryAndSubject(ctx, lesson); err != nil {
+		return err
+	}
+
 	currentTime := time.Now()
 	lesson.Status = LessonStatusDraft
 	lesson.Created = currentTime
@@ -140,26 +142,38 @@ func UpdateLesson(ctx context.Context, lesson *Lesson) error {
 	return nil
 }
 
-func UpdateLessonAndMaterial(ctx context.Context, lessonID int64, lessonMaterialID int64, lesson *Lesson, lessonMaterial *LessonMaterial) error {
+// UpdateLessonAndMaterialは、jsonのフィールドを既存のLesson/LessonMaterialへマージし、トランザクション中で二つのエンティティを更新します。
+// jsonのフィールド名がlessonFieldsまたはlessonMaterialFieldsに含まれない場合、そのフィールドは無視されます。
+func UpdateLessonAndMaterial(ctx context.Context, lesson *Lesson, jsonBody *map[string]interface{}, lessonFields *[]string, lessonMaterialFields *[]string) error {
+	currentStatus := lesson.Status
+	currentSubjectID := lesson.SubjectID
+	currentJapaneseCategoryID := lesson.JapaneseCategoryID
+
+	MergeJsonToStruct(jsonBody, lesson, lessonFields)
+
+	if lesson.SubjectID != currentSubjectID || lesson.JapaneseCategoryID != currentJapaneseCategoryID {
+		if err := setCategoryAndSubject(ctx, lesson); err != nil {
+			return err
+		}
+	}
+
+	currentTime := time.Now()
+	if currentStatus != LessonStatusPublic && lesson.Status == LessonStatusPublic {
+		lesson.Published = currentTime
+	}
+
 	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
 	if err != nil {
 		return err
 	}
 
 	_, err = client.RunInTransaction(ctx, func(tx *datastore.Transaction) error {
-		var blankLesson Lesson
-		if !reflect.DeepEqual(*lesson, blankLesson) {
-			lesson.ID = lessonID
-			if err := updateLessonInTransaction(tx, lesson); err != nil {
-				return err
-			}
+		if err := updateLessonInTransaction(tx, lesson); err != nil {
+			return err
 		}
 
-		var blankLessonMaterial LessonMaterial
-		if !reflect.DeepEqual(*lessonMaterial, blankLessonMaterial) {
-			if err := UpdateLessonMaterialInTransaction(tx, lessonMaterialID, lessonID, lessonMaterial); err != nil {
-				return err
-			}
+		if err := updateLessonMaterialInTransaction(tx, lesson.MaterialID, lesson.ID, jsonBody, lessonMaterialFields); err != nil {
+			return err
 		}
 
 		return nil
@@ -172,27 +186,26 @@ func UpdateLessonAndMaterial(ctx context.Context, lessonID int64, lessonMaterial
 	return nil
 }
 
-func updateLessonInTransaction(tx *datastore.Transaction, newLesson *Lesson) error {
-	key := datastore.IDKey("Lesson", newLesson.ID, nil)
-	var lesson Lesson
-	if err := tx.Get(key, &lesson); err != nil {
+func setCategoryAndSubject(ctx context.Context, lesson *Lesson) error {
+	subject, err := GetSubject(ctx, lesson.SubjectID)
+	if err != nil {
 		return err
 	}
 
-	if err := mergo.Merge(newLesson, lesson); err != nil {
+	category, err := GetJapaneseCategory(ctx, lesson.JapaneseCategoryID, lesson.SubjectID)
+	if err != nil {
 		return err
 	}
 
-	currentTime := time.Now()
-	if lesson.Status != LessonStatusPublic && newLesson.Status == LessonStatusPublic {
-		newLesson.Published = currentTime
-	} else {
-		newLesson.Published = lesson.Published
-	}
-	newLesson.Created = lesson.Created
-	newLesson.Updated = currentTime
+	lesson.SubjectName = subject.JapaneseName
+	lesson.JapaneseCategoryName = category.Name
 
-	if _, err := tx.Put(key, newLesson); err != nil {
+	return nil
+}
+
+func updateLessonInTransaction(tx *datastore.Transaction, lesson *Lesson) error {
+	key := datastore.IDKey("Lesson", lesson.ID, nil)
+	if _, err := tx.Put(key, lesson); err != nil {
 		return err
 	}
 

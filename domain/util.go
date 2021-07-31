@@ -74,11 +74,11 @@ func setValueToField(jsonValue interface{}, targetField reflect.Value) {
 }
 
 func TopLevelStructKeys(target interface{}) []string {
-	v := reflect.ValueOf(target).Elem()
+	v := reflect.ValueOf(target).Elem().Type()
 
 	var keys []string
 	for i := 0; i < v.NumField(); i++ {
-		keys = append(keys, v.Type().Field(i).Name)
+		keys = append(keys, v.Field(i).Name)
 	}
 
 	return keys
