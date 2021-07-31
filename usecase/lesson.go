@@ -46,15 +46,15 @@ type PatchLessonAndMaterialParams struct {
 }
 
 type PatchLessonParams struct {
-	PrevLessonID       int64                     `json:"prevLessonID"`
-	NextLessonID       int64                     `json:"nextLessonID"`
-	SubjectID          int64                     `json:"subjectID"`
-	JapaneseCategoryID int64                     `json:"japaneseCategoryID"`
-	Status             domain.LessonStatus       `json:"status"`
-	HasThumbnail       bool                      `json:"hasThumbnail"`
-	Title              string                    `json:"title"`
-	Description        string                    `json:"description"`
-	References         []domain.LessonReferences `json:"references"`
+	PrevLessonID       int64                    `json:"prevLessonID"`
+	NextLessonID       int64                    `json:"nextLessonID"`
+	SubjectID          int64                    `json:"subjectID"`
+	JapaneseCategoryID int64                    `json:"japaneseCategoryID"`
+	Status             domain.LessonStatus      `json:"status"`
+	HasThumbnail       bool                     `json:"hasThumbnail"`
+	Title              string                   `json:"title"`
+	Description        string                   `json:"description"`
+	References         []domain.LessonReference `json:"references"`
 }
 
 type PatchLessonMaterialParams struct {
