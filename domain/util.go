@@ -34,6 +34,7 @@ func MergeJsonToStruct(jsonDiff *map[string]interface{}, origin interface{}, all
 		} else if jsonFieldType == "[]interface {}" {
 			switch targets := targetField.Interface().(type) {
 			case []LessonReference:
+				targets = nil // 配列は元の値にマージせず丸ごと置き換える
 				var targetBlankStruct LessonReference
 				allowChildFields := TopLevelStructKeys(&targetBlankStruct)
 				for _, v := range jsonValue.([]interface{}) {
@@ -41,7 +42,7 @@ func MergeJsonToStruct(jsonDiff *map[string]interface{}, origin interface{}, all
 					MergeJsonToStruct(&child, &targetBlankStruct, &allowChildFields)
 					targets = append(targets, targetBlankStruct)
 				}
-				targetField.Set(reflect.ValueOf(&targets).Elem()) // 配列は元の値にマージせず丸ごと置き換える
+				targetField.Set(reflect.ValueOf(&targets).Elem())
 			}
 		} else {
 			setValueToField(jsonValue, targetField)
