@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func infolLog(err interface{}) {
+func infoLog(err interface{}) {
 	log.Printf("INFO     %v\n", errorString(err))
 }
 
