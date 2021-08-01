@@ -9,8 +9,8 @@ import (
 	"github.com/super-dog-human/teraconnectgo/domain"
 )
 
-// LessonMaterialParams
-type LessonMaterialParams struct {
+// NewLessonMaterialParams
+type NewLessonMaterialParams struct {
 	DurationSec          float32                     `json:"durationSec"`
 	AvatarID             int64                       `json:"avatarID"`
 	AvatarLightColor     string                      `json:"avatarLightColor"`
@@ -78,7 +78,7 @@ func GetLessonMaterial(request *http.Request, id int64, lessonID int64) (domain.
 	return lessonMaterial, nil
 }
 
-func CreateLessonMaterial(request *http.Request, lessonID int64, params LessonMaterialParams) (int64, error) {
+func CreateLessonMaterial(request *http.Request, lessonID int64, params NewLessonMaterialParams) (int64, error) {
 	ctx := request.Context()
 
 	userID, err := currentUserAccessToLesson(ctx, request, lessonID)
@@ -116,17 +116,32 @@ func CreateLessonMaterial(request *http.Request, lessonID int64, params LessonMa
 	return lessonMaterial.ID, nil
 }
 
-func UpdateLessonMaterial(request *http.Request, id int64, lessonID int64, params LessonMaterialParams) error {
+func UpdateLessonMaterial(request *http.Request, id int64, lessonID int64, params *map[string]interface{}) error {
 	ctx := request.Context()
 
-	if _, err := currentUserAccessToLesson(ctx, request, lessonID); err != nil {
+	currentUser, err := domain.GetCurrentUser(request)
+	if err != nil {
+		return err
+	}
+
+	lesson, err := domain.GetLessonByID(ctx, lessonID)
+	if err != nil {
+		if err == datastore.ErrNoSuchEntity {
+			return LessonNotFound
+		}
+		return err
+	}
+
+	if lesson.UserID != currentUser.ID {
 		return LessonMaterialNotAvailable
 	}
 
-	var lessonMaterial domain.LessonMaterial
-	copier.Copy(&lessonMaterial, &params)
+	if id != lesson.MaterialID {
+		return LessonMaterialNotAvailable
+	}
 
-	if err := domain.UpdateLessonMaterial(ctx, id, lessonID, &lessonMaterial); err != nil {
+	targetFields := []string{"Avatars", "Drawings", "Embeddings", "Graphics", "Musics", "Speeches"}
+	if err := domain.UpdateLessonMaterial(ctx, id, lessonID, params, &targetFields); err != nil {
 		return err
 	}
 

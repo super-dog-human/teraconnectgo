@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/json"
 	"net/http"
 	"strconv"
 	"time"
@@ -72,7 +73,7 @@ func postLessonMaterial(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, errMessage)
 	}
 
-	params := new(usecase.LessonMaterialParams)
+	params := new(usecase.NewLessonMaterialParams)
 	if err := c.Bind(params); err != nil {
 		fatalLog(err)
 		return c.JSON(http.StatusInternalServerError, err.Error())
@@ -109,13 +110,12 @@ func patchLessonMaterial(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, errMessage)
 	}
 
-	params := new(usecase.LessonMaterialParams)
-	if err := c.Bind(params); err != nil {
-		fatalLog(err)
-		return c.JSON(http.StatusInternalServerError, err.Error())
+	var params map[string]interface{}
+	if err := json.NewDecoder(c.Request().Body).Decode(&params); err != nil {
+		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 
-	if err := usecase.UpdateLessonMaterial(c.Request(), id, lessonID, *params); err != nil {
+	if err := usecase.UpdateLessonMaterial(c.Request(), id, lessonID, &params); err != nil {
 		fatalLog(err)
 		lessonErr, ok := err.(usecase.LessonMaterialErrorCode)
 		if ok && lessonErr == usecase.LessonMaterialNotFound {

@@ -184,14 +184,14 @@ func (a *EmbeddingAction) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-type GraphicActrion int8
+type GraphicAction int8
 
 const (
-	GraphicActionShow GraphicActrion = 0
-	GraphicActionHide GraphicActrion = 1
+	GraphicActionShow GraphicAction = 0
+	GraphicActionHide GraphicAction = 1
 )
 
-func (r GraphicActrion) String() string {
+func (r GraphicAction) String() string {
 	switch r {
 	case GraphicActionShow:
 		return "show"
@@ -202,24 +202,24 @@ func (r GraphicActrion) String() string {
 	}
 }
 
-func (r GraphicActrion) MarshalJSON() ([]byte, error) {
+func (r GraphicAction) MarshalJSON() ([]byte, error) {
 	return json.Marshal(r.String())
 }
 
-func (a *GraphicActrion) UnmarshalJSON(data []byte) error {
+func (a *GraphicAction) UnmarshalJSON(data []byte) error {
 	var str string
 	if err := json.Unmarshal(data, &str); err != nil {
 		return fmt.Errorf("data should be a string, got %s", data)
 	}
 
-	var action GraphicActrion
+	var action GraphicAction
 	switch str {
 	case "show":
 		action = GraphicActionShow
 	case "hide":
 		action = GraphicActionHide
 	default:
-		return fmt.Errorf("invalid GraphicActrion %s", str)
+		return fmt.Errorf("invalid GraphicAction %s", str)
 	}
 	*a = action
 	return nil

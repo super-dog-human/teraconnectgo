@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"cloud.google.com/go/datastore"
-	"github.com/imdario/mergo"
 	"github.com/super-dog-human/teraconnectgo/infrastructure"
 )
 
@@ -65,9 +64,9 @@ type LessonEmbedding struct {
 }
 
 type LessonGraphic struct {
-	ElapsedTime float64        `json:"elapsedTime"`
-	GraphicID   int64          `json:"graphicID"`
-	Action      GraphicActrion `json:"action"`
+	ElapsedTime float64       `json:"elapsedTime"`
+	GraphicID   int64         `json:"graphicID"`
+	Action      GraphicAction `json:"action"`
 }
 
 type LessonMusic struct {
@@ -138,29 +137,19 @@ func CreateLessonMaterial(ctx context.Context, lessonID int64, lessonMaterial *L
 	return nil
 }
 
-func UpdateLessonMaterial(ctx context.Context, id int64, lessonID int64, newLessonMaterial *LessonMaterial) error {
+func UpdateLessonMaterial(ctx context.Context, id int64, lessonID int64, jsonBody *map[string]interface{}, targetFields *[]string) error {
 	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
 	if err != nil {
 		return err
 	}
 
-	ancestor := datastore.IDKey("Lesson", lessonID, nil)
-	key := datastore.IDKey("LessonMaterial", id, ancestor)
-	lessonMaterial := new(LessonMaterial)
-	if err := client.Get(ctx, key, lessonMaterial); err != nil {
-		return err
-	}
+	_, err = client.RunInTransaction(ctx, func(tx *datastore.Transaction) error {
+		if err := updateLessonMaterialInTransaction(tx, id, lessonID, jsonBody, targetFields); err != nil {
+			return err
+		}
 
-	if err := mergo.Merge(newLessonMaterial, lessonMaterial); err != nil {
-		return err
-	}
-
-	newLessonMaterial.Created = lessonMaterial.Created
-	newLessonMaterial.Updated = time.Now()
-
-	if _, err := client.Put(ctx, key, newLessonMaterial); err != nil {
-		return err
-	}
+		return nil
+	})
 
 	if err != nil {
 		return err

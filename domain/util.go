@@ -20,9 +20,14 @@ func MergeJsonToStruct(jsonDiff *map[string]interface{}, origin interface{}, all
 			continue
 		}
 
-		jsonFieldType := reflect.TypeOf(jsonValue).String()
 		targetField := o.FieldByName(fieldName)
 
+		if jsonValue == nil {
+			targetField.Set(reflect.Zero(targetField.Type()))
+			continue
+		}
+
+		jsonFieldType := reflect.TypeOf(jsonValue).String()
 		if jsonFieldType == "map[string]interface {}" {
 			childJson := jsonValue.(map[string]interface{})
 			switch childTarget := targetField.Interface().(type) {
@@ -30,13 +35,101 @@ func MergeJsonToStruct(jsonDiff *map[string]interface{}, origin interface{}, all
 				allowChildFields := TopLevelStructKeys(&childTarget) // 親フィールドが既に許可されているので子は全て許可
 				MergeJsonToStruct(&childJson, &childTarget, &allowChildFields)
 				targetField.Set(reflect.ValueOf(&childTarget).Elem())
+			case Position3D:
+				allowChildFields := TopLevelStructKeys(&childTarget)
+				MergeJsonToStruct(&childJson, &childTarget, &allowChildFields)
+				targetField.Set(reflect.ValueOf(&childTarget).Elem())
+			case LessonDrawingStroke:
+				allowChildFields := TopLevelStructKeys(&childTarget)
+				MergeJsonToStruct(&childJson, &childTarget, &allowChildFields)
+				targetField.Set(reflect.ValueOf(&childTarget).Elem())
 			}
 		} else if jsonFieldType == "[]interface {}" {
 			switch targets := targetField.Interface().(type) {
 			case []LessonReference:
-				targets = nil // 配列は元の値にマージせず丸ごと置き換える
 				var targetBlankStruct LessonReference
 				allowChildFields := TopLevelStructKeys(&targetBlankStruct)
+				targets = nil // 配列は元の値にマージせず丸ごと置き換える
+				for _, v := range jsonValue.([]interface{}) {
+					child := v.(map[string]interface{})
+					MergeJsonToStruct(&child, &targetBlankStruct, &allowChildFields)
+					targets = append(targets, targetBlankStruct)
+				}
+				targetField.Set(reflect.ValueOf(&targets).Elem())
+			case []LessonAvatar:
+				var targetBlankStruct LessonAvatar
+				allowChildFields := TopLevelStructKeys(&targetBlankStruct)
+				targets = nil
+				for _, v := range jsonValue.([]interface{}) {
+					child := v.(map[string]interface{})
+					MergeJsonToStruct(&child, &targetBlankStruct, &allowChildFields)
+					targets = append(targets, targetBlankStruct)
+				}
+				targetField.Set(reflect.ValueOf(&targets).Elem())
+			case []LessonDrawing:
+				var targetBlankStruct LessonDrawing
+				allowChildFields := TopLevelStructKeys(&targetBlankStruct)
+				targets = nil
+				for _, v := range jsonValue.([]interface{}) {
+					child := v.(map[string]interface{})
+					MergeJsonToStruct(&child, &targetBlankStruct, &allowChildFields)
+					targets = append(targets, targetBlankStruct)
+				}
+				targetField.Set(reflect.ValueOf(&targets).Elem())
+			case []LessonEmbedding:
+				var targetBlankStruct LessonEmbedding
+				allowChildFields := TopLevelStructKeys(&targetBlankStruct)
+				targets = nil
+				for _, v := range jsonValue.([]interface{}) {
+					child := v.(map[string]interface{})
+					MergeJsonToStruct(&child, &targetBlankStruct, &allowChildFields)
+					targets = append(targets, targetBlankStruct)
+				}
+				targetField.Set(reflect.ValueOf(&targets).Elem())
+			case []LessonGraphic:
+				var targetBlankStruct LessonGraphic
+				allowChildFields := TopLevelStructKeys(&targetBlankStruct)
+				targets = nil
+				for _, v := range jsonValue.([]interface{}) {
+					child := v.(map[string]interface{})
+					MergeJsonToStruct(&child, &targetBlankStruct, &allowChildFields)
+					targets = append(targets, targetBlankStruct)
+				}
+				targetField.Set(reflect.ValueOf(&targets).Elem())
+			case []LessonMusic:
+				var targetBlankStruct LessonMusic
+				allowChildFields := TopLevelStructKeys(&targetBlankStruct)
+				targets = nil
+				for _, v := range jsonValue.([]interface{}) {
+					child := v.(map[string]interface{})
+					MergeJsonToStruct(&child, &targetBlankStruct, &allowChildFields)
+					targets = append(targets, targetBlankStruct)
+				}
+				targetField.Set(reflect.ValueOf(&targets).Elem())
+			case []LessonSpeech:
+				var targetBlankStruct LessonSpeech
+				allowChildFields := TopLevelStructKeys(&targetBlankStruct)
+				targets = nil
+				for _, v := range jsonValue.([]interface{}) {
+					child := v.(map[string]interface{})
+					MergeJsonToStruct(&child, &targetBlankStruct, &allowChildFields)
+					targets = append(targets, targetBlankStruct)
+				}
+				targetField.Set(reflect.ValueOf(&targets).Elem())
+			case []LessonDrawingUnit:
+				var targetBlankStruct LessonDrawingUnit
+				allowChildFields := TopLevelStructKeys(&targetBlankStruct)
+				targets = nil
+				for _, v := range jsonValue.([]interface{}) {
+					child := v.(map[string]interface{})
+					MergeJsonToStruct(&child, &targetBlankStruct, &allowChildFields)
+					targets = append(targets, targetBlankStruct)
+				}
+				targetField.Set(reflect.ValueOf(&targets).Elem())
+			case []Position2D:
+				var targetBlankStruct Position2D
+				allowChildFields := TopLevelStructKeys(&targetBlankStruct)
+				targets = nil
 				for _, v := range jsonValue.([]interface{}) {
 					child := v.(map[string]interface{})
 					MergeJsonToStruct(&child, &targetBlankStruct, &allowChildFields)
