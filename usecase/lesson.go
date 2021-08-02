@@ -145,7 +145,7 @@ func CreateLesson(request *http.Request, newLesson *NewLessonParams, lesson *dom
 	return nil
 }
 
-func UpdateLessonWithMaterial(id int64, request *http.Request, params *map[string]interface{}) error {
+func UpdateLessonWithMaterial(id int64, request *http.Request, needsCopyThumbnail bool, params *map[string]interface{}) error {
 	ctx := request.Context()
 
 	currentUser, err := domain.GetCurrentUser(request)
@@ -167,7 +167,7 @@ func UpdateLessonWithMaterial(id int64, request *http.Request, params *map[strin
 
 	lessonFields := []string{"PrevLessonID", "NextLessonID", "SubjectID", "JapaneseCategoryID", "Status", "HasThumbnail", "Title", "Description", "References"}
 	lessonMaterialFields := []string{"BackgroundImageID", "AvatarID", "AvatarLightColor", "VoiceSynthesisConfig"}
-	if err := domain.UpdateLessonAndMaterial(ctx, &lesson, params, &lessonFields, &lessonMaterialFields); err != nil {
+	if err := domain.UpdateLessonAndMaterial(ctx, &lesson, needsCopyThumbnail, params, &lessonFields, &lessonMaterialFields); err != nil {
 		return err
 	}
 

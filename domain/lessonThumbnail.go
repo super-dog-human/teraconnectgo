@@ -3,7 +3,9 @@ package domain
 import (
 	"context"
 	"strconv"
+	"time"
 
+	"cloud.google.com/go/storage"
 	"github.com/super-dog-human/teraconnectgo/infrastructure"
 )
 
@@ -26,24 +28,24 @@ func SetLessonThumbnailURL(ctx context.Context, lesson *Lesson) error {
 }
 
 func CreateLessonThumbnailBlankFile(ctx context.Context, id int64, isPublic bool) (string, error) {
-	fileID := strconv.FormatInt(id, 10)
+	fileName := "thumbnail"
 	fileRequest := infrastructure.FileRequest{
-		ID:          fileID,
-		Entity:      "lesson_thumbnail",
 		Extension:   "png",
 		ContentType: "image/png",
 	}
 
+	idStr := strconv.FormatInt(id, 10)
+	fileDir := "lesson/" + idStr
 	var url string
 	var err error
 
 	if isPublic {
-		url, err = infrastructure.CreateBlankFileToPublicGCS(ctx, fileID, "lesson_thumbnail", fileRequest)
+		url, err = infrastructure.CreateBlankFileToPublicGCS(ctx, fileName, fileDir, fileRequest)
 		if err != nil {
 			return "", err
 		}
 	} else {
-		url, err = infrastructure.CreateBlankFileToGCS(ctx, fileID, "lesson_thumbnail", fileRequest)
+		url, err = infrastructure.CreateBlankFileToGCS(ctx, fileName, fileDir, fileRequest)
 		if err != nil {
 			return "", err
 		}
@@ -52,17 +54,60 @@ func CreateLessonThumbnailBlankFile(ctx context.Context, id int64, isPublic bool
 	return url, nil
 }
 
-func createPublicURL(id int64) string {
+func CopyLessonThumbnail(ctx context.Context, id int64, currentStatus LessonStatus, newStatus LessonStatus) error {
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*30)
+	defer cancel()
+
+	var srcBucket string
+	var destBucket string
+	if currentStatus == LessonStatusPublic {
+		srcBucket = infrastructure.PublicBucketName()
+	} else {
+		srcBucket = infrastructure.MaterialBucketName()
+	}
+
+	if newStatus == LessonStatusPublic {
+		destBucket = infrastructure.PublicBucketName()
+	} else {
+		destBucket = infrastructure.MaterialBucketName()
+	}
+
+	if srcBucket == destBucket {
+		return nil
+	}
+
 	fileID := strconv.FormatInt(id, 10)
-	return "https://storage.googleapis.com/" + infrastructure.PublicBucketName() + "/lesson_thumbnail/" + fileID + ".png"
+	objectPath := thumbnailFilePath(fileID)
+	src := client.Bucket(srcBucket).Object(objectPath)
+	dst := client.Bucket(destBucket).Object(objectPath)
+
+	if _, err := dst.CopierFrom(src).Run(ctx); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func thumbnailFilePath(id string) string {
+	return "lesson/" + id + "/thumbnail.png"
+}
+
+func createPublicURL(id int64) string {
+	idStr := strconv.FormatInt(id, 10)
+	return "https://storage.googleapis.com/" + infrastructure.PublicBucketName() + "/" + thumbnailFilePath(idStr)
 }
 
 func createSignedURL(ctx context.Context, id int64) (string, error) {
-	fileID := strconv.FormatInt(id, 10)
-	filePath := "lesson_thumbnail/" + fileID + ".png"
+	idStr := strconv.FormatInt(id, 10)
 	fileType := "" // this is unnecessary when GET request
 	bucketName := infrastructure.MaterialBucketName()
-	url, err := infrastructure.GetGCSSignedURL(ctx, bucketName, filePath, "GET", fileType)
+	url, err := infrastructure.GetGCSSignedURL(ctx, bucketName, thumbnailFilePath(idStr), "GET", fileType)
 
 	if err != nil {
 		return "", err

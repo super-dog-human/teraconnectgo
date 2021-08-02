@@ -123,7 +123,8 @@ func patchLesson(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 
-	if err := usecase.UpdateLessonWithMaterial(id, c.Request(), &params); err != nil {
+	needsCopyThumbnail := c.QueryParam("move_thumbnail") == "true"
+	if err := usecase.UpdateLessonWithMaterial(id, c.Request(), needsCopyThumbnail, &params); err != nil {
 		fatalLog(err)
 		LessonErr, ok := err.(usecase.LessonErrorCode)
 		if ok && LessonErr == usecase.LessonNotFound {

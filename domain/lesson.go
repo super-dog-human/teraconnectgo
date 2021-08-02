@@ -23,6 +23,8 @@ type Lesson struct {
 	IsPacked             bool              `json:"isPacked"`       // 公開準備の完了
 	HasThumbnail         bool              `json:"hasThumbnail"`
 	ThumbnailURL         string            `json:"thumbnailURL" datastore:"-"`
+	AudioURL             string            `json:"audioURL" datastore:"-"`
+	ZipURL               string            `json:"zipURL" datastore:"-"`
 	Status               LessonStatus      `json:"status"`
 	References           []LessonReference `json:"references"`
 	Reviews              []LessonReview    `json:"reviews"`
@@ -144,7 +146,7 @@ func UpdateLesson(ctx context.Context, lesson *Lesson) error {
 
 // UpdateLessonAndMaterialは、jsonのフィールドを既存のLesson/LessonMaterialへマージし、トランザクション中で二つのエンティティを更新します。
 // jsonのフィールド名がlessonFieldsまたはlessonMaterialFieldsに含まれない場合、そのフィールドは無視されます。
-func UpdateLessonAndMaterial(ctx context.Context, lesson *Lesson, jsonBody *map[string]interface{}, lessonFields *[]string, lessonMaterialFields *[]string) error {
+func UpdateLessonAndMaterial(ctx context.Context, lesson *Lesson, needsCopyThumbnail bool, jsonBody *map[string]interface{}, lessonFields *[]string, lessonMaterialFields *[]string) error {
 	currentStatus := lesson.Status
 	currentSubjectID := lesson.SubjectID
 	currentJapaneseCategoryID := lesson.JapaneseCategoryID
@@ -162,17 +164,23 @@ func UpdateLessonAndMaterial(ctx context.Context, lesson *Lesson, jsonBody *map[
 		lesson.Published = currentTime
 	}
 
+	if currentStatus != lesson.Status && needsCopyThumbnail {
+		if err := CopyLessonThumbnail(ctx, lesson.ID, currentStatus, lesson.Status); err != nil {
+			return err
+		}
+	}
+
 	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
 	if err != nil {
 		return err
 	}
 
 	_, err = client.RunInTransaction(ctx, func(tx *datastore.Transaction) error {
-		if err := updateLessonInTransaction(tx, lesson); err != nil {
+		if err = updateLessonInTransaction(tx, lesson); err != nil {
 			return err
 		}
 
-		if err := updateLessonMaterialInTransaction(tx, lesson.MaterialID, lesson.ID, jsonBody, lessonMaterialFields); err != nil {
+		if err = updateLessonMaterialInTransaction(tx, lesson.MaterialID, lesson.ID, jsonBody, lessonMaterialFields); err != nil {
 			return err
 		}
 
