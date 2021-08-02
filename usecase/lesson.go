@@ -176,25 +176,25 @@ func UpdateLessonWithMaterial(id int64, request *http.Request, params *map[strin
 
 func setRelationLessonTitle(ctx context.Context, lesson *domain.Lesson) error {
 	if lesson.PrevLessonID != 0 {
-		lesson, err := domain.GetLessonByID(ctx, lesson.PrevLessonID)
+		prevLesson, err := domain.GetLessonByID(ctx, lesson.PrevLessonID)
 		if err != nil {
 			if err == datastore.ErrNoSuchEntity {
 				return nil // 授業が見つからなかった場合もエラーにしない
 			}
 			return err
 		}
-		lesson.PrevLessonTitle = lesson.Title
+		lesson.PrevLessonTitle = prevLesson.Title
 	}
 
 	if lesson.NextLessonID != 0 {
-		lesson, err := domain.GetLessonByID(ctx, lesson.NextLessonID)
+		nextLesson, err := domain.GetLessonByID(ctx, lesson.NextLessonID)
 		if err != nil {
 			if err == datastore.ErrNoSuchEntity {
 				return nil // 授業が見つからなかった場合もエラーにしない
 			}
 			return err
 		}
-		lesson.NextLessonTitle = lesson.Title
+		lesson.NextLessonTitle = nextLesson.Title
 	}
 
 	return nil
