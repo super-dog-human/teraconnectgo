@@ -16,7 +16,8 @@ func postLessonThumbnail(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, errMessage)
 	}
 
-	url, err := usecase.CreateLessonThumbnailBlankFile(c.Request(), id)
+	isPublic := c.QueryParam("is_public") == "true"
+	url, err := usecase.CreateLessonThumbnailBlankFile(c.Request(), isPublic, id)
 	if err != nil {
 		fatalLog(err)
 		return c.JSON(http.StatusInternalServerError, err.Error())

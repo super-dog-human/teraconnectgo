@@ -7,10 +7,8 @@ import (
 )
 
 // CreateLessonThumbnailBlankFile is create blank image file to public or private bucket.
-func CreateLessonThumbnailBlankFile(request *http.Request, id int64) (string, error) {
+func CreateLessonThumbnailBlankFile(request *http.Request, isPublic bool, id int64) (string, error) {
 	ctx := request.Context()
-
-	isPublic := request.URL.Query().Get("is_public") == "true"
 	url, err := domain.CreateLessonThumbnailBlankFile(ctx, id, isPublic)
 	if err != nil {
 		return "", err
