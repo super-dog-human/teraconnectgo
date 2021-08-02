@@ -54,7 +54,6 @@ func Main(appEnv string) {
 	auth.GET("/lessons/:lessonID/materials/:id", getLessonMaterials)
 	auth.POST("/lessons/:lessonID/materials", postLessonMaterial)
 	auth.PATCH("/lessons/:lessonID/materials/:id", patchLessonMaterial)
-	auth.PUT("/lessons/:id/pack", putLessonPack)
 	auth.POST("lessons/:id/thumbnail", postLessonThumbnail)
 
 	port := os.Getenv("PORT")
