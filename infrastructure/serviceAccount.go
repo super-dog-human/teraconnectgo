@@ -9,3 +9,7 @@ func ServiceAccountName() string {
 func ServiceAccountID() string {
 	return "projects/" + ProjectID() + "/serviceAccounts/" + ServiceAccountName()
 }
+
+func LocationID() string {
+	return "asia-northeast1" // Tokyo
+}

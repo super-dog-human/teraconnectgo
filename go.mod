@@ -7,6 +7,7 @@ require (
 	cloud.google.com/go/datastore v1.3.0
 	cloud.google.com/go/storage v1.12.0
 	github.com/golang-jwt/jwt v3.2.1+incompatible
+	github.com/golang/protobuf v1.4.3
 	github.com/imdario/mergo v0.3.11
 	github.com/jinzhu/copier v0.1.0
 	github.com/labstack/echo/v4 v4.1.17

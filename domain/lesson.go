@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"strconv"
 	"time"
 
 	"cloud.google.com/go/datastore"
@@ -55,6 +56,8 @@ type LessonReview struct {
 	Comment        string    `json:"comment"`
 	Created        time.Time `json:"created"`
 }
+
+const queueID string = "zipLesson"
 
 func GetLessonByID(ctx context.Context, id int64) (Lesson, error) {
 	lesson := new(Lesson)
@@ -160,7 +163,8 @@ func UpdateLessonAndMaterial(ctx context.Context, lesson *Lesson, needsCopyThumb
 	}
 
 	currentTime := time.Now()
-	if lesson.Status != LessonStatusDraft {
+	needsZipLesson := lesson.Status != LessonStatusDraft
+	if needsZipLesson {
 		lesson.Published = currentTime
 	}
 
@@ -186,6 +190,15 @@ func UpdateLessonAndMaterial(ctx context.Context, lesson *Lesson, needsCopyThumb
 
 		return nil
 	})
+
+	if needsZipLesson {
+		taskName := strconv.FormatInt(lesson.ID, 10) + "-" + strconv.FormatInt(lesson.Published.UnixNano(), 10)
+		taskEta := lesson.Published.Add(5 * time.Minute)
+		taskBody := strconv.FormatInt(lesson.MaterialID, 10)
+		if _, err := infrastructure.CreateTask(ctx, queueID, taskName, taskEta, taskBody); err != nil {
+			return err
+		}
+	}
 
 	if err != nil {
 		return err
