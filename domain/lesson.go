@@ -159,12 +159,6 @@ func UpdateLessonAndMaterial(ctx context.Context, lesson *Lesson, needsCopyThumb
 		}
 	}
 
-	currentTime := time.Now()
-	needsLessonCompressing := lesson.Status != LessonStatusDraft
-	if needsLessonCompressing {
-		lesson.Published = currentTime
-	}
-
 	if currentStatus != lesson.Status && needsCopyThumbnail {
 		if err := CopyLessonThumbnail(ctx, lesson.ID, currentStatus, lesson.Status); err != nil {
 			return err
@@ -189,7 +183,7 @@ func UpdateLessonAndMaterial(ctx context.Context, lesson *Lesson, needsCopyThumb
 		return nil
 	})
 
-	if needsLessonCompressing {
+	if lesson.Status != LessonStatusDraft {
 		taskName := infrastructure.LessonCompressingTaskName(lesson.ID, lesson.Published)
 		if err := createLessonMaterialForCompress(ctx, taskName, &lessonMaterial, lesson.Published); err != nil {
 			return err
