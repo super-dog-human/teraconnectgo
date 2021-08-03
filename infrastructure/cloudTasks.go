@@ -17,8 +17,8 @@ const (
 	relativeUri string = "/compressing_lesson"
 )
 
-func LessonCompressingTaskName(lessonID int64, published time.Time) string {
-	return strconv.FormatInt(lessonID, 10) + "-" + strconv.FormatInt(published.UnixNano(), 10)
+func LessonCompressingTaskName(lessonID int64, currentTime time.Time) string {
+	return strconv.FormatInt(lessonID, 10) + "-" + strconv.FormatInt(currentTime.UnixNano(), 10)
 }
 
 func CreateTask(ctx context.Context, name string, eta time.Time, message string) (*taskspb.Task, error) {

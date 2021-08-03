@@ -165,6 +165,9 @@ func UpdateLessonAndMaterial(ctx context.Context, lesson *Lesson, needsCopyThumb
 		}
 	}
 
+	currentTime := time.Now()
+	lesson.Updated = currentTime
+
 	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
 	if err != nil {
 		return err
@@ -176,7 +179,7 @@ func UpdateLessonAndMaterial(ctx context.Context, lesson *Lesson, needsCopyThumb
 			return err
 		}
 
-		if lessonMaterial, err = updateLessonMaterialInTransaction(tx, lesson.MaterialID, lesson.ID, jsonBody, lessonMaterialFields); err != nil {
+		if lessonMaterial, err = updateLessonMaterialInTransaction(tx, lesson.MaterialID, lesson.ID, jsonBody, lessonMaterialFields, currentTime); err != nil {
 			return err
 		}
 
@@ -184,12 +187,12 @@ func UpdateLessonAndMaterial(ctx context.Context, lesson *Lesson, needsCopyThumb
 	})
 
 	if lesson.Status != LessonStatusDraft {
-		taskName := infrastructure.LessonCompressingTaskName(lesson.ID, lesson.Published)
-		if err := createLessonMaterialForCompress(ctx, taskName, &lessonMaterial, lesson.Published); err != nil {
+		taskName := infrastructure.LessonCompressingTaskName(lesson.ID, currentTime)
+		if err := createLessonMaterialForCompress(ctx, taskName, &lessonMaterial); err != nil {
 			return err
 		}
 
-		if err := createCompressingTask(ctx, taskName, lesson.MaterialID, lesson.Published); err != nil {
+		if err := createCompressingTask(ctx, taskName, lesson.MaterialID, currentTime); err != nil {
 			return err
 		}
 	}
@@ -227,13 +230,13 @@ func updateLessonInTransaction(tx *datastore.Transaction, lesson *Lesson) error 
 	return nil
 }
 
-func createLessonMaterialForCompress(ctx context.Context, taskName string, lessonMaterial *LessonMaterial, published time.Time) error {
+func createLessonMaterialForCompress(ctx context.Context, id string, lessonMaterial *LessonMaterial) error {
 	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
 	if err != nil {
 		return err
 	}
 
-	key := datastore.NameKey("LessonMaterialForCompress", taskName, nil)
+	key := datastore.NameKey("LessonMaterialForCompress", id, nil)
 	if _, err := client.Put(ctx, key, lessonMaterial); err != nil {
 		return err
 	}
@@ -241,8 +244,8 @@ func createLessonMaterialForCompress(ctx context.Context, taskName string, lesso
 	return nil
 }
 
-func createCompressingTask(ctx context.Context, taskName string, materialID int64, published time.Time) error {
-	taskEta := published.Add(5 * time.Minute)
+func createCompressingTask(ctx context.Context, taskName string, materialID int64, currentTime time.Time) error {
+	taskEta := currentTime.Add(5 * time.Minute)
 	// タスクに必要な情報はtaskNameで事足りるのでmessageは空文字でよい
 	if _, err := infrastructure.CreateTask(ctx, taskName, taskEta, ""); err != nil {
 		return err
