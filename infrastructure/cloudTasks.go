@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"time"
 
 	cloudtasks "cloud.google.com/go/cloudtasks/apiv2"
@@ -10,10 +11,20 @@ import (
 	taskspb "google.golang.org/genproto/googleapis/cloud/tasks/v2"
 )
 
-func CreateTask(ctx context.Context, queueID, name string, eta time.Time, message string) (*taskspb.Task, error) {
+// 現状ではLessonMaterialの圧縮にしか使用していないので固定値
+const (
+	queueID     string = "compressLesson"
+	relativeUri string = "/compressing_lesson"
+)
+
+func LessonCompressingTaskName(lessonID int64, published time.Time) string {
+	return strconv.FormatInt(lessonID, 10) + "-" + strconv.FormatInt(published.UnixNano(), 10)
+}
+
+func CreateTask(ctx context.Context, name string, eta time.Time, message string) (*taskspb.Task, error) {
 	client, err := cloudtasks.NewClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("cloud tasks NewClient: %v", err)
+		return nil, err
 	}
 	defer client.Close()
 
@@ -30,7 +41,7 @@ func CreateTask(ctx context.Context, queueID, name string, eta time.Time, messag
 			MessageType: &taskspb.Task_AppEngineHttpRequest{
 				AppEngineHttpRequest: &taskspb.AppEngineHttpRequest{
 					HttpMethod:  taskspb.HttpMethod_POST,
-					RelativeUri: "/zip_lesson",
+					RelativeUri: relativeUri,
 				},
 			},
 			Name:         taskName,
@@ -42,7 +53,7 @@ func CreateTask(ctx context.Context, queueID, name string, eta time.Time, messag
 
 	createdTask, err := client.CreateTask(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("cloud tasks CreateTask: %v", err)
+		return nil, err
 	}
 
 	return createdTask, nil

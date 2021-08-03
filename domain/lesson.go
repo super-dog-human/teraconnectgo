@@ -2,7 +2,6 @@ package domain
 
 import (
 	"context"
-	"strconv"
 	"time"
 
 	"cloud.google.com/go/datastore"
@@ -25,7 +24,7 @@ type Lesson struct {
 	HasThumbnail         bool              `json:"hasThumbnail"`
 	ThumbnailURL         string            `json:"thumbnailURL" datastore:"-"`
 	AudioURL             string            `json:"audioURL" datastore:"-"`
-	ZipURL               string            `json:"zipURL" datastore:"-"`
+	CompressedURL        string            `json:"compressedURL" datastore:"-"`
 	Status               LessonStatus      `json:"status"`
 	References           []LessonReference `json:"references"`
 	Reviews              []LessonReview    `json:"reviews"`
@@ -56,8 +55,6 @@ type LessonReview struct {
 	Comment        string    `json:"comment"`
 	Created        time.Time `json:"created"`
 }
-
-const queueID string = "zipLesson"
 
 func GetLessonByID(ctx context.Context, id int64) (Lesson, error) {
 	lesson := new(Lesson)
@@ -163,8 +160,8 @@ func UpdateLessonAndMaterial(ctx context.Context, lesson *Lesson, needsCopyThumb
 	}
 
 	currentTime := time.Now()
-	needsZipLesson := lesson.Status != LessonStatusDraft
-	if needsZipLesson {
+	needsLessonCompressing := lesson.Status != LessonStatusDraft
+	if needsLessonCompressing {
 		lesson.Published = currentTime
 	}
 
@@ -179,23 +176,26 @@ func UpdateLessonAndMaterial(ctx context.Context, lesson *Lesson, needsCopyThumb
 		return err
 	}
 
+	var lessonMaterial LessonMaterial
 	_, err = client.RunInTransaction(ctx, func(tx *datastore.Transaction) error {
 		if err = updateLessonInTransaction(tx, lesson); err != nil {
 			return err
 		}
 
-		if err = updateLessonMaterialInTransaction(tx, lesson.MaterialID, lesson.ID, jsonBody, lessonMaterialFields); err != nil {
+		if lessonMaterial, err = updateLessonMaterialInTransaction(tx, lesson.MaterialID, lesson.ID, jsonBody, lessonMaterialFields); err != nil {
 			return err
 		}
 
 		return nil
 	})
 
-	if needsZipLesson {
-		taskName := strconv.FormatInt(lesson.ID, 10) + "-" + strconv.FormatInt(lesson.Published.UnixNano(), 10)
-		taskEta := lesson.Published.Add(5 * time.Minute)
-		taskBody := strconv.FormatInt(lesson.MaterialID, 10)
-		if _, err := infrastructure.CreateTask(ctx, queueID, taskName, taskEta, taskBody); err != nil {
+	if needsLessonCompressing {
+		taskName := infrastructure.LessonCompressingTaskName(lesson.ID, lesson.Published)
+		if err := createLessonMaterialForCompress(ctx, taskName, &lessonMaterial, lesson.Published); err != nil {
+			return err
+		}
+
+		if err := createCompressingTask(ctx, taskName, lesson.MaterialID, lesson.Published); err != nil {
 			return err
 		}
 	}
@@ -227,6 +227,30 @@ func setCategoryAndSubject(ctx context.Context, lesson *Lesson) error {
 func updateLessonInTransaction(tx *datastore.Transaction, lesson *Lesson) error {
 	key := datastore.IDKey("Lesson", lesson.ID, nil)
 	if _, err := tx.Put(key, lesson); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func createLessonMaterialForCompress(ctx context.Context, taskName string, lessonMaterial *LessonMaterial, published time.Time) error {
+	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
+	if err != nil {
+		return err
+	}
+
+	key := datastore.NameKey("LessonMaterialForCompress", taskName, nil)
+	if _, err := client.Put(ctx, key, lessonMaterial); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func createCompressingTask(ctx context.Context, taskName string, materialID int64, published time.Time) error {
+	taskEta := published.Add(5 * time.Minute)
+	// タスクに必要な情報はtaskNameで事足りるのでmessageは空文字でよい
+	if _, err := infrastructure.CreateTask(ctx, taskName, taskEta, ""); err != nil {
 		return err
 	}
 

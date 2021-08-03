@@ -144,7 +144,7 @@ func UpdateLessonMaterial(ctx context.Context, id int64, lessonID int64, jsonBod
 	}
 
 	_, err = client.RunInTransaction(ctx, func(tx *datastore.Transaction) error {
-		if err := updateLessonMaterialInTransaction(tx, id, lessonID, jsonBody, targetFields); err != nil {
+		if _, err := updateLessonMaterialInTransaction(tx, id, lessonID, jsonBody, targetFields); err != nil {
 			return err
 		}
 
@@ -158,20 +158,20 @@ func UpdateLessonMaterial(ctx context.Context, id int64, lessonID int64, jsonBod
 	return nil
 }
 
-func updateLessonMaterialInTransaction(tx *datastore.Transaction, id int64, lessonID int64, jsonBody *map[string]interface{}, targetFields *[]string) error {
+func updateLessonMaterialInTransaction(tx *datastore.Transaction, id int64, lessonID int64, jsonBody *map[string]interface{}, targetFields *[]string) (LessonMaterial, error) {
 	ancestor := datastore.IDKey("Lesson", lessonID, nil)
 	key := datastore.IDKey("LessonMaterial", id, ancestor)
 	lessonMaterial := new(LessonMaterial)
 	if err := tx.Get(key, lessonMaterial); err != nil {
-		return err
+		return *lessonMaterial, err
 	}
 
 	MergeJsonToStruct(jsonBody, lessonMaterial, targetFields)
 	lessonMaterial.Updated = time.Now()
 
 	if _, err := tx.Put(key, lessonMaterial); err != nil {
-		return err
+		return *lessonMaterial, err
 	}
 
-	return nil
+	return *lessonMaterial, nil
 }
