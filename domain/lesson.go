@@ -160,7 +160,7 @@ func UpdateLessonAndMaterial(ctx context.Context, lesson *Lesson, needsCopyThumb
 	}
 
 	currentTime := time.Now()
-	if currentStatus != LessonStatusPublic && lesson.Status == LessonStatusPublic {
+	if lesson.Status != LessonStatusDraft {
 		lesson.Published = currentTime
 	}
 
