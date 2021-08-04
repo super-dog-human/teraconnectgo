@@ -31,7 +31,6 @@ func Main(appEnv string) {
 	e.GET("/lessons", getLessons)
 	e.GET("/lessons/:id", getLesson)
 	e.GET("/users/:id", getUser)
-	e.GET("/lesson_compressing", postLessonCompressing)
 	e.POST("/lesson_compressing", postLessonCompressing)
 
 	auth := e.Group("", Authentication())

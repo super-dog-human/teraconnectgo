@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"fmt"
+	"os"
 	"strconv"
 	"time"
 
@@ -35,14 +36,18 @@ func CreateTask(ctx context.Context, name string, eta time.Time, message string)
 	}
 
 	queuePath := fmt.Sprintf("projects/%s/locations/%s/queues/%s", ProjectID(), LocationID(), queueID)
+	appEngineRouting := &taskspb.AppEngineRouting{
+		Service: os.Getenv("GAE_SERVICE"),
+	}
 	taskName := fmt.Sprintf("%s/tasks/%s", queuePath, name)
 	req := &taskspb.CreateTaskRequest{
 		Parent: queuePath,
 		Task: &taskspb.Task{
 			MessageType: &taskspb.Task_AppEngineHttpRequest{
 				AppEngineHttpRequest: &taskspb.AppEngineHttpRequest{
-					HttpMethod:  taskspb.HttpMethod_POST,
-					RelativeUri: relativeUri,
+					HttpMethod:       taskspb.HttpMethod_POST,
+					RelativeUri:      relativeUri,
+					AppEngineRouting: appEngineRouting,
 				},
 			},
 			Name:         taskName,
