@@ -14,7 +14,7 @@ import (
 // 現状ではLessonMaterialの圧縮にしか使用していないので固定値
 const (
 	queueID     string = "compressLesson"
-	relativeUri string = "/compressing_lesson"
+	relativeUri string = "/lesson_compressing"
 )
 
 func LessonCompressingTaskName(lessonID int64, currentTime time.Time) string {
