@@ -18,6 +18,7 @@ func Main(appEnv string) {
 	http.Handle("/", e)
 
 	e.Pre(middleware.RemoveTrailingSlash())
+	e.Use(middleware.RequestID())
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{

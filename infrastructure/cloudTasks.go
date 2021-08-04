@@ -17,8 +17,9 @@ const (
 	relativeUri string = "/lesson_compressing"
 )
 
-func LessonCompressingTaskName(lessonID int64, currentTime time.Time) string {
-	return strconv.FormatInt(lessonID, 10) + "-" + strconv.FormatInt(currentTime.UnixNano(), 10)
+func LessonCompressingTaskName(lessonID int64, currentTime time.Time, requestID string) string {
+	// シーケンシャルな値を避けるため、ランダム文字列であるリクエストIDを先頭に付与する
+	return requestID + "-" + strconv.FormatInt(lessonID, 10) + "-" + strconv.FormatInt(currentTime.UnixNano(), 10)
 }
 
 func CreateTask(ctx context.Context, name string, eta time.Time, message string) (*taskspb.Task, error) {

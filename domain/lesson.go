@@ -146,7 +146,7 @@ func UpdateLesson(ctx context.Context, lesson *Lesson) error {
 
 // UpdateLessonAndMaterialは、jsonのフィールドを既存のLesson/LessonMaterialへマージし、トランザクション中で二つのエンティティを更新します。
 // jsonのフィールド名がlessonFieldsまたはlessonMaterialFieldsに含まれない場合、そのフィールドは無視されます。
-func UpdateLessonAndMaterial(ctx context.Context, lesson *Lesson, needsCopyThumbnail bool, jsonBody *map[string]interface{}, lessonFields *[]string, lessonMaterialFields *[]string) error {
+func UpdateLessonAndMaterial(ctx context.Context, lesson *Lesson, needsCopyThumbnail bool, requestID string, jsonBody *map[string]interface{}, lessonFields *[]string, lessonMaterialFields *[]string) error {
 	currentStatus := lesson.Status
 	currentSubjectID := lesson.SubjectID
 	currentJapaneseCategoryID := lesson.JapaneseCategoryID
@@ -187,7 +187,7 @@ func UpdateLessonAndMaterial(ctx context.Context, lesson *Lesson, needsCopyThumb
 	})
 
 	if lesson.Status != LessonStatusDraft {
-		taskName := infrastructure.LessonCompressingTaskName(lesson.ID, currentTime)
+		taskName := infrastructure.LessonCompressingTaskName(lesson.ID, currentTime, requestID)
 		if err := createLessonMaterialForCompress(ctx, taskName, &lessonMaterial); err != nil {
 			return err
 		}

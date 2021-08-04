@@ -124,7 +124,8 @@ func patchLesson(c echo.Context) error {
 	}
 
 	needsCopyThumbnail := c.QueryParam("move_thumbnail") == "true"
-	if err := usecase.UpdateLessonWithMaterial(id, c.Request(), needsCopyThumbnail, &params); err != nil {
+	requestID := c.Response().Header().Get(echo.HeaderXRequestID)
+	if err := usecase.UpdateLessonWithMaterial(id, c.Request(), needsCopyThumbnail, requestID, &params); err != nil {
 		fatalLog(err)
 		LessonErr, ok := err.(usecase.LessonErrorCode)
 		if ok && LessonErr == usecase.LessonNotFound {
