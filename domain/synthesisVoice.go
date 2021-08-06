@@ -21,10 +21,11 @@ func CreateSynthesisVoice(ctx context.Context, params *CreateSynthesisVoiceParam
 	g, ctx := errgroup.WithContext(ctx)
 
 	bucketName := infrastructure.MaterialBucketName()
-	filePath := fmt.Sprintf("voice/%d/%d.mp3", params.LessonID, voiceID)
+	filePath := CloudStorageVoiceFilePath(params.LessonID, voiceID)
 
 	g.Go(func() error {
-		return createSynthesizedVoice(ctx, params, bucketName, filePath)
+		_, err := CreateSynthesizedVoice(ctx, params, bucketName, filePath)
+		return err
 	})
 
 	var url string
@@ -39,10 +40,10 @@ func CreateSynthesisVoice(ctx context.Context, params *CreateSynthesisVoiceParam
 	return url, nil
 }
 
-func createSynthesizedVoice(ctx context.Context, params *CreateSynthesisVoiceParam, bucketName, filePath string) error {
+func CreateSynthesizedVoice(ctx context.Context, params *CreateSynthesisVoiceParam, bucketName, filePath string) ([]byte, error) {
 	client, err := texttospeech.NewClient(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	req := texttospeechpb.SynthesizeSpeechRequest{
@@ -63,14 +64,20 @@ func createSynthesizedVoice(ctx context.Context, params *CreateSynthesisVoicePar
 
 	resp, err := client.SynthesizeSpeech(ctx, &req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	if err := infrastructure.CreateFileToGCS(ctx, bucketName, filePath, "audio/mpeg", resp.AudioContent); err != nil {
-		return err
+	if filePath != "" {
+		if err := infrastructure.CreateFileToGCS(ctx, bucketName, filePath, "audio/mpeg", resp.AudioContent); err != nil {
+			return nil, err
+		}
 	}
 
-	return nil
+	return resp.AudioContent, nil
+}
+
+func CloudStorageVoiceFilePath(lessonID, voiceID int64) string {
+	return fmt.Sprintf("voice/%d/%d.mp3", lessonID, voiceID)
 }
 
 func getSignedURLOfVoiceFile(ctx context.Context, lessonID int64, voiceID int64, bucketName, filePath string, url *string) error {

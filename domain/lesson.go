@@ -188,7 +188,7 @@ func UpdateLessonAndMaterial(ctx context.Context, lesson *Lesson, needsCopyThumb
 
 	if lesson.Status != LessonStatusDraft {
 		taskName := infrastructure.LessonCompressingTaskName(lesson.ID, currentTime, requestID)
-		if err := createLessonMaterialForCompress(ctx, taskName, &lessonMaterial); err != nil {
+		if err := createLessonMaterialForCompressing(ctx, taskName, &lessonMaterial); err != nil {
 			return err
 		}
 
@@ -224,30 +224,6 @@ func setCategoryAndSubject(ctx context.Context, lesson *Lesson) error {
 func updateLessonInTransaction(tx *datastore.Transaction, lesson *Lesson) error {
 	key := datastore.IDKey("Lesson", lesson.ID, nil)
 	if _, err := tx.Put(key, lesson); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func createLessonMaterialForCompress(ctx context.Context, id string, lessonMaterial *LessonMaterial) error {
-	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
-	if err != nil {
-		return err
-	}
-
-	key := datastore.NameKey("LessonMaterialForCompress", id, nil)
-	if _, err := client.Put(ctx, key, lessonMaterial); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func createCompressingTask(ctx context.Context, taskName string, materialID int64, currentTime time.Time) error {
-	taskEta := currentTime.Add(5 * time.Minute)
-	// タスクに必要な情報はtaskNameで事足りるのでmessageは空文字でよい
-	if _, err := infrastructure.CreateTask(ctx, taskName, taskEta, ""); err != nil {
 		return err
 	}
 
