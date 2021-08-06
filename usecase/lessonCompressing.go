@@ -30,13 +30,15 @@ func CompreesLesson(request *http.Request, lessonID int64, taskName string, queu
 	lessonMaterial, err := domain.GetLessonMaterialForCompressing(ctx, taskName)
 	if err != nil {
 		if ok := errors.Is(err, domain.AlreadyCompressed); ok {
-			log.Println("LessonMaterialForCompressのIsCompressingがtrueなので終了")
+			log.Println("LessonMaterialForCompressingのIsCompressingがtrueなので終了")
 			return nil
 		}
+		log.Printf("GetLessonMaterialForCompressing error: %v\n", err.Error())
 		return err
 	}
 
 	if err := domain.CompressLesson(ctx, lessonID, taskName, &lessonMaterial); err != nil {
+		log.Printf("CompressLesson error: %v\n", err.Error())
 		return err
 	}
 

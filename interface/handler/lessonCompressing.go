@@ -1,13 +1,13 @@
 package handler
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
 	"strings"
 
 	"github.com/labstack/echo/v4"
+	"github.com/super-dog-human/teraconnectgo/usecase"
 )
 
 func postLessonCompressing(c echo.Context) error {
@@ -35,9 +35,9 @@ func postLessonCompressing(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 
-	fmt.Printf("queueName: %v\n", queueName)
-	fmt.Printf("lessonID: %v\n", lessonID)
-	fmt.Printf("queuedUnixNanoTime: %v\n", queuedUnixNanoTime)
+	if err = usecase.CompreesLesson(request, lessonID, taskName, queuedUnixNanoTime); err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
 
 	return c.JSON(http.StatusCreated, "succeeded.")
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"time"
 
 	"cloud.google.com/go/datastore"
@@ -114,26 +115,25 @@ func DeleteLessonMaterialForCompress(ctx context.Context, id string) error {
 }
 
 func CompressLesson(ctx context.Context, lessonID int64, taskName string, lessonMaterial *LessonMaterialForCompressing) error {
-	workingDir := "/tmp/" + taskName
-
-	if err := os.Mkdir(workingDir, 0644); err != nil {
+	workingDir, err := ioutil.TempDir(os.TempDir(), taskName)
+	if err != nil {
 		return err
 	}
+
+	defer func() {
+		_ = os.RemoveAll(workingDir) // 一時ファイルの削除に失敗しても実害はないのでエラーに関知しない
+	}()
 
 	if err := downloadOrCreateVoiceFiles(ctx, lessonID, workingDir, lessonMaterial); err != nil {
 		return err
 	}
 
-	if err := mixAllAudios(lessonID, workingDir, &lessonMaterial.Speeches); err != nil {
+	if err := mixAllAudios(lessonID, workingDir, &lessonMaterial.Musics, &lessonMaterial.Speeches); err != nil {
 		return err
 	}
 
 	if err := createCompressedMaterialToCloudStorage(lessonMaterial); err != nil {
 		return err
-	}
-
-	if err := os.RemoveAll(workingDir); err != nil {
-		return nil // 一時ファイルの削除に失敗しても実害はないので握り潰す
 	}
 
 	return nil
@@ -193,7 +193,7 @@ func downloadOrCreateVoiceFiles(ctx context.Context, lessonID int64, workingDir 
 			}
 		}
 
-		tmpFilePath := fmt.Sprintf("%d.mp3", speech.VoiceID)
+		tmpFilePath := fmt.Sprintf("%s/%d.mp3", workingDir, speech.VoiceID)
 		if err := ioutil.WriteFile(tmpFilePath, voiceFile, 0644); err != nil {
 			return err
 		}
@@ -202,7 +202,28 @@ func downloadOrCreateVoiceFiles(ctx context.Context, lessonID int64, workingDir 
 	return nil
 }
 
-func mixAllAudios(lessonID int64, workindDir string, speeches *[]LessonSpeech) error {
+func mixAllAudios(lessonID int64, workindDir string, musics *[]LessonMusic, speeches *[]LessonSpeech) error {
+	//	filename := workingDir + fmt.Sprintf("%d.mp3", speech.VoiceID)
+
+	out, err := exec.Command("ffmpeg", "-version").Output()
+	if err != nil {
+		return err
+	}
+	fmt.Printf("%v\n", string(out))
+
+	for _, speech := range *speeches {
+		fmt.Printf("%v\n", speech)
+	}
+
+	/*
+		out, err = exec.Command("ffmpeg", "-i", workindDir+"/5122084296458240.mp3", "-i", workindDir+"/5633442834284544.mp3", workindDir+"/out.mp3", "-acodec", "copy").Output()
+		if err != nil {
+			fmt.Printf("err...: %v\n", err)
+			fmt.Printf("out...: %v\n", string(out))
+			return err
+		}
+		fmt.Printf("%v\n", string(out))
+	*/
 	return nil
 }
 
