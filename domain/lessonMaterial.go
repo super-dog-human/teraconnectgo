@@ -64,7 +64,7 @@ type LessonEmbedding struct {
 }
 
 type LessonGraphic struct {
-	ElapsedTime float64       `json:"elapsedTime"`
+	ElapsedTime float32       `json:"elapsedTime"`
 	GraphicID   int64         `json:"graphicID"`
 	Action      GraphicAction `json:"action"`
 }
