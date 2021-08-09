@@ -140,7 +140,7 @@ func UpdateLessonMaterial(request *http.Request, id int64, lessonID int64, param
 		return LessonMaterialNotAvailable
 	}
 
-	targetFields := []string{"Avatars", "Drawings", "Embeddings", "Graphics", "Musics", "Speeches"}
+	targetFields := []string{"DurationSec", "Avatars", "Drawings", "Embeddings", "Graphics", "Musics", "Speeches"}
 	if err := domain.UpdateLessonMaterial(ctx, id, lessonID, params, &targetFields); err != nil {
 		return err
 	}

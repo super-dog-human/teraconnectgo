@@ -42,7 +42,7 @@ func CompreesLesson(request *http.Request, lessonID int64, taskName string, queu
 		return err
 	}
 
-	if err = domain.UpdateLessonAfterCompressing(ctx, lessonID, lesson.Updated); err != nil {
+	if err = domain.UpdateLessonAfterCompressing(ctx, lessonID, lessonMaterial.durationSec, lesson.Updated); err != nil {
 		// 失敗時も実害はないのでそのまま終了
 		if ok := errors.Is(err, domain.AnotherTaskWillRun); ok {
 			log.Println("このタスク実行中に更新があったのでPublishedは更新せずに終了")

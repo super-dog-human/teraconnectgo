@@ -34,7 +34,7 @@ type Lesson struct {
 	JapaneseCategoryName string            `json:"japaneseCategoryName"`
 	Title                string            `json:"title"`
 	Description          string            `json:"description"`
-	DurationSec          float64           `json:"durationSec"`
+	DurationSec          float32           `json:"durationSec"`
 	ViewCount            int64             `json:"viewCount"`
 	ViewKey              string            `json:"-"`
 	SizeInBytes          int64             `json:"sizeInBytes"`

@@ -68,7 +68,7 @@ func GetLessonMaterialForCompressing(ctx context.Context, id string) (LessonMate
 	return *lessonMaterial, nil
 }
 
-func UpdateLessonAfterCompressing(ctx context.Context, id int64, updated time.Time) error {
+func UpdateLessonAfterCompressing(ctx context.Context, id int64, durationSec float32, updated time.Time) error {
 	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
 	if err != nil {
 		return err
@@ -85,6 +85,7 @@ func UpdateLessonAfterCompressing(ctx context.Context, id int64, updated time.Ti
 			return AnotherTaskWillRun
 		}
 
+		lesson.DurationSec = durationSec
 		lesson.Published = updated
 		if _, err := tx.Put(key, lesson); err != nil {
 			return err
