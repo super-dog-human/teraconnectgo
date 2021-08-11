@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"strconv"
+	"strings"
 	"time"
 
 	"cloud.google.com/go/datastore"
@@ -115,25 +117,29 @@ func DeleteLessonMaterialForCompress(ctx context.Context, id string) error {
 	return nil
 }
 
-func CompressLesson(ctx context.Context, lessonID int64, taskName string, lessonMaterial *LessonMaterialForCompressing) error {
+func CompressLesson(ctx context.Context, lesson *Lesson, taskName string, lessonMaterial *LessonMaterialForCompressing) error {
 	workingDir, err := ioutil.TempDir(os.TempDir(), taskName)
 	if err != nil {
 		return err
 	}
 
 	defer func() {
-		_ = os.RemoveAll(workingDir) // 一時ファイルの削除に失敗しても実害はないのでエラーに関知しない
+		_ = os.RemoveAll(workingDir) // 一時ファイルの削除に失敗しても実害はないのでエラーは関知しない
 	}()
 
-	if err := downloadOrCreateVoiceFiles(ctx, lessonID, workingDir, lessonMaterial); err != nil {
+	if err := downloadBGMFiles(ctx, lesson.ID, workingDir, &lessonMaterial.Musics); err != nil {
 		return err
 	}
 
-	if err := mixAllAudios(lessonID, workingDir, &lessonMaterial.Musics, &lessonMaterial.Speeches); err != nil {
+	if err := downloadOrCreateVoiceFiles(ctx, lesson.ID, workingDir, lessonMaterial); err != nil {
 		return err
 	}
 
-	if err := createCompressedMaterialToCloudStorage(lessonMaterial); err != nil {
+	if err := mixAllSounds(ctx, lesson, workingDir, lessonMaterial.DurationSec, &lessonMaterial.Musics, &lessonMaterial.Speeches); err != nil {
+		return err
+	}
+
+	if err := createCompressedMaterialToCloudStorage(ctx, lessonMaterial); err != nil {
 		return err
 	}
 
@@ -164,6 +170,32 @@ func createCompressingTask(ctx context.Context, taskName string, materialID int6
 	return nil
 }
 
+func downloadBGMFiles(ctx context.Context, lessonID int64, workingDir string, musics *[]LessonMusic) error {
+	for _, music := range *musics {
+		originalFilePath := fmt.Sprintf("bgm/%d.mp3", music.BackgroundMusicID)
+
+		var bgmFile []byte
+		if _, err := os.Stat(originalFilePath); err != nil {
+			bucketName := infrastructure.PublicBucketName()
+			bgmFile, err = infrastructure.GetFileFromGCS(ctx, bucketName, originalFilePath)
+			if err != nil {
+				return err
+			}
+		} else {
+			bgmFile, err = ioutil.ReadFile(originalFilePath) // BGMが既にDL済みならそれを使用
+			if err != nil {
+				return err
+			}
+		}
+
+		tmpFilePath := fmt.Sprintf("%s/bgm_%d.mp3", workingDir, music.BackgroundMusicID)
+		if err := ioutil.WriteFile(tmpFilePath, bgmFile, 0644); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func downloadOrCreateVoiceFiles(ctx context.Context, lessonID int64, workingDir string, lessonMaterial *LessonMaterialForCompressing) error {
 	for _, speech := range lessonMaterial.Speeches {
 		if !speech.IsSynthesis {
@@ -181,7 +213,7 @@ func downloadOrCreateVoiceFiles(ctx context.Context, lessonID int64, workingDir 
 			} else {
 				voiceParams.VoiceSynthesisConfig = speech.SynthesisConfig
 			}
-			// フロント側から声生成は済んでいるはずなので、ここで都度生成することはほぼないはず
+			// フロント側から声生成は済んでいるはずなので、ここで都度生成することはほぼない
 			voiceFile, err = CreateSynthesizedVoice(ctx, &voiceParams, bucketName, "")
 			if err != nil {
 				return err
@@ -203,32 +235,134 @@ func downloadOrCreateVoiceFiles(ctx context.Context, lessonID int64, workingDir 
 	return nil
 }
 
-func mixAllAudios(lessonID int64, workindDir string, musics *[]LessonMusic, speeches *[]LessonSpeech) error {
-	//	filename := workingDir + fmt.Sprintf("%d.mp3", speech.VoiceID)
+func mixAllSounds(ctx context.Context, lesson *Lesson, workingDir string, fullDurationSec float32, musics *[]LessonMusic, speeches *[]LessonSpeech) error {
+	commandOptions := []string{"-y"}
 
-	out, err := exec.Command("ffmpeg", "-version").Output()
+	var inputFiles []string
+	var filters []string
+
+	fullDurationStr := strconv.FormatFloat(float64(fullDurationSec), 'f', 3, 64)
+	silenceFileName := fmt.Sprintf("%s/silence.mp3", workingDir)
+	out, err := exec.Command("ffmpeg", "-f", "lavfi", "-i", "anullsrc=channel_layout=mono", "-t", fullDurationStr, "-ab", "32k", silenceFileName).CombinedOutput()
+	if err != nil {
+		fmt.Printf("%s\n", string(out))
+		return err
+	}
+	inputFiles = append(inputFiles, "-i", silenceFileName)
+
+	for i, music := range *musics {
+		if music.Action == MusicActionStop {
+			continue
+		}
+
+		var nextMusic LessonMusic
+		var durationSec float32
+		if i+1 < len(*musics) {
+			nextMusic = (*musics)[i+1]
+			durationSec = nextMusic.ElapsedTime - music.ElapsedTime
+		} else {
+			durationSec = fullDurationSec - music.ElapsedTime
+		}
+
+		originalBgmFileName := fmt.Sprintf("%s/bgm_%d.mp3", workingDir, music.BackgroundMusicID)
+		currentBgmFileName := fmt.Sprintf("%s/fixed_bgm_%d.mp3", workingDir, i)
+		inputFiles = append(inputFiles, "-i", currentBgmFileName)
+
+		musicDuration := strconv.FormatFloat(float64(durationSec), 'f', 3, 64)
+		out, err := exec.Command("ffmpeg", "-stream_loop", "-1", "-fflags", "+genpts", "-i", originalBgmFileName, "-t", musicDuration, "-c", "copy", currentBgmFileName).CombinedOutput()
+		if err != nil {
+			fmt.Printf("%s\n", string(out))
+			return err
+		}
+
+		fileIndex := len(inputFiles)/2 - 1
+		filters = append(filters, musicFilter(fileIndex, durationSec, &music, &nextMusic))
+	}
+
+	for _, speech := range *speeches {
+		delayMilliSec := speech.ElapsedTime * 1000
+		voiceFileName := fmt.Sprintf("%s/%d.mp3", workingDir, speech.VoiceID)
+		inputFiles = append(inputFiles, "-i", voiceFileName)
+		fileIndex := len(inputFiles)/2 - 1
+		filters = append(filters, fmt.Sprintf("[%d:a]adelay=%f|%f[%d];", fileIndex, delayMilliSec, delayMilliSec, fileIndex))
+	}
+
+	inputsCount := len(inputFiles) / 2
+	allInputs := func() string {
+		var inputs string
+		for i := 0; i < inputsCount; i++ {
+			inputs += fmt.Sprintf("[%d]", i)
+		}
+		return inputs
+	}()
+	outputFilePath := fmt.Sprintf("%s/speech.mp3", workingDir)
+
+	commandOptions = append(commandOptions, inputFiles...)
+	commandOptions = append(commandOptions, "-filter_complex") // filter_complexの引数のエスケープはexec.Commandが自動でつけてくれる
+	commandOptions = append(commandOptions, fmt.Sprintf("%s%samix=dropout_transition=600000:inputs=%d,volume=%d", strings.Join(filters, " "), allInputs, inputsCount, inputsCount))
+	commandOptions = append(commandOptions, "-ar", "44100", "-ab", "128k", "-acodec", "libmp3lame", outputFilePath)
+
+	out, err = exec.Command("ffmpeg", commandOptions...).CombinedOutput()
+	if err != nil {
+		fmt.Printf("ffmpeg %s\n", strings.Join(commandOptions, " "))
+		fmt.Printf("%s\n", string(out))
+		return err
+	}
+
+	var bucketName string
+	if lesson.Status == LessonStatusPublic {
+		bucketName = infrastructure.PublicBucketName()
+	} else {
+		bucketName = infrastructure.MaterialBucketName()
+	}
+	bucketFilePath := fmt.Sprintf("lesson/%d/speech.mp3", lesson.ID)
+	outputFile, err := ioutil.ReadFile(outputFilePath)
 	if err != nil {
 		return err
 	}
-	fmt.Printf("%v\n", string(out))
 
-	for _, speech := range *speeches {
-		fmt.Printf("%v\n", speech)
+	if err := infrastructure.CreateFileToGCS(ctx, bucketName, bucketFilePath, "audio/mpeg", outputFile); err != nil {
+		return err
 	}
 
-	/*
-		out, err = exec.Command("ffmpeg", "-i", workindDir+"/5122084296458240.mp3", "-i", workindDir+"/5633442834284544.mp3", workindDir+"/out.mp3", "-acodec", "copy").Output()
-		if err != nil {
-			fmt.Printf("err...: %v\n", err)
-			fmt.Printf("out...: %v\n", string(out))
-			return err
-		}
-		fmt.Printf("%v\n", string(out))
-	*/
 	return nil
 }
 
-func createCompressedMaterialToCloudStorage(lessonMaterial *LessonMaterialForCompressing) error {
+func musicFilter(fileIndex int, durationSec float32, music *LessonMusic, nextMusic *LessonMusic) string {
+	delayMilliSec := music.ElapsedTime * 1000
+
+	var fade string
+	if nextMusic != nil {
+		if music.IsFading && nextMusic.IsFading && nextMusic.Action == MusicActionStop {
+			if durationSec < 6.0 {
+				fade = "afade=t=in:st=0:d=3,afade=t=out:st=3:d=3"
+			} else {
+				fade = fmt.Sprintf("afade=t=in:st=0:d=3,afade=t=out:st=%f:d=3", durationSec-3.0)
+			}
+		} else if music.IsFading {
+			fade = "afade=t=in:st=0:d=3"
+		} else if nextMusic.IsFading && nextMusic.Action == MusicActionStop {
+			if durationSec < 3.0 {
+				fade = "afade=t=out:st=0:d=3"
+			} else {
+				fade = fmt.Sprintf("afade=t=out:st=%f:d=3", durationSec-3.0)
+			}
+
+		}
+	} else {
+		if music.IsFading {
+			fade = "afade=t=in:st=0:d=3"
+		}
+	}
+
+	if fade == "" {
+		return fmt.Sprintf("[%d:a]volume=%f,adelay=%f|%f[%d];", fileIndex, music.Volume, delayMilliSec, delayMilliSec, fileIndex)
+	} else {
+		return fmt.Sprintf("[%d:a]%s,volume=%f,adelay=%f|%f[%d];", fileIndex, fade, music.Volume, delayMilliSec, delayMilliSec, fileIndex)
+	}
+}
+
+func createCompressedMaterialToCloudStorage(ctx context.Context, lessonMaterial *LessonMaterialForCompressing) error {
 	// jsonをzstd圧縮する
 	return nil
 }
