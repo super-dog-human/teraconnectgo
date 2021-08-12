@@ -3,19 +3,19 @@ package infrastructure
 import (
 	"context"
 	"fmt"
-	"os"
 	"strconv"
 	"time"
 
 	cloudtasks "cloud.google.com/go/cloudtasks/apiv2"
-	"github.com/golang/protobuf/ptypes"
 	taskspb "google.golang.org/genproto/googleapis/cloud/tasks/v2"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // 現状ではLessonMaterialの圧縮にしか使用していないので固定値
 const (
-	queueID     string = "compressLesson"
-	relativeUri string = "/lesson_compressing"
+	taskServiceName string = "teraconnect-task"
+	queueID         string = "compressLesson"
+	relativeUri     string = "/lesson_compressing"
 )
 
 func LessonCompressingTaskName(lessonID int64, currentTime time.Time, requestID string) string {
@@ -30,14 +30,10 @@ func CreateTask(ctx context.Context, name string, eta time.Time, message string)
 	}
 	defer client.Close()
 
-	scheduleTime, err := ptypes.TimestampProto(eta)
-	if err != nil {
-		return nil, err
-	}
-
+	scheduleTime := timestamppb.New(eta)
 	queuePath := fmt.Sprintf("projects/%s/locations/%s/queues/%s", ProjectID(), LocationID(), queueID)
 	appEngineRouting := &taskspb.AppEngineRouting{
-		Service: os.Getenv("GAE_SERVICE"),
+		Service: taskServiceName,
 	}
 	taskName := fmt.Sprintf("%s/tasks/%s", queuePath, name)
 	req := &taskspb.CreateTaskRequest{

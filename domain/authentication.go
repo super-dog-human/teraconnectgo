@@ -40,9 +40,13 @@ func (e AuthErrorCode) Error() string {
 	}
 }
 
-var publicKey = loadPublicKey()
+var publicKey *rsa.PublicKey
 
 func loadPublicKey() *rsa.PublicKey {
+	if publicKey != nil {
+		return publicKey
+	}
+
 	keyData, err := ioutil.ReadFile("./public.pem")
 	if err != nil {
 		log.Printf("%v", err)
@@ -55,6 +59,7 @@ func loadPublicKey() *rsa.PublicKey {
 		panic("failed to parse pem file.")
 	}
 
+	publicKey = key
 	return key
 }
 
@@ -70,7 +75,7 @@ func ValidTokenClaims(r *http.Request) (map[string]interface{}, error) {
 		if !ok {
 			return nil, UnexpectedSigningMethod
 		}
-		return publicKey, nil
+		return loadPublicKey(), nil
 	})
 	if err != nil {
 		return nil, err
