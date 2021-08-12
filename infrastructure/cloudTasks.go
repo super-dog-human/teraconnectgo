@@ -13,9 +13,8 @@ import (
 
 // 現状ではLessonMaterialの圧縮にしか使用していないので固定値
 const (
-	taskServiceName string = "teraconnect-task"
-	queueID         string = "compressLesson"
-	relativeUri     string = "/lesson_compressing"
+	queueID     string = "compressLesson"
+	relativeUri string = "/lesson_compressing"
 )
 
 func LessonCompressingTaskName(lessonID int64, currentTime time.Time, requestID string) string {
@@ -32,18 +31,14 @@ func CreateTask(ctx context.Context, name string, eta time.Time, message string)
 
 	scheduleTime := timestamppb.New(eta)
 	queuePath := fmt.Sprintf("projects/%s/locations/%s/queues/%s", ProjectID(), LocationID(), queueID)
-	appEngineRouting := &taskspb.AppEngineRouting{
-		Service: taskServiceName,
-	}
 	taskName := fmt.Sprintf("%s/tasks/%s", queuePath, name)
 	req := &taskspb.CreateTaskRequest{
 		Parent: queuePath,
 		Task: &taskspb.Task{
 			MessageType: &taskspb.Task_AppEngineHttpRequest{
 				AppEngineHttpRequest: &taskspb.AppEngineHttpRequest{
-					HttpMethod:       taskspb.HttpMethod_POST,
-					RelativeUri:      relativeUri,
-					AppEngineRouting: appEngineRouting,
+					HttpMethod:  taskspb.HttpMethod_POST,
+					RelativeUri: relativeUri,
 				},
 			},
 			Name:         taskName,

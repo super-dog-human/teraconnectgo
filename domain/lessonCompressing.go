@@ -23,7 +23,12 @@ func createLessonMaterialForCompressing(ctx context.Context, id string, lessonMa
 }
 
 func createCompressingTask(ctx context.Context, taskName string, materialID int64, currentTime time.Time) error {
-	taskEta := currentTime.Add(5 * time.Minute)
+	var taskEta time.Time
+	if infrastructure.AppEnv() == "production" {
+		taskEta = currentTime.Add(5 * time.Minute)
+	} else {
+		taskEta = currentTime.Add(1 * time.Minute)
+	}
 	// タスクに必要な情報はtaskNameで事足りるのでmessageは空文字でよい
 	if _, err := infrastructure.CreateTask(ctx, taskName, taskEta, ""); err != nil {
 		return err
