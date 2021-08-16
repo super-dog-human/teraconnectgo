@@ -13,6 +13,7 @@ import (
 )
 
 type getLessonMaterialShortResponse struct {
+	DurationSec          float32                     `json:"durationSec"`
 	AvatarID             int64                       `json:"avatarID"`
 	Avatar               domain.Avatar               `json:"avatar"`
 	AvatarLightColor     string                      `json:"avatarLightColor"`
