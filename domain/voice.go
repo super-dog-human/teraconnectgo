@@ -2,11 +2,11 @@ package domain
 
 import (
 	"context"
-	"fmt"
-	"strconv"
+	"strings"
 	"time"
 
 	"cloud.google.com/go/datastore"
+	"github.com/google/uuid"
 	"github.com/super-dog-human/teraconnectgo/infrastructure"
 )
 
@@ -28,15 +28,15 @@ func (e VoiceErrorCode) Error() string {
 // Voice is used for lesson.
 type Voice struct {
 	ID          int64     `json:"id" datastore:"-"`
-	UserID      int64     `json:"userID"`
-	ElapsedTime float32   `json:"elapsedTime"`
-	DurationSec float32   `json:"durationSec"`
-	Text        string    `json:"text"`
-	IsTexted    bool      `json:"isTexted"`
-	IsSynthesis bool      `json:"-"`
-	URL         string    `json:"url,omitempty" datastore:"-"`
-	Created     time.Time `json:"created"`
-	Updated     time.Time `json:"updated"`
+	UserID      int64     `json:"userID" datastore:",noindex"`
+	FileKey     string    `json:"fileKey" datastore:",noindex"`
+	ElapsedTime float32   `json:"elapsedTime" datastore:",noindex"`
+	DurationSec float32   `json:"durationSec" datastore:",noindex"`
+	Text        string    `json:"text" datastore:",noindex"`
+	IsTexted    bool      `json:"isTexted" datastore:",noindex"`
+	IsSynthesis bool      `json:"-" datastore:",noindex"`
+	Created     time.Time `json:"created" datastore:",noindex"`
+	Updated     time.Time `json:"updated" datastore:",noindex"`
 }
 
 // GetVoice is get voice entities belongs to lesson.
@@ -54,8 +54,6 @@ func GetVoice(ctx context.Context, lessonID int64, voice *Voice) error {
 		}
 		return err
 	}
-
-	storeVoiceURL(ctx, lessonID, voice)
 
 	return nil
 }
@@ -95,6 +93,12 @@ func CreateVoice(ctx context.Context, lessonID int64, voice *Voice) error {
 		return err
 	}
 
+	uuid, err := uuid.NewRandom()
+	if err != nil {
+		return err
+	}
+
+	voice.FileKey = strings.Replace(uuid.String(), "-", "", -1)
 	voice.Created = time.Now()
 
 	ancestor := datastore.IDKey("Lesson", lessonID, nil)
@@ -105,23 +109,6 @@ func CreateVoice(ctx context.Context, lessonID int64, voice *Voice) error {
 	}
 
 	voice.ID = putKey.ID
-
-	return nil
-}
-
-func storeVoiceURL(ctx context.Context, lessonID int64, voice *Voice) error {
-	lessonIDString := strconv.FormatInt(lessonID, 10)
-
-	fileID := strconv.FormatInt(voice.ID, 10)
-	filePath := fmt.Sprintf("voice/%s/%s.mp3", lessonIDString, fileID)
-	bucketName := infrastructure.MaterialBucketName()
-
-	url, err := infrastructure.GetGCSSignedURL(ctx, bucketName, filePath, "GET", "")
-	if err != nil {
-		return err
-	}
-
-	voice.URL = url
 
 	return nil
 }

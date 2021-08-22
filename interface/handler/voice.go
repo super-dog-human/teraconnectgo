@@ -67,11 +67,18 @@ func postVoice(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 
-	signedURL, err := usecase.CreateVoiceAndBlankFile(c.Request(), param)
+	voice, signedURL, err := usecase.CreateVoiceAndBlankFile(c.Request(), param)
 	if err != nil {
 		fatalLog(err)
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, signedURL)
+	response := synthesisVoiceResponse{ID: voice.ID, FileKey: voice.FileKey, SignedURL: signedURL}
+	return c.JSON(http.StatusOK, response)
+}
+
+type synthesisVoiceResponse struct {
+	ID        int64  `json:"id"`
+	FileKey   string `json:"fileKey"`
+	SignedURL string `json:"signedURL"`
 }

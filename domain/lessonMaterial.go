@@ -82,6 +82,7 @@ type LessonSpeech struct {
 	ElapsedTime     float32              `json:"elapsedTime"`
 	DurationSec     float32              `json:"durationSec"`
 	VoiceID         int64                `json:"voiceID"`
+	VoiceFileKey    string               `json:"voiceFileKey"`
 	Subtitle        string               `json:"subtitle"`
 	Caption         Caption              `json:"caption"`
 	IsSynthesis     bool                 `json:"isSynthesis"`

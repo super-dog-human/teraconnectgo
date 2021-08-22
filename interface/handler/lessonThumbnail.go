@@ -23,11 +23,11 @@ func postLessonThumbnail(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	response := response{url}
+	response := thumbnailResponse{url}
 
 	return c.JSON(http.StatusCreated, response)
 }
 
-type response struct {
+type thumbnailResponse struct {
 	URL string `json:"url"`
 }

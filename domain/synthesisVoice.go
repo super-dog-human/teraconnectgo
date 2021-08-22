@@ -6,7 +6,6 @@ import (
 
 	texttospeech "cloud.google.com/go/texttospeech/apiv1"
 	"github.com/super-dog-human/teraconnectgo/infrastructure"
-	"golang.org/x/sync/errgroup"
 	texttospeechpb "google.golang.org/genproto/googleapis/cloud/texttospeech/v1"
 )
 
@@ -17,27 +16,15 @@ type CreateSynthesisVoiceParam struct {
 }
 
 // CreateSynthesisVoice is creates new voice.
-func CreateSynthesisVoice(ctx context.Context, params *CreateSynthesisVoiceParam, voiceID int64) (string, error) {
-	g, ctx := errgroup.WithContext(ctx)
+func CreateSynthesisVoice(ctx context.Context, params *CreateSynthesisVoiceParam, voice Voice) error {
+	bucketName := infrastructure.PublicBucketName()
+	filePath := CloudStorageVoiceFilePath(params.LessonID, voice.ID, voice.FileKey)
 
-	bucketName := infrastructure.MaterialBucketName()
-	filePath := CloudStorageVoiceFilePath(params.LessonID, voiceID)
-
-	g.Go(func() error {
-		_, err := CreateSynthesizedVoice(ctx, params, bucketName, filePath)
+	if _, err := CreateSynthesizedVoice(ctx, params, bucketName, filePath); err != nil {
 		return err
-	})
-
-	var url string
-	g.Go(func() error {
-		return getSignedURLOfVoiceFile(ctx, params.LessonID, voiceID, bucketName, filePath, &url)
-	})
-
-	if err := g.Wait(); err != nil {
-		return "", err
 	}
 
-	return url, nil
+	return nil
 }
 
 func CreateSynthesizedVoice(ctx context.Context, params *CreateSynthesisVoiceParam, bucketName, filePath string) ([]byte, error) {
@@ -76,17 +63,6 @@ func CreateSynthesizedVoice(ctx context.Context, params *CreateSynthesisVoicePar
 	return resp.AudioContent, nil
 }
 
-func CloudStorageVoiceFilePath(lessonID, voiceID int64) string {
-	return fmt.Sprintf("voice/%d/%d.mp3", lessonID, voiceID)
-}
-
-func getSignedURLOfVoiceFile(ctx context.Context, lessonID int64, voiceID int64, bucketName, filePath string, url *string) error {
-	result, err := infrastructure.GetGCSSignedURL(ctx, bucketName, filePath, "GET", "")
-	if err != nil {
-		return err
-	}
-
-	*url = result
-
-	return nil
+func CloudStorageVoiceFilePath(lessonID, voiceID int64, voiceFileKey string) string {
+	return fmt.Sprintf("voice/%d/%d_%s.mp3", lessonID, voiceID, voiceFileKey)
 }

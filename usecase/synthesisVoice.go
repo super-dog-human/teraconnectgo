@@ -26,12 +26,9 @@ func CreateSynthesisVoice(request *http.Request, params *domain.CreateSynthesisV
 		return voice, err
 	}
 
-	mp3URL, err := domain.CreateSynthesisVoice(ctx, params, voice.ID)
-	if err != nil {
+	if err := domain.CreateSynthesisVoice(ctx, params, voice); err != nil {
 		return voice, err
 	}
-
-	voice.URL = mp3URL
 
 	return voice, nil
 }

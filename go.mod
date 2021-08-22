@@ -8,7 +8,7 @@ require (
 	cloud.google.com/go/storage v1.16.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
-	github.com/golang/protobuf v1.5.2
+	github.com/google/uuid v1.1.2
 	github.com/imdario/mergo v0.3.12
 	github.com/jinzhu/copier v0.3.2
 	github.com/labstack/echo/v4 v4.5.0
@@ -23,5 +23,5 @@ require (
 	google.golang.org/api v0.52.0
 	google.golang.org/genproto v0.0.0-20210805201207-89edb61ffb67
 	google.golang.org/grpc v1.39.1 // indirect
-	google.golang.org/protobuf v1.27.1 // indirect
+	google.golang.org/protobuf v1.27.1
 )

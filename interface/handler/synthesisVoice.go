@@ -26,5 +26,12 @@ func postSynthesisVoice(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, voice)
+	response := voiceResponse{ID: voice.ID, FileKey: voice.FileKey}
+
+	return c.JSON(http.StatusOK, response)
+}
+
+type voiceResponse struct {
+	ID      int64  `json:"id"`
+	FileKey string `json:"fileKey"`
 }

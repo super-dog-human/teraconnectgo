@@ -47,45 +47,40 @@ func GetVoices(request *http.Request, lessonID int64) ([]domain.Voice, error) {
 	return voices, nil
 }
 
-// CreateVoiceAndBlankFile creates Voice and blank files of mp3 and wav.
-func CreateVoiceAndBlankFile(request *http.Request, params *CreateVoiceParam) (infrastructure.SignedURL, error) {
+// CreateVoiceAndBlankFile creates Voice and blank mp3 file.
+func CreateVoiceAndBlankFile(request *http.Request, params *CreateVoiceParam) (domain.Voice, string, error) {
 	ctx := request.Context()
 
-	var response infrastructure.SignedURL
+	var voice domain.Voice
 
 	userID, err := currentUserAccessToLesson(ctx, request, params.LessonID)
 	if err != nil {
-		return response, err
+		return voice, "", err
 	}
 
-	voice := domain.Voice{
-		UserID:      userID,
-		ElapsedTime: params.ElapsedTime,
-		DurationSec: params.DurationSec,
-	}
+	voice.UserID = userID
+	voice.ElapsedTime = params.ElapsedTime
+	voice.DurationSec = params.DurationSec
 
 	if err = domain.CreateVoice(ctx, params.LessonID, &voice); err != nil {
-		return response, err
+		return voice, "", err
 	}
 
 	lessonID := strconv.FormatInt(params.LessonID, 10)
-	voiceID := strconv.FormatInt(voice.ID, 10)
+	fileName := strconv.FormatInt(voice.ID, 10) + "_" + voice.FileKey
 
 	mp3FileRequest := infrastructure.FileRequest{
-		ID:          voiceID,
+		ID:          fileName,
 		Entity:      "voice",
 		Extension:   "mp3",
 		ContentType: "audio/mpeg",
 	}
 
-	filePath := lessonID + "/" + voiceID
-	mp3URL, err := infrastructure.CreateBlankFileToGCS(ctx, filePath, "voice", mp3FileRequest)
+	filePath := lessonID + "/" + fileName
+	mp3URL, err := infrastructure.CreateBlankFileToPublicGCS(ctx, filePath, "voice", mp3FileRequest)
 	if err != nil {
-		return response, err
+		return voice, mp3URL, err
 	}
 
-	response.FileID = voiceID
-	response.SignedURL = mp3URL
-
-	return response, nil
+	return voice, mp3URL, nil
 }
