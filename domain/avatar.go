@@ -154,7 +154,7 @@ func GetPublicAvatars(ctx context.Context) ([]Avatar, error) {
 
 func createAvatarPublicURL(id int64) string {
 	fileID := strconv.FormatInt(id, 10)
-	return "https://storage.googleapis.com/" + infrastructure.PublicBucketName() + "/avatar/" + fileID + ".vrm"
+	return infrastructure.CloudStorageURL + infrastructure.PublicBucketName() + "/avatar/" + fileID + ".vrm"
 }
 
 func createAvatarSignedURLs(ctx context.Context, id int64) (string, error) {

@@ -42,6 +42,8 @@ type EntityBelongToFile struct {
 
 var iamService *iam.Service
 
+const CloudStorageURL string = "https://storage.googleapis.com/"
+
 func init() {
 	cred, err := google.DefaultClient(context.Background(), iam.CloudPlatformScope)
 	if err != nil {
@@ -182,12 +184,12 @@ func DeleteObjectFromGCS(ctx context.Context, bucketName string, filePath string
 
 // GetPublicBackgroundImageURL returns public image file URL in GCS.
 func GetPublicBackgroundImageURL(id string) string {
-	return "https://storage.googleapis.com/" + PublicBucketName() + "/background/" + id + ".jpg"
+	return CloudStorageURL + PublicBucketName() + "/background/" + id + ".jpg"
 }
 
 // GetPublicBackgroundMusicURL returns public audio file URL in GCS.
 func GetPublicBackgroundMusicURL(id string) string {
-	return "https://storage.googleapis.com/" + PublicBucketName() + "/bgm/" + id + ".mp3"
+	return CloudStorageURL + PublicBucketName() + "/bgm/" + id + ".mp3"
 }
 
 func StorageObjectFilePath(entity string, id string, extension string) string {

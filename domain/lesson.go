@@ -23,8 +23,8 @@ type Lesson struct {
 	IsPacked             bool              `json:"isPacked"`       // 公開準備の完了
 	HasThumbnail         bool              `json:"hasThumbnail"`
 	ThumbnailURL         string            `json:"thumbnailURL" datastore:"-"`
-	AudioURL             string            `json:"audioURL" datastore:"-"`
-	CompressedURL        string            `json:"compressedURL" datastore:"-"`
+	SpeechURL            string            `json:"speechURL" datastore:"-"`
+	BodyURL              string            `json:"bodyURL" datastore:"-"`
 	Status               LessonStatus      `json:"status"`
 	References           []LessonReference `json:"references"`
 	Reviews              []LessonReview    `json:"reviews"`

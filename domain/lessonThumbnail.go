@@ -100,7 +100,7 @@ func thumbnailFilePath(id string) string {
 
 func createPublicURL(id int64) string {
 	idStr := strconv.FormatInt(id, 10)
-	return "https://storage.googleapis.com/" + infrastructure.PublicBucketName() + "/" + thumbnailFilePath(idStr)
+	return infrastructure.CloudStorageURL + infrastructure.PublicBucketName() + "/" + thumbnailFilePath(idStr)
 }
 
 func createSignedURL(ctx context.Context, id int64) (string, error) {

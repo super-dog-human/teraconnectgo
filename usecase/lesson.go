@@ -2,11 +2,13 @@ package usecase
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"cloud.google.com/go/datastore"
 	"github.com/jinzhu/copier"
 	"github.com/super-dog-human/teraconnectgo/domain"
+	"github.com/super-dog-human/teraconnectgo/infrastructure"
 )
 
 type LessonErrorCode uint
@@ -72,15 +74,18 @@ func GetPublicLesson(request *http.Request, id int64) (domain.Lesson, error) {
 		return lesson, err
 	}
 
+	if lesson.Status != domain.LessonStatusPublic && lesson.Status != domain.LessonStatusLimited {
+	}
+
 	if err = setRelationLessonTitle(ctx, &lesson); err != nil {
+		return lesson, LessonNotAvailable
+	}
+
+	if err = setResourceURLs(ctx, &lesson); err != nil {
 		return lesson, err
 	}
 
-	if lesson.Status == domain.LessonStatusPublic {
-		return lesson, nil
-	}
-
-	return lesson, LessonNotAvailable
+	return lesson, nil
 }
 
 func GetPrivateLesson(request *http.Request, id int64) (domain.Lesson, error) {
@@ -195,6 +200,33 @@ func setRelationLessonTitle(ctx context.Context, lesson *domain.Lesson) error {
 			return err
 		}
 		lesson.NextLessonTitle = nextLesson.Title
+	}
+
+	return nil
+}
+
+func setResourceURLs(ctx context.Context, lesson *domain.Lesson) error {
+	speechFilePath := fmt.Sprintf("lesson/%d/speech.mp3", lesson.ID)
+	bodyFilePath := fmt.Sprintf("lesson/%d/body.zst", lesson.ID)
+
+	if lesson.Status == domain.LessonStatusPublic {
+		lesson.SpeechURL = infrastructure.CloudStorageURL + infrastructure.PublicBucketName() + "/" + speechFilePath
+		lesson.BodyURL = infrastructure.CloudStorageURL + infrastructure.PublicBucketName() + "/" + bodyFilePath
+	} else if lesson.Status == domain.LessonStatusLimited {
+		fileType := "" // this is unnecessary when GET request
+		bucketName := infrastructure.MaterialBucketName()
+
+		speechURL, err := infrastructure.GetGCSSignedURL(ctx, bucketName, speechFilePath, "GET", fileType)
+		if err != nil {
+			return err
+		}
+		lesson.SpeechURL = speechURL
+
+		BodyURL, err := infrastructure.GetGCSSignedURL(ctx, bucketName, bodyFilePath, "GET", fileType)
+		if err != nil {
+			return err
+		}
+		lesson.BodyURL = BodyURL
 	}
 
 	return nil
