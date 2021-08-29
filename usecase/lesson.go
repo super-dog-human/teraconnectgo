@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -81,6 +82,10 @@ func GetPublicLesson(request *http.Request, id int64) (domain.Lesson, error) {
 		return lesson, LessonNotAvailable
 	}
 
+	if err = setAvatar(ctx, &lesson); err != nil {
+		return lesson, err
+	}
+
 	if err = setResourceURLs(ctx, &lesson); err != nil {
 		return lesson, err
 	}
@@ -105,10 +110,6 @@ func GetPrivateLesson(request *http.Request, id int64) (domain.Lesson, error) {
 
 	if lesson.UserID != currentUser.ID {
 		return lesson, InvalidLessonParams
-	}
-
-	if err = setRelationLessonTitle(ctx, &lesson); err != nil {
-		return lesson, err
 	}
 
 	return lesson, nil
@@ -201,6 +202,28 @@ func setRelationLessonTitle(ctx context.Context, lesson *domain.Lesson) error {
 		}
 		lesson.NextLessonTitle = nextLesson.Title
 	}
+
+	return nil
+}
+
+func setAvatar(ctx context.Context, lesson *domain.Lesson) error {
+	if lesson.AvatarID == 0 {
+		return nil
+	}
+
+	avatar, err := domain.GetPublicAvatarByID(ctx, lesson.AvatarID)
+	if err != nil {
+		if ok := errors.Is(err, domain.AvatarNotFound); ok {
+			avatar, err = domain.GetCurrentUsersAvatarByID(ctx, lesson.AvatarID, lesson.UserID)
+			if err != nil {
+				return err
+			}
+		} else {
+			return err
+		}
+	}
+
+	lesson.Avatar = avatar
 
 	return nil
 }
