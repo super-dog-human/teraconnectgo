@@ -2,11 +2,9 @@ package domain
 
 import (
 	"context"
-	"strings"
 	"time"
 
 	"cloud.google.com/go/datastore"
-	"github.com/google/uuid"
 	"github.com/super-dog-human/teraconnectgo/infrastructure"
 )
 
@@ -93,12 +91,12 @@ func CreateVoice(ctx context.Context, lessonID int64, voice *Voice) error {
 		return err
 	}
 
-	uuid, err := uuid.NewRandom()
+	uuid, err := UUIDWithoutHypen()
 	if err != nil {
 		return err
 	}
 
-	voice.FileKey = strings.Replace(uuid.String(), "-", "", -1)
+	voice.FileKey = uuid
 	voice.Created = time.Now()
 
 	ancestor := datastore.IDKey("Lesson", lessonID, nil)

@@ -4,7 +4,18 @@ import (
 	"encoding/json"
 	"reflect"
 	"strings"
+
+	"github.com/google/uuid"
 )
+
+func UUIDWithoutHypen() (string, error) {
+	uuid, err := uuid.NewRandom()
+	if err != nil {
+		return "", err
+	}
+
+	return strings.Replace(uuid.String(), "-", "", -1), nil
+}
 
 func MergeJsonToStruct(jsonDiff *map[string]interface{}, origin interface{}, allowFields *[]string) {
 	allKeys := TopLevelStructKeys(origin)
