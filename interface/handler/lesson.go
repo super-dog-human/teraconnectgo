@@ -48,7 +48,8 @@ func getLesson(c echo.Context) error {
 	if c.QueryParam("for_authoring") == "true" {
 		lesson, err = usecase.GetPrivateLesson(c.Request(), id)
 	} else {
-		lesson, err = usecase.GetPublicLesson(c.Request(), id)
+		viewKey := c.QueryParam("view_key")
+		lesson, err = usecase.GetPublicLesson(c.Request(), id, viewKey)
 	}
 
 	if err != nil {

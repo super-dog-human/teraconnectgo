@@ -38,7 +38,7 @@ type Lesson struct {
 	Description          string            `json:"description"`
 	DurationSec          float32           `json:"durationSec"`
 	ViewCount            int64             `json:"viewCount"`
-	ViewKey              string            `json:"-"`
+	ViewKey              string            `json:"viewKey"`
 	SizeInBytes          int64             `json:"sizeInBytes"`
 	Created              time.Time         `json:"created"`
 	Updated              time.Time         `json:"updated"`
@@ -168,6 +168,13 @@ func UpdateLessonAndMaterial(ctx context.Context, lesson *Lesson, needsCopyThumb
 	}
 
 	currentTime := time.Now()
+	if lesson.Status == LessonStatusLimited && lesson.ViewKey == "" {
+		uuid, err := UUIDWithoutHypen()
+		if err != nil {
+			return err
+		}
+		lesson.ViewKey = uuid
+	}
 	lesson.Updated = currentTime
 
 	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())

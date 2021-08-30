@@ -56,7 +56,7 @@ func GetLessonsByConditions(request *http.Request) ([]domain.Lesson, error) {
 }
 
 // GetPublicLesson for fetch the lesson by id
-func GetPublicLesson(request *http.Request, id int64) (domain.Lesson, error) {
+func GetPublicLesson(request *http.Request, id int64, viewKey string) (domain.Lesson, error) {
 	ctx := request.Context()
 
 	_, err := domain.GetCurrentUser(request)
@@ -76,6 +76,11 @@ func GetPublicLesson(request *http.Request, id int64) (domain.Lesson, error) {
 	}
 
 	if lesson.Status != domain.LessonStatusPublic && lesson.Status != domain.LessonStatusLimited {
+		return lesson, LessonNotAvailable
+	}
+
+	if lesson.Status == domain.LessonStatusLimited && lesson.ViewKey != viewKey {
+		return lesson, LessonNotAvailable
 	}
 
 	if err = setRelationLessonTitle(ctx, &lesson); err != nil {

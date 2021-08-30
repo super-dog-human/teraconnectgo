@@ -86,6 +86,33 @@ func GetGraphicsByLessonID(ctx context.Context, lessonID int64, graphics *[]*Gra
 	return nil
 }
 
+func GetGraphicsByIDs(ctx context.Context, userID int64, ids []int64) ([]*Graphic, error) {
+	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
+	if err != nil {
+		return nil, err
+	}
+
+	ancestor := datastore.IDKey("User", userID, nil)
+	keys := make([]*datastore.Key, len(ids))
+	for i, id := range ids {
+		keys[i] = datastore.IDKey("Graphic", id, ancestor)
+	}
+
+	graphics := make([]*Graphic, len(ids))
+	if err = client.GetMulti(ctx, keys, graphics); err != nil {
+		if _, ok := err.(datastore.MultiError); ok {
+			return nil, GraphicNotFound
+		}
+		return nil, err
+	}
+
+	for i, graphic := range graphics {
+		graphic.ID = keys[i].ID
+	}
+
+	return graphics, nil
+}
+
 func CreateGraphics(ctx context.Context, userID int64, graphics []*Graphic) error {
 	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
 	if err != nil {

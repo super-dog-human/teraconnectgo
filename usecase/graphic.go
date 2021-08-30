@@ -53,6 +53,39 @@ func GetGraphicsByLessonID(request *http.Request, lessonID int64) ([]*domain.Gra
 	return graphics, nil
 }
 
+func GetGraphicsByLessonIDAndIDs(request *http.Request, lessonID int64, userID int64, ids []string) (map[int64]string, error) {
+	ctx := request.Context()
+
+	intIDs := make([]int64, len(ids))
+	for i, id := range ids {
+		intID, err := strconv.ParseInt(id, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		intIDs[i] = intID
+	}
+
+	graphics, err := domain.GetGraphicsByIDs(ctx, userID, intIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	urls := make(map[int64]string)
+	for _, graphic := range graphics {
+		if graphic.LessonID != lessonID {
+			continue // GraphicのIDさえ分かれば今回取得分のLessonに無関係なものも取得できてしまうので、紐付きを確認する
+		}
+		url, err := domain.GetGraphicSignedURL(ctx, graphic)
+		if err != nil {
+			return nil, err
+		}
+
+		urls[graphic.ID] = url
+	}
+
+	return urls, nil
+}
+
 func CreateGraphicsAndBlankFiles(request *http.Request, objectRequest infrastructure.StorageObjectRequest) (infrastructure.SignedURLs, error) {
 	ctx := request.Context()
 
