@@ -14,8 +14,8 @@ type LessonMaterial struct {
 	UserID               int64                `json:"userID"`
 	AvatarID             int64                `json:"avatarID"`
 	Avatar               Avatar               `json:"avatar" datastore:"-"`
-	DurationSec          float32              `json:"durationSec" datastore:",noindex"`
 	AvatarLightColor     string               `json:"avatarLightColor" datastore:",noindex"`
+	DurationSec          float32              `json:"durationSec" datastore:",noindex"`
 	BackgroundImageID    int64                `json:"backgroundImageID"`
 	BackgroundImageURL   string               `json:"backgroundImageURL" datastore:"-"`
 	VoiceSynthesisConfig VoiceSynthesisConfig `json:"voiceSynthesisConfig" datastore:",noindex"`
