@@ -30,9 +30,9 @@ type LessonMaterial struct {
 }
 
 type LessonAvatar struct {
-	ElapsedTime float32    `json:"elapsedTime"`
-	DurationSec float32    `json:"durationSec"`
-	Moving      Position3D `json:"moving,omitempty"`
+	ElapsedTime float32   `json:"elapsedTime"`
+	DurationSec float32   `json:"durationSec"`
+	Positions   []float32 `json:"positions"` // x, y, zの順で格納される
 }
 
 type LessonDrawing struct {

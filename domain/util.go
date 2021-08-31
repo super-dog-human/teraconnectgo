@@ -46,10 +46,6 @@ func MergeJsonToStruct(jsonDiff *map[string]interface{}, origin interface{}, all
 				allowChildFields := TopLevelStructKeys(&childTarget) // 親フィールドが既に許可されているので子は全て許可
 				MergeJsonToStruct(&childJson, &childTarget, &allowChildFields)
 				targetField.Set(reflect.ValueOf(&childTarget).Elem())
-			case Position3D:
-				allowChildFields := TopLevelStructKeys(&childTarget)
-				MergeJsonToStruct(&childJson, &childTarget, &allowChildFields)
-				targetField.Set(reflect.ValueOf(&childTarget).Elem())
 			case LessonDrawingStroke:
 				allowChildFields := TopLevelStructKeys(&childTarget)
 				MergeJsonToStruct(&childJson, &childTarget, &allowChildFields)
@@ -149,6 +145,13 @@ func MergeJsonToStruct(jsonDiff *map[string]interface{}, origin interface{}, all
 					child := v.(map[string]interface{})
 					MergeJsonToStruct(&child, &targetBlankStruct, &allowChildFields)
 					targets = append(targets, targetBlankStruct)
+				}
+				targetField.Set(reflect.ValueOf(&targets).Elem())
+			case []float32:
+				targets = nil
+				for _, v := range jsonValue.([]interface{}) {
+					value := float32(v.(float64))
+					targets = append(targets, value)
 				}
 				targetField.Set(reflect.ValueOf(&targets).Elem())
 			}

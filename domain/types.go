@@ -5,12 +5,6 @@ type Position2D struct {
 	Y float64 `json:"y"`
 }
 
-type Position3D struct {
-	X float64 `json:"x"`
-	Y float64 `json:"y"`
-	Z float64 `json:"z"`
-}
-
 // VoiceSynthesisConfig is synthesis voice settings. used from SynthesisVoice params and LessonSpeech.
 // https://github.com/googleapis/go-genproto/blob/master/googleapis/cloud/texttospeech/v1beta1/cloud_tts.pb.go#L663
 type VoiceSynthesisConfig struct {
