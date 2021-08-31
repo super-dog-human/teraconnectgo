@@ -90,12 +90,12 @@ type LessonSpeech struct {
 }
 
 type Caption struct {
-	SizeVW          int8   `json:"sizeVW"`
-	Body            string `json:"body"`
-	BodyColor       string `json:"bodyColor"`
-	BorderColor     string `json:"borderColor"`
-	HorizontalAlign string `json:"horizontalAlign"`
-	VerticalAlign   string `json:"verticalAlign"`
+	SizeVW          int8   `json:"sizeVW,omitempty"`
+	Body            string `json:"body,omitempty"`
+	BodyColor       string `json:"bodyColor,omitempty"`
+	BorderColor     string `json:"borderColor,omitempty"`
+	HorizontalAlign string `json:"horizontalAlign,omitempty"`
+	VerticalAlign   string `json:"verticalAlign,omitempty"`
 }
 
 func GetLessonMaterial(ctx context.Context, id int64, lessonID int64, lessonMaterial *LessonMaterial) error {

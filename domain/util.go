@@ -54,6 +54,10 @@ func MergeJsonToStruct(jsonDiff *map[string]interface{}, origin interface{}, all
 				allowChildFields := TopLevelStructKeys(&childTarget)
 				MergeJsonToStruct(&childJson, &childTarget, &allowChildFields)
 				targetField.Set(reflect.ValueOf(&childTarget).Elem())
+			case Caption:
+				allowChildFields := TopLevelStructKeys(&childTarget)
+				MergeJsonToStruct(&childJson, &childTarget, &allowChildFields)
+				targetField.Set(reflect.ValueOf(&childTarget).Elem())
 			}
 		} else if jsonFieldType == "[]interface {}" {
 			switch targets := targetField.Interface().(type) {
