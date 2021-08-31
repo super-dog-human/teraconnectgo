@@ -90,7 +90,6 @@ type LessonSpeech struct {
 }
 
 type Caption struct {
-	SizeVW          int8   `json:"sizeVW,omitempty"`
 	Body            string `json:"body,omitempty"`
 	BodyColor       string `json:"bodyColor,omitempty"`
 	BorderColor     string `json:"borderColor,omitempty"`
