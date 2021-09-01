@@ -7,6 +7,7 @@ import (
 
 	"cloud.google.com/go/datastore"
 	"github.com/super-dog-human/teraconnectgo/infrastructure"
+	"golang.org/x/sync/errgroup"
 )
 
 type GraphicErrorCode uint
@@ -74,13 +75,24 @@ func GetGraphicsByLessonID(ctx context.Context, lessonID int64, graphics *[]*Gra
 		return GraphicNotFound
 	}
 
+	g, ctx := errgroup.WithContext(ctx)
+
 	for i, graphic := range *graphics {
-		graphic.ID = keys[i].ID
-		url, err := GetGraphicSignedURL(ctx, graphic)
-		if err != nil {
-			return err
-		}
-		graphic.URL = url
+		i := i
+		graphic := graphic
+		g.Go(func() error {
+			graphic.ID = keys[i].ID
+			url, err := GetGraphicSignedURL(ctx, graphic)
+			if err != nil {
+				return err
+			}
+			graphic.URL = url
+			return nil
+		})
+	}
+
+	if err := g.Wait(); err != nil {
+		return err
 	}
 
 	return nil

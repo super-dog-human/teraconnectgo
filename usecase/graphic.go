@@ -8,6 +8,7 @@ import (
 	"cloud.google.com/go/storage"
 	"github.com/super-dog-human/teraconnectgo/domain"
 	"github.com/super-dog-human/teraconnectgo/infrastructure"
+	"golang.org/x/sync/errgroup"
 )
 
 // GetGraphicByID is fetching a graphic by id.
@@ -70,17 +71,25 @@ func GetGraphicsByLessonIDAndIDs(request *http.Request, lessonID int64, userID i
 		return nil, err
 	}
 
+	g, ctx := errgroup.WithContext(ctx)
 	urls := make(map[int64]string)
 	for _, graphic := range graphics {
 		if graphic.LessonID != lessonID {
 			continue // GraphicのIDさえ分かれば今回取得分のLessonに無関係なものも取得できてしまうので、紐付きを確認する
 		}
-		url, err := domain.GetGraphicSignedURL(ctx, graphic)
-		if err != nil {
-			return nil, err
-		}
+		graphic := graphic
+		g.Go(func() error {
+			url, err := domain.GetGraphicSignedURL(ctx, graphic)
+			if err != nil {
+				return err
+			}
+			urls[graphic.ID] = url
+			return nil
+		})
+	}
 
-		urls[graphic.ID] = url
+	if err := g.Wait(); err != nil {
+		return urls, err
 	}
 
 	return urls, nil

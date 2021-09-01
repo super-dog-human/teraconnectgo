@@ -10,6 +10,7 @@ import (
 	"github.com/jinzhu/copier"
 	"github.com/super-dog-human/teraconnectgo/domain"
 	"github.com/super-dog-human/teraconnectgo/infrastructure"
+	"golang.org/x/sync/errgroup"
 )
 
 type LessonErrorCode uint
@@ -244,17 +245,27 @@ func setResourceURLs(ctx context.Context, lesson *domain.Lesson) error {
 		fileType := "" // this is unnecessary when GET request
 		bucketName := infrastructure.MaterialBucketName()
 
-		speechURL, err := infrastructure.GetGCSSignedURL(ctx, bucketName, speechFilePath, "GET", fileType)
-		if err != nil {
-			return err
-		}
-		lesson.SpeechURL = speechURL
+		var speechURL string
+		var bodyURL string
+		var err error
 
-		BodyURL, err := infrastructure.GetGCSSignedURL(ctx, bucketName, bodyFilePath, "GET", fileType)
-		if err != nil {
+		g, ctx := errgroup.WithContext(ctx)
+		g.Go(func() error {
+			speechURL, err = infrastructure.GetGCSSignedURL(ctx, bucketName, speechFilePath, "GET", fileType)
+			return err
+		})
+
+		g.Go(func() error {
+			bodyURL, err = infrastructure.GetGCSSignedURL(ctx, bucketName, bodyFilePath, "GET", fileType)
+			return err
+		})
+
+		if err := g.Wait(); err != nil {
 			return err
 		}
-		lesson.BodyURL = BodyURL
+
+		lesson.SpeechURL = speechURL
+		lesson.BodyURL = bodyURL
 	}
 
 	return nil
