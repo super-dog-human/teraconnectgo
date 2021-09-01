@@ -37,9 +37,18 @@ type Avatar struct {
 }
 
 type AvatarConfig struct {
-	Scale        float32          `json:"scale"`
-	Positions    []float32        `json:"positions"`
-	InitialPoses []AvatarRotation `json:"initialPoses"`
+	Scale             float32           `json:"scale"`
+	Positions         []float32         `json:"positions"`
+	InitialPoses      []AvatarRotation  `json:"initialPoses"`
+	WalkingAnimations []AvatarAnimation `json:"walkingAnimations"`
+}
+
+type AvatarAnimation struct {
+	BoneName    string    `json:"boneName"`
+	Axis        string    `json:"axis"` // x, y, zのいずれか
+	DurationSec float32   `json:"durationSec"`
+	KeyTimes    []float32 `json:"keyTimes"`
+	Rotations   []float32 `json:"rotations"`
 }
 
 type AvatarRotation struct {
