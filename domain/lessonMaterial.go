@@ -32,7 +32,7 @@ type LessonMaterial struct {
 type LessonAvatar struct {
 	ElapsedTime float32   `json:"elapsedTime"`
 	DurationSec float32   `json:"durationSec"`
-	Positions   []float32 `json:"positions"` // x, y, zの順で格納される
+	Positions   []float32 `json:"positions"` // x, y, zの順で格納
 }
 
 type LessonDrawing struct {
@@ -60,6 +60,7 @@ type LessonEmbedding struct {
 	ElapsedTime float32         `json:"elapsedTime"`
 	Action      EmbeddingAction `json:"action"`
 	ContentID   string          `json:"contentID"`
+	StartAtSec  int32           `json:"startAtSec"`
 	ServiceName string          `json:"serviceName"`
 }
 
