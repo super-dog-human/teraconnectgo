@@ -60,15 +60,6 @@ func GetLessonsByConditions(request *http.Request) ([]domain.Lesson, error) {
 func GetPublicLesson(request *http.Request, id int64, viewKey string) (domain.Lesson, error) {
 	ctx := request.Context()
 
-	_, err := domain.GetCurrentUser(request)
-	authErr, _ := err.(domain.AuthErrorCode)
-
-	if err != nil && authErr != domain.TokenNotFound {
-		// can get lesson without token, but can NOT get with invalid token.
-		lesson := new(domain.Lesson)
-		return *lesson, err
-	}
-
 	lesson, err := domain.GetLessonByID(ctx, id)
 	if err == datastore.ErrNoSuchEntity {
 		return lesson, LessonNotFound
@@ -96,6 +87,12 @@ func GetPublicLesson(request *http.Request, id int64, viewKey string) (domain.Le
 		return lesson, err
 	}
 
+	author, err := domain.GetUserByID(ctx, lesson.UserID)
+	if err != nil {
+		return lesson, nil
+	}
+	lesson.Author = author
+
 	return lesson, nil
 }
 
@@ -117,6 +114,8 @@ func GetPrivateLesson(request *http.Request, id int64) (domain.Lesson, error) {
 	if lesson.UserID != currentUser.ID {
 		return lesson, InvalidLessonParams
 	}
+
+	lesson.Author = currentUser
 
 	return lesson, nil
 }

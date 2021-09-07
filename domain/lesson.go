@@ -12,6 +12,7 @@ import (
 type Lesson struct {
 	ID                   int64             `json:"id" datastore:"-"`
 	UserID               int64             `json:"userID"`
+	Author               User              `json:"author" datastore:",noindex"`
 	MaterialID           int64             `json:"materialID"`
 	AvatarID             int64             `json:"avatarID"`                              // 公開処理完了時にLessonMaterialの値で更新される
 	AvatarLightColor     string            `json:"avatarLightColor" datastore:",noindex"` // 公開処理完了時にLessonMaterialの値で更新される
