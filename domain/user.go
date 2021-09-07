@@ -88,6 +88,7 @@ func GetUserByID(ctx context.Context, id int64) (User, error) {
 		}
 		return *user, err
 	}
+	user.ID = id
 
 	return *user, nil
 }
