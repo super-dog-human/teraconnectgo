@@ -18,6 +18,7 @@ type User struct {
 	ID         int64     `json:"id" datastore:"-"`
 	ProviderID string    `json:"-"`
 	Name       string    `json:"name"`
+	Profile    string    `json:"profile"`
 	Email      string    `json:"email"`
 	Created    time.Time `json:"-"`
 	Updated    time.Time `json:"-"`
