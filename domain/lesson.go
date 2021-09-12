@@ -2,9 +2,12 @@ package domain
 
 import (
 	"context"
+	"os"
+	"strconv"
 	"time"
 
 	"cloud.google.com/go/datastore"
+	"github.com/algolia/algoliasearch-client-go/v3/algolia/search"
 	"github.com/super-dog-human/teraconnectgo/infrastructure"
 )
 
@@ -210,6 +213,15 @@ func UpdateLessonAndMaterial(ctx context.Context, lesson *Lesson, needsCopyThumb
 
 	if err != nil {
 		return err
+	}
+
+	if currentStatus == LessonStatusPublic && lesson.Status != LessonStatusPublic {
+		// 公開を取りやめる際は検索インデックスから登録を削除
+		client := search.NewClient(os.Getenv("ALGOLIA_APPLICATION_ID"), os.Getenv("ALGOLIA_ADMIN_API_KEY"))
+		index := client.InitIndex(os.Getenv("ALGOLIA_INDEX_NAME"))
+		if _, err := index.DeleteObject(strconv.FormatInt(lesson.ID, 10)); err != nil {
+			return err
+		}
 	}
 
 	return nil

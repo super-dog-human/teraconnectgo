@@ -45,14 +45,6 @@ type NewLessonParams struct {
 
 // GetLessonsByConditions for search lessons
 func GetLessonsByConditions(request *http.Request) ([]domain.Lesson, error) {
-	//		ctx := request.Context()
-
-	//	id := c.Param("id")
-
-	// 検索パラメータ
-	// ページネーション
-	// SearchAPIが必須
-
 	return nil, nil
 }
 

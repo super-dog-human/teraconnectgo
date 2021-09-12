@@ -12,7 +12,9 @@ import (
 
 // Main is handling API request.
 func Main(appEnv string) {
-	infrastructure.SetAppEnv(appEnv)
+	if err := infrastructure.SetAppEnv(appEnv); err != nil {
+		log.Fatal(err)
+	}
 
 	e := echo.New()
 	http.Handle("/", e)

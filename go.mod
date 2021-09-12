@@ -6,11 +6,13 @@ require (
 	cloud.google.com/go v0.90.0
 	cloud.google.com/go/datastore v1.5.0
 	cloud.google.com/go/storage v1.16.0
+	github.com/algolia/algoliasearch-client-go/v3 v3.21.0 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/google/uuid v1.1.2
 	github.com/imdario/mergo v0.3.12
 	github.com/jinzhu/copier v0.3.2
+	github.com/joho/godotenv v1.3.0 // indirect
 	github.com/labstack/echo/v4 v4.5.0
 	github.com/mattn/go-isatty v0.0.13 // indirect
 	github.com/pkg/errors v0.9.1
