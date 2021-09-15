@@ -179,6 +179,8 @@ func UpdateLessonAndMaterial(ctx context.Context, lesson *Lesson, needsCopyThumb
 			return err
 		}
 		lesson.ViewKey = uuid
+	} else if lesson.Status == LessonStatusPublic && lesson.ViewKey != "" {
+		lesson.ViewKey = ""
 	}
 	lesson.Updated = currentTime
 
