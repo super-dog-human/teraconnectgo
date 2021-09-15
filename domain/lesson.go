@@ -45,6 +45,7 @@ type Lesson struct {
 	ViewCount            int64             `json:"viewCount"`
 	ViewKey              string            `json:"viewKey"`
 	SizeInBytes          int64             `json:"sizeInBytes"`
+	Version              int32             `json:"version"`
 	Created              time.Time         `json:"created"`
 	Updated              time.Time         `json:"updated"`
 	Published            time.Time         `json:"published"` // 公開処理完了時にLessonMaterialのUpdatedの値で更新される

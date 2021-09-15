@@ -226,8 +226,8 @@ func setAvatar(ctx context.Context, lesson *domain.Lesson) error {
 }
 
 func setResourceURLs(ctx context.Context, lesson *domain.Lesson) error {
-	speechFilePath := fmt.Sprintf("lesson/%d/speech.mp3", lesson.ID)
-	bodyFilePath := fmt.Sprintf("lesson/%d/body.zst", lesson.ID)
+	speechFilePath := fmt.Sprintf("lesson/%d/speech-%d.mp3", lesson.ID, lesson.Version)
+	bodyFilePath := fmt.Sprintf("lesson/%d/body-%d.zst", lesson.ID, lesson.Version)
 
 	if lesson.Status == domain.LessonStatusPublic {
 		lesson.SpeechURL = infrastructure.CloudStorageURL + infrastructure.PublicBucketName() + "/" + speechFilePath
