@@ -9,46 +9,51 @@ import (
 	"cloud.google.com/go/datastore"
 	"github.com/algolia/algoliasearch-client-go/v3/algolia/search"
 	"github.com/super-dog-human/teraconnectgo/infrastructure"
+	"google.golang.org/api/iterator"
 )
 
 // Lesson is the lesson infomation type.
 type Lesson struct {
 	ID                   int64             `json:"id" datastore:"-"`
 	UserID               int64             `json:"userID"`
-	Author               User              `json:"author" datastore:",noindex"`
+	Author               User              `json:"author" datastore:"-"`
 	MaterialID           int64             `json:"materialID"`
 	AvatarID             int64             `json:"avatarID"`                              // 公開処理完了時にLessonMaterialの値で更新される
 	AvatarLightColor     string            `json:"avatarLightColor" datastore:",noindex"` // 公開処理完了時にLessonMaterialの値で更新される
 	Avatar               Avatar            `json:"avatar,omitempty" datastore:"-"`
-	PrevLessonID         int64             `json:"prevLessonID"`
+	PrevLessonID         int64             `json:"prevLessonID" datastore:",noindex"`
 	PrevLessonTitle      string            `json:"prevLessonTitle" datastore:"-"`
-	NextLessonID         int64             `json:"nextLessonID"`
+	NextLessonID         int64             `json:"nextLessonID" datastore:",noindex"`
 	NextLessonTitle      string            `json:"nextLessonTitle" datastore:"-"`
-	NeedsRecording       bool              `json:"needsRecording"` // 収録画面での収録必要の有無
-	IsEdited             bool              `json:"isEdited"`       // 編集画面から保存されたことがある
-	IsIntroduction       bool              `json:"isIntroduction"` // 自己紹介用の授業
-	IsPacked             bool              `json:"isPacked"`       // 公開準備の完了
-	HasThumbnail         bool              `json:"hasThumbnail"`
+	NeedsRecording       bool              `json:"needsRecording" datastore:",noindex"` // 収録画面での収録必要の有無
+	IsIntroduction       bool              `json:"isIntroduction"`                      // 自己紹介用の授業
+	HasThumbnail         bool              `json:"hasThumbnail" datastore:",noindex"`
 	ThumbnailURL         string            `json:"thumbnailURL" datastore:"-"`
 	SpeechURL            string            `json:"speechURL" datastore:"-"`
 	BodyURL              string            `json:"bodyURL" datastore:"-"`
 	Status               LessonStatus      `json:"status"`
-	References           []LessonReference `json:"references"`
-	Reviews              []LessonReview    `json:"reviews"`
+	References           []LessonReference `json:"references" datastore:",noindex"`
+	Reviews              []LessonReview    `json:"reviews" datastore:",noindex"`
 	SubjectID            int64             `json:"subjectID"`
-	SubjectName          string            `json:"subjectName"`
+	SubjectName          string            `json:"subjectName" datastore:",noindex"`
 	JapaneseCategoryID   int64             `json:"japaneseCategoryID"`
-	JapaneseCategoryName string            `json:"japaneseCategoryName"`
+	JapaneseCategoryName string            `json:"japaneseCategoryName" datastore:",noindex"`
 	Title                string            `json:"title"`
 	Description          string            `json:"description"`
-	DurationSec          float32           `json:"durationSec"`
-	ViewCount            int64             `json:"viewCount"`
-	ViewKey              string            `json:"viewKey"`
-	SizeInBytes          int64             `json:"sizeInBytes"`
-	Version              int32             `json:"version"`
-	Created              time.Time         `json:"created"`
-	Updated              time.Time         `json:"updated"`
+	DurationSec          float32           `json:"durationSec" datastore:",noindex"`
+	ViewCount            int64             `json:"viewCount" datastore:",noindex"`
+	ViewKey              string            `json:"viewKey" datastore:",noindex"`
+	Version              int32             `json:"version" datastore:",noindex"`
+	Created              time.Time         `json:"created" datastore:",noindex"`
+	Updated              time.Time         `json:"updated" datastore:",noindex"`
 	Published            time.Time         `json:"published"` // 公開処理完了時にLessonMaterialのUpdatedの値で更新される
+}
+
+type ShortLesson struct {
+	ID          int64  `json:"id" datastore:"-"`
+	UserID      int64  `json:"userID"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
 }
 
 // LessonReference is link to another web page.
@@ -108,6 +113,45 @@ func GetLessonsByUserID(ctx context.Context, userID int64) ([]Lesson, error) {
 	}
 
 	return lessons, nil
+}
+
+func GetLessonsByCategoryID(ctx context.Context, cursorStr string, categoryID int64) ([]ShortLesson, string, error) {
+	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
+	if err != nil {
+		return nil, "", err
+	}
+
+	query := datastore.NewQuery("Lesson").Project("UserID", "Title", "Description").
+		Filter("JapaneseCategoryID =", categoryID).Filter("Status = ", int32(LessonStatusPublic)).Order("-Published")
+
+	if cursorStr != "" {
+		cursor, err := datastore.DecodeCursor(cursorStr)
+		if err != nil {
+			return nil, "", err
+		}
+		query = query.Start(cursor)
+	}
+
+	var lessons []ShortLesson
+	it := client.Run(ctx, query)
+	for {
+		var lesson ShortLesson
+		key, err := it.Next(&lesson)
+		if err == iterator.Done {
+			break
+		} else if err != nil {
+			return nil, "", err
+		}
+		lesson.ID = key.ID
+		lessons = append(lessons, lesson)
+	}
+
+	nextCursor, err := it.Cursor()
+	if err != nil {
+		return nil, "", err
+	}
+
+	return lessons, nextCursor.String(), nil
 }
 
 func CreateLesson(ctx context.Context, lesson *Lesson) error {

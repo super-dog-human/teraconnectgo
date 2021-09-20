@@ -10,8 +10,23 @@ import (
 	"github.com/super-dog-human/teraconnectgo/usecase"
 )
 
+type getLessonShortResponse struct {
+	NextCursor string               `json:"nextCursor"`
+	Lessons    []domain.ShortLesson `json:"lessons"`
+}
+
 func getLessons(c echo.Context) error {
-	lessons, err := usecase.GetLessonsByConditions(c.Request())
+	categoryID, err := strconv.ParseInt(c.QueryParam("category_id"), 10, 64)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+	if categoryID == 0 {
+		return c.JSON(http.StatusNotFound, "category_id is blank.")
+	}
+
+	cursorStr := c.QueryParam("next_cursor")
+
+	lessons, nextCursorStr, err := usecase.GetLessonsByCategoryID(c.Request(), categoryID, cursorStr)
 	if err != nil {
 		lessonErr, ok := err.(usecase.LessonErrorCode)
 		if ok && lessonErr == usecase.LessonNotFound {
@@ -21,17 +36,13 @@ func getLessons(c echo.Context) error {
 			return c.JSON(http.StatusInternalServerError, err.Error())
 		}
 
-		authErr, ok := err.(domain.AuthErrorCode)
-		if ok {
-			fatalLog(authErr)
-			return c.JSON(http.StatusUnauthorized, err.Error())
-		}
-
 		fatalLog(err)
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, lessons)
+	response := getLessonShortResponse{Lessons: lessons, NextCursor: nextCursorStr}
+
+	return c.JSON(http.StatusOK, response)
 }
 
 func getLesson(c echo.Context) error {

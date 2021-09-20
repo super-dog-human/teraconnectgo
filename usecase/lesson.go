@@ -43,9 +43,14 @@ type NewLessonParams struct {
 	Title              string `json:"title"`
 }
 
-// GetLessonsByConditions for search lessons
-func GetLessonsByConditions(request *http.Request) ([]domain.Lesson, error) {
-	return nil, nil
+// GetLessonsByCategoryID for search lessons
+func GetLessonsByCategoryID(request *http.Request, categoryID int64, cursorStr string) ([]domain.ShortLesson, string, error) {
+	ctx := request.Context()
+	lessons, nextCursorStr, err := domain.GetLessonsByCategoryID(ctx, cursorStr, categoryID)
+	if err != nil {
+		return nil, "", err
+	}
+	return lessons, nextCursorStr, nil
 }
 
 // GetPublicLesson for fetch the lesson by id
