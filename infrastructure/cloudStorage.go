@@ -184,7 +184,7 @@ func DeleteObjectFromGCS(ctx context.Context, bucketName string, filePath string
 
 // GetPublicBackgroundImageURL returns public image file URL in GCS.
 func GetPublicBackgroundImageURL(id string) string {
-	return CloudStorageURL + PublicBucketName() + "/background/" + id + ".jpg"
+	return CloudStorageURL + PublicBucketName() + "/background/" + id + ".webp"
 }
 
 // GetPublicBackgroundMusicURL returns public audio file URL in GCS.
