@@ -28,6 +28,7 @@ func Main(appEnv string) {
 	}))
 
 	e.GET("/subjects", getSubjects)
+	e.GET("/categories/:id", getCategory)
 	e.GET("/categories", getCategories)
 	e.GET("/background_images", getBackgroundImages)
 	e.GET("/lessons", getLessons)

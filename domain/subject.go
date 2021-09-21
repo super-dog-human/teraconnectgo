@@ -9,9 +9,9 @@ import (
 
 // Subject of the class type.
 type Subject struct {
-	ID           int64  `json:"id"`
-	Name         string `json:"name"`
-	JapaneseName string `json:"japaneseName"`
+	ID           int64  `json:"id" datastore:"-"`
+	Name         string `json:"name" datastore:",noindex"`
+	JapaneseName string `json:"japaneseName" datastore:",noindex"`
 	SortID       int64  `json:"-"`
 }
 

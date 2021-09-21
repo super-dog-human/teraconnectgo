@@ -12,7 +12,7 @@ import (
 // BackgroundMusic type is used in the class.
 type BackgroundMusic struct {
 	ID       int64     `json:"id" datastore:"-"`
-	Name     string    `json:"name"`
+	Name     string    `json:"name" datastore:",noindex"`
 	URL      string    `json:"url" datastore:"-"`
 	SortID   int64     `json:"-"`
 	IsPublic bool      `json:"-"`

@@ -11,8 +11,8 @@ import (
 // BackgroundImage type is used in the class.
 type BackgroundImage struct {
 	ID     int64  `json:"id"`
-	Name   string `json:"name"`
-	URL    string `json:"url"`
+	Name   string `json:"name" datastore:",noindex"`
+	URL    string `json:"url" datastore:"-"`
 	SortID int64  `json:"-"`
 }
 
