@@ -121,8 +121,9 @@ func GetLessonsByCategoryID(ctx context.Context, cursorStr string, categoryID in
 		return nil, "", err
 	}
 
+	const lessonPageSize = 18
 	query := datastore.NewQuery("Lesson").Project("UserID", "Title", "Description").
-		Filter("JapaneseCategoryID =", categoryID).Filter("Status = ", int32(LessonStatusPublic)).Order("-Published")
+		Filter("JapaneseCategoryID =", categoryID).Filter("Status = ", int32(LessonStatusPublic)).Order("-Published").Limit(lessonPageSize)
 
 	if cursorStr != "" {
 		cursor, err := datastore.DecodeCursor(cursorStr)
