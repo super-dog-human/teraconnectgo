@@ -168,7 +168,7 @@ func createAvatarPublicURL(id int64) string {
 
 func createAvatarSignedURLs(ctx context.Context, id int64) (string, error) {
 	fileID := strconv.FormatInt(id, 10)
-	filePath := infrastructure.StorageObjectFilePath("Avatar", fileID, "vrm")
+	filePath := infrastructure.StorageObjectFilePath("Avatar", fileID, "zst")
 	bucketName := infrastructure.MaterialBucketName()
 
 	url, err := infrastructure.GetGCSSignedURL(ctx, bucketName, filePath, "GET", "")
