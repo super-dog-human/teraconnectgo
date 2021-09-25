@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/json"
 	"net/http"
 	"strconv"
 
@@ -54,6 +55,10 @@ func postUser(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 
+	if user.Name == "" || user.Email == "" {
+		return c.JSON(http.StatusBadRequest, "Invalid params")
+	}
+
 	if err := usecase.CreateUser(c.Request(), user); err != nil {
 		userErr, ok := err.(usecase.UserErrorCode)
 		if ok && userErr == usecase.AlreadyUserExists {
@@ -66,14 +71,13 @@ func postUser(c echo.Context) error {
 }
 
 func patchUser(c echo.Context) error {
-	user := new(domain.User)
-
-	if err := c.Bind(user); err != nil {
-		fatalLog(err)
-		return c.JSON(http.StatusInternalServerError, err.Error())
+	var params map[string]interface{}
+	if err := json.NewDecoder(c.Request().Body).Decode(&params); err != nil {
+		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 
-	if err := usecase.UpdateUser(c.Request(), user); err != nil {
+	user, err := usecase.UpdateUser(c.Request(), &params)
+	if err != nil {
 		fatalLog(err)
 		userErr, ok := err.(usecase.UserErrorCode)
 		if ok && userErr == usecase.UserNotAvailable {

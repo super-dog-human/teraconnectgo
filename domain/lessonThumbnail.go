@@ -34,8 +34,7 @@ func CreateLessonThumbnailBlankFile(ctx context.Context, id int64, isPublic bool
 		ContentType: "image/png",
 	}
 
-	idStr := strconv.FormatInt(id, 10)
-	fileDir := "lesson/" + idStr
+	fileDir := "lesson/" + strconv.FormatInt(id, 10)
 	var url string
 	var err error
 

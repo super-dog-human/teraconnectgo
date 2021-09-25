@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"cloud.google.com/go/datastore"
-	"github.com/imdario/mergo"
 	"github.com/super-dog-human/teraconnectgo/domain"
 	"github.com/super-dog-human/teraconnectgo/infrastructure"
 )
@@ -83,6 +82,8 @@ func CreateUser(request *http.Request, user *domain.User) error {
 			return err
 		}
 
+		// 自己紹介授業つくる
+
 		return nil
 	})
 
@@ -95,24 +96,20 @@ func CreateUser(request *http.Request, user *domain.User) error {
 	return nil
 }
 
-func UpdateUser(request *http.Request, user *domain.User) error {
+func UpdateUser(request *http.Request, params *map[string]interface{}) (domain.User, error) {
 	ctx := request.Context()
 
-	currentUser, err := domain.GetCurrentUser(request)
+	user, err := domain.GetCurrentUser(request)
 	if err != nil {
-		return UserNotAvailable
+		return user, UserNotAvailable
 	}
 
-	if err := mergo.Merge(user, currentUser); err != nil {
-		return err
-	}
-	user.Created = currentUser.Created // Created field not merged because this time.Time fieled was initialized is not nil.
-
-	if err = domain.UpdateUser(ctx, user); err != nil {
-		return err
+	targetFields := []string{"Name", "Profile", "Email"}
+	if err = domain.UpdateUser(ctx, &user, params, &targetFields); err != nil {
+		return user, err
 	}
 
-	return nil
+	return user, nil
 }
 
 func UnsubscribeCurrentUser(request *http.Request) error {

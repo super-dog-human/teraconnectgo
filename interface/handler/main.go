@@ -39,7 +39,8 @@ func Main(appEnv string) {
 	auth := e.Group("", Authentication())
 	auth.GET("/users/me", getUserMe)
 	auth.POST("/users", postUser)
-	auth.PATCH("/users", patchUser)
+	auth.PATCH("/users/me", patchUser)
+	auth.POST("/users/me/thumbnail", postUserThumbnail)
 	auth.DELETE("/users", deleteUser)
 	auth.GET("/users/me/lessons", getCurrentUserLessons)
 	auth.GET("/avatars", getAvatars)
@@ -59,7 +60,7 @@ func Main(appEnv string) {
 	auth.GET("/lessons/:lessonID/materials/:id", getLessonMaterials)
 	auth.POST("/lessons/:lessonID/materials", postLessonMaterial)
 	auth.PATCH("/lessons/:lessonID/materials/:id", patchLessonMaterial)
-	auth.POST("lessons/:id/thumbnail", postLessonThumbnail)
+	auth.POST("/lessons/:id/thumbnail", postLessonThumbnail)
 
 	port := os.Getenv("PORT")
 	if port == "" {

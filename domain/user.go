@@ -10,18 +10,18 @@ import (
 )
 
 type UserProviderID struct {
-	ID string
+	ID int64 `datastore:"-"`
 }
 
 // User is application registrated user
 type User struct {
 	ID         int64     `json:"id" datastore:"-"`
 	ProviderID string    `json:"-"`
-	Name       string    `json:"name"`
-	Profile    string    `json:"profile"`
-	Email      string    `json:"email"`
-	Created    time.Time `json:"-"`
-	Updated    time.Time `json:"-"`
+	Name       string    `json:"name" datastore:",noindex"`
+	Profile    string    `json:"profile" datastore:",noindex"`
+	Email      string    `json:"email" datastore:",noindex"`
+	Created    time.Time `json:"-" datastore:",noindex"`
+	Updated    time.Time `json:"-" datastore:",noindex"`
 }
 
 // UserErrorCode is user error code.
@@ -127,14 +127,15 @@ func CreateUserInTransaction(tx *datastore.Transaction, user *User) (*datastore.
 }
 
 // UpdateUser updates user.
-func UpdateUser(ctx context.Context, user *User) error {
+func UpdateUser(ctx context.Context, user *User, jsonBody *map[string]interface{}, targetFields *[]string) error {
+	MergeJsonToStruct(jsonBody, user, targetFields)
+
 	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
 	if err != nil {
 		return err
 	}
 
 	key := datastore.IDKey("User", user.ID, nil)
-
 	user.Updated = time.Now()
 
 	if _, err := client.Put(ctx, key, user); err != nil {
