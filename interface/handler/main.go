@@ -26,6 +26,9 @@ func Main(appEnv string) {
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{infrastructure.OriginURL()},
 	}))
+	e.Use(middleware.GzipWithConfig(middleware.GzipConfig{
+		Level: 1,
+	}))
 
 	e.GET("/subjects", getSubjects)
 	e.GET("/categories/:id", getCategory)
