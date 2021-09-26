@@ -68,8 +68,7 @@ func CreateUser(request *http.Request, user *domain.User) error {
 
 	user.ProviderID = providerID
 
-	var pendingKey *datastore.PendingKey
-	commit, err := client.RunInTransaction(ctx, func(tx *datastore.Transaction) error {
+	_, err = client.RunInTransaction(ctx, func(tx *datastore.Transaction) error {
 		err = domain.ReserveUserProviderIDInTransaction(tx, providerID)
 		if err == domain.AlreadyProviderIDExists {
 			return AlreadyUserExists
@@ -78,11 +77,9 @@ func CreateUser(request *http.Request, user *domain.User) error {
 			return err
 		}
 
-		if pendingKey, err = domain.CreateUserInTransaction(tx, user); err != nil {
+		if _, err = domain.CreateUserInTransaction(tx, user); err != nil {
 			return err
 		}
-
-		// 自己紹介授業つくる
 
 		return nil
 	})
@@ -90,8 +87,6 @@ func CreateUser(request *http.Request, user *domain.User) error {
 	if err != nil {
 		return err
 	}
-
-	user.ID = commit.Key(pendingKey).ID
 
 	return nil
 }

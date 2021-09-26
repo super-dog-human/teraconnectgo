@@ -59,6 +59,7 @@ func Main(appEnv string) {
 	auth.POST("/voice", postVoice)
 	auth.POST("/synthesis_voice", postSynthesisVoice)
 	auth.POST("/lessons", postLesson)
+	auth.POST("/lessons/introduction", postIntroductionLesson)
 	auth.PATCH("/lessons/:id", patchLesson)
 	auth.GET("/lessons/:lessonID/materials/:id", getLessonMaterials)
 	auth.POST("/lessons/:lessonID/materials", postLessonMaterial)

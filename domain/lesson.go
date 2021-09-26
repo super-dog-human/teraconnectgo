@@ -181,6 +181,34 @@ func CreateLesson(ctx context.Context, lesson *Lesson) error {
 	return nil
 }
 
+func CreateIntroductionLesson(ctx context.Context, user *User) (int64, error) {
+	var lessonID int64
+
+	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
+	if err != nil {
+		return lessonID, err
+	}
+
+	query := datastore.NewQuery("Lesson").KeysOnly().Filter("UserID =", user.ID).Filter("IsIntroduction =", true).Limit(1)
+	keys, err := client.GetAll(ctx, query, nil)
+	if err != nil {
+		return lessonID, err
+	}
+
+	if len(keys) > 0 {
+		return keys[0].ID, nil // 既に自己紹介授業が作られていればそれを使用する
+	}
+
+	lesson := Lesson{UserID: user.ID, Title: "はじめまして、" + user.Name + "です。", IsIntroduction: true, Created: time.Now()}
+	key := datastore.IncompleteKey("Lesson", nil)
+	putKey, err := client.Put(ctx, key, &lesson)
+	if err != nil {
+		return lessonID, err
+	}
+
+	return putKey.ID, nil
+}
+
 func UpdateLesson(ctx context.Context, lesson *Lesson) error {
 	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
 	if err != nil {
