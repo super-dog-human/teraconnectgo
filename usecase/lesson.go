@@ -153,6 +153,25 @@ func CreateLesson(request *http.Request, newLesson *NewLessonParams, lesson *dom
 	return nil
 }
 
+// CreateIntroductionLesson is create the new lesson and graphics for self-introduction.
+func CreateIntroductionLesson(request *http.Request, lesson *domain.Lesson) error {
+	currentUser, err := domain.GetCurrentUser(request)
+	if err != nil {
+		return InvalidLessonParams
+	}
+
+	ctx := request.Context()
+	if err = domain.CreateIntroductionLesson(ctx, &currentUser, lesson); err != nil {
+		return err
+	}
+
+	if err != domain.CreateIntroductionGraphics(ctx, currentUser.ID, lesson.ID) {
+		return err
+	}
+
+	return nil
+}
+
 func UpdateLessonWithMaterial(id int64, request *http.Request, needsCopyThumbnail bool, requestID string, params *map[string]interface{}) error {
 	ctx := request.Context()
 

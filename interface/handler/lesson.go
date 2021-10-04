@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/labstack/echo/v4"
+	"github.com/pkg/errors"
 	"github.com/super-dog-human/teraconnectgo/domain"
 	"github.com/super-dog-human/teraconnectgo/usecase"
 )
@@ -94,7 +95,7 @@ func getCurrentUserLessons(c echo.Context) error {
 	}
 
 	if len(lessons) == 0 {
-		return c.JSON(http.StatusNotFound, "lesson doesn't exist.")
+		return c.JSON(http.StatusNotFound, "lesson doesn't exist")
 	}
 
 	return c.JSON(http.StatusOK, lessons)
@@ -102,19 +103,36 @@ func getCurrentUserLessons(c echo.Context) error {
 
 func postLesson(c echo.Context) error {
 	params := new(usecase.NewLessonParams)
-	lesson := new(domain.Lesson)
 
 	if err := c.Bind(params); err != nil {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 
-	// TODO validate newLesson
+	if !params.IsIntroduction {
+		if params.Title == "" {
+			return c.JSON(http.StatusBadRequest, "title is blank")
+		} else if params.SubjectID == 0 {
+			return c.JSON(http.StatusBadRequest, "subjectID is blank")
+		} else if params.JapaneseCategoryID == 0 {
+			return c.JSON(http.StatusBadRequest, "japanseCategoryID is blank")
+		}
+	}
 
-	if err := usecase.CreateLesson(c.Request(), params, lesson); err != nil {
+	lesson := new(domain.Lesson)
+	var err error
+	if params.IsIntroduction {
+		err = usecase.CreateIntroductionLesson(c.Request(), lesson)
+	} else {
+		err = usecase.CreateLesson(c.Request(), params, lesson)
+	}
+
+	if err != nil {
 		fatalLog(err)
-		LessonErr, ok := err.(usecase.LessonErrorCode)
-		if ok && LessonErr == usecase.InvalidLessonParams {
+		if ok := errors.Is(err, usecase.InvalidLessonParams); ok {
 			return c.JSON(http.StatusBadRequest, err.Error())
+		}
+		if ok := errors.Is(err, domain.AlreadyIntroductionExist); ok {
+			return c.JSON(http.StatusConflict, err.Error())
 		}
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}

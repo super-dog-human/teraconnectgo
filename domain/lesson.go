@@ -69,6 +69,21 @@ type LessonReview struct {
 	Created        time.Time `json:"created"`
 }
 
+type LessonErrorCode uint
+
+const (
+	AlreadyIntroductionExist LessonErrorCode = 1
+)
+
+func (e LessonErrorCode) Error() string {
+	switch e {
+	case AlreadyIntroductionExist:
+		return "already introduction lesson exists"
+	default:
+		return "unknown lesson error"
+	}
+}
+
 func GetLessonByID(ctx context.Context, id int64) (Lesson, error) {
 	lesson := new(Lesson)
 
@@ -181,32 +196,34 @@ func CreateLesson(ctx context.Context, lesson *Lesson) error {
 	return nil
 }
 
-func CreateIntroductionLesson(ctx context.Context, user *User) (int64, error) {
-	var lessonID int64
-
+func CreateIntroductionLesson(ctx context.Context, user *User, lesson *Lesson) error {
 	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
 	if err != nil {
-		return lessonID, err
+		return err
 	}
 
 	query := datastore.NewQuery("Lesson").KeysOnly().Filter("UserID =", user.ID).Filter("IsIntroduction =", true).Limit(1)
 	keys, err := client.GetAll(ctx, query, nil)
 	if err != nil {
-		return lessonID, err
+		return err
 	}
 
 	if len(keys) > 0 {
-		return keys[0].ID, nil // 既に自己紹介授業が作られていればそれを使用する
+		return AlreadyIntroductionExist
 	}
 
-	lesson := Lesson{UserID: user.ID, Title: "はじめまして、" + user.Name + "です。", IsIntroduction: true, Created: time.Now()}
-	key := datastore.IncompleteKey("Lesson", nil)
-	putKey, err := client.Put(ctx, key, &lesson)
+	lesson.UserID = user.ID
+	lesson.Title = "はじめまして、" + user.Name + "です。"
+	lesson.IsIntroduction = true
+	lesson.Created = time.Now()
+
+	key, err := client.Put(ctx, datastore.IncompleteKey("Lesson", nil), lesson)
 	if err != nil {
-		return lessonID, err
+		return err
 	}
+	lesson.ID = key.ID
 
-	return putKey.ID, nil
+	return nil
 }
 
 func UpdateLesson(ctx context.Context, lesson *Lesson) error {
