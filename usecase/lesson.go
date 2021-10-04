@@ -168,13 +168,16 @@ func CreateLesson(request *http.Request, newLesson *NewLessonParams, lesson *dom
 // 自己紹介授業は複数作成することはできないため、Lesson作成後にエラーが発生した場合はLessonの削除を試みます。
 // Graphicはユーザーによる削除が可能なので、重複制限を行わず、Graphic作成後にエラーが発生してもロールバックは試みません。
 // LessonMaterialも、Lesson削除後に残り続けても実害はないのでロールバックは試みません。
-func CreateIntroductionLesson(request *http.Request, lesson *domain.Lesson) error {
+func CreateIntroductionLesson(request *http.Request, needsRecording bool, lesson *domain.Lesson) error {
 	currentUser, err := domain.GetCurrentUser(request)
 	if err != nil {
 		return InvalidLessonParams
 	}
 
 	ctx := request.Context()
+
+	lesson.NeedsRecording = needsRecording
+
 	if err = domain.CreateIntroductionLesson(ctx, &currentUser, lesson); err != nil {
 		return err
 	}

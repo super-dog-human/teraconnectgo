@@ -121,7 +121,7 @@ func postLesson(c echo.Context) error {
 	lesson := new(domain.Lesson)
 	var err error
 	if params.IsIntroduction {
-		err = usecase.CreateIntroductionLesson(c.Request(), lesson)
+		err = usecase.CreateIntroductionLesson(c.Request(), params.NeedsRecording, lesson)
 	} else {
 		err = usecase.CreateLesson(c.Request(), params, lesson)
 	}
