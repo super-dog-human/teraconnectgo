@@ -182,7 +182,7 @@ func CreateIntroductionLesson(request *http.Request, needsRecording bool, lesson
 		return err
 	}
 
-	if err != domain.CreateIntroductionGraphics(ctx, currentUser.ID, lesson.ID) {
+	if err = domain.CreateIntroductionGraphics(ctx, currentUser.ID, lesson.ID); err != nil {
 		// エラー時はLessonを削除する。削除時のエラーは無視する。
 		domain.DeleteLesson(ctx, lesson.ID)
 		return err
