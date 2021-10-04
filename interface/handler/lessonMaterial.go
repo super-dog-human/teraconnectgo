@@ -66,36 +66,6 @@ func getLessonMaterials(c echo.Context) error {
 	}
 }
 
-func postLessonMaterial(c echo.Context) error {
-	lessonID, err := strconv.ParseInt(c.Param("lessonID"), 10, 64)
-	if err != nil {
-		errMessage := "Invalid lessonID error"
-		warnLog(errMessage)
-		return c.JSON(http.StatusBadRequest, errMessage)
-	}
-
-	params := new(usecase.NewLessonMaterialParams)
-	if err := c.Bind(params); err != nil {
-		fatalLog(err)
-		return c.JSON(http.StatusInternalServerError, err.Error())
-	}
-
-	id, err := usecase.CreateLessonMaterial(c.Request(), lessonID, *params)
-	if err != nil {
-		fatalLog(err)
-		lessonErr, ok := err.(usecase.LessonMaterialErrorCode)
-		if ok && lessonErr == usecase.LessonMaterialNotFound {
-			return c.JSON(http.StatusNotFound, err.Error())
-		} else if ok && lessonErr == usecase.LessonMaterialNotAvailable {
-			return c.JSON(http.StatusForbidden, err.Error())
-		}
-		return c.JSON(http.StatusInternalServerError, err.Error())
-	}
-
-	response := postMaterialResponse{id}
-	return c.JSON(http.StatusCreated, response)
-}
-
 func patchLessonMaterial(c echo.Context) error {
 	lessonID, err := strconv.ParseInt(c.Param("lessonID"), 10, 64)
 	if err != nil {

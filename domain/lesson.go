@@ -180,8 +180,9 @@ func CreateLesson(ctx context.Context, lesson *Lesson) error {
 		return err
 	}
 
-	currentTime := time.Now()
 	lesson.Status = LessonStatusDraft
+
+	currentTime := time.Now()
 	lesson.Created = currentTime
 	lesson.Updated = currentTime
 
@@ -215,7 +216,11 @@ func CreateIntroductionLesson(ctx context.Context, user *User, lesson *Lesson) e
 	lesson.UserID = user.ID
 	lesson.Title = "はじめまして、" + user.Name + "です。"
 	lesson.IsIntroduction = true
-	lesson.Created = time.Now()
+	lesson.Status = LessonStatusDraft
+
+	currentTime := time.Now()
+	lesson.Created = currentTime
+	lesson.Updated = currentTime
 
 	key, err := client.Put(ctx, datastore.IncompleteKey("Lesson", nil), lesson)
 	if err != nil {
@@ -315,6 +320,21 @@ func UpdateLessonAndMaterial(ctx context.Context, lesson *Lesson, needsCopyThumb
 		if _, err := index.DeleteObject(strconv.FormatInt(lesson.ID, 10)); err != nil {
 			return err
 		}
+	}
+
+	return nil
+}
+
+// DeleteLessonは、idから同定したLessonを削除します。
+func DeleteLesson(ctx context.Context, id int64) error {
+	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
+	if err != nil {
+		return err
+	}
+
+	key := datastore.IDKey("Lesson", id, nil)
+	if err := client.Delete(ctx, key); err != nil {
+		return err
 	}
 
 	return nil

@@ -116,26 +116,31 @@ func GetLessonMaterial(ctx context.Context, id int64, lessonID int64, lessonMate
 	return nil
 }
 
-func CreateLessonMaterial(ctx context.Context, lessonID int64, lessonMaterial *LessonMaterial) error {
+func CreateInitialLessonMaterial(ctx context.Context, userID int64, lessonID int64) (int64, error) {
+	var id int64
+
 	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
 	if err != nil {
-		return err
+		return id, err
 	}
+
+	var lessonMaterial LessonMaterial
+	lessonMaterial.UserID = userID
+	lessonMaterial.VoiceSynthesisConfig.LanguageCode = "ja-JP"
+	lessonMaterial.VoiceSynthesisConfig.Name = "ja-JP-Wavenet-A"
 
 	currentTime := time.Now()
 	lessonMaterial.Created = currentTime
 	lessonMaterial.Updated = currentTime
 
 	ancestor := datastore.IDKey("Lesson", lessonID, nil)
-	key := datastore.IncompleteKey("LessonMaterial", ancestor)
-	putKey, err := client.Put(ctx, key, lessonMaterial)
+	key, err := client.Put(ctx, datastore.IncompleteKey("LessonMaterial", ancestor), &lessonMaterial)
 	if err != nil {
-		return err
+		return id, err
 	}
+	id = key.ID
 
-	lessonMaterial.ID = putKey.ID
-
-	return nil
+	return id, nil
 }
 
 func UpdateLessonMaterial(ctx context.Context, id int64, lessonID int64, jsonBody *map[string]interface{}, targetFields *[]string) error {

@@ -61,7 +61,6 @@ func Main(appEnv string) {
 	auth.POST("/lessons", postLesson)
 	auth.PATCH("/lessons/:id", patchLesson)
 	auth.GET("/lessons/:lessonID/materials/:id", getLessonMaterials)
-	auth.POST("/lessons/:lessonID/materials", postLessonMaterial)
 	auth.PATCH("/lessons/:lessonID/materials/:id", patchLessonMaterial)
 	auth.POST("/lessons/:id/thumbnail", postLessonThumbnail)
 

@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"cloud.google.com/go/datastore"
-	"github.com/jinzhu/copier"
 	"github.com/super-dog-human/teraconnectgo/domain"
 )
 
@@ -76,44 +75,6 @@ func GetLessonMaterial(request *http.Request, id int64, lessonID int64) (domain.
 	}
 
 	return lessonMaterial, nil
-}
-
-func CreateLessonMaterial(request *http.Request, lessonID int64, params NewLessonMaterialParams) (int64, error) {
-	ctx := request.Context()
-
-	userID, err := currentUserAccessToLesson(ctx, request, lessonID)
-	if err != nil {
-		return 0, LessonMaterialNotAvailable
-	}
-
-	var lessonMaterial domain.LessonMaterial
-	copier.Copy(&lessonMaterial, &params)
-	lessonMaterial.UserID = userID
-
-	if lessonMaterial.VoiceSynthesisConfig.LanguageCode == "" {
-		lessonMaterial.VoiceSynthesisConfig.LanguageCode = "ja-JP"
-	}
-
-	if lessonMaterial.VoiceSynthesisConfig.Name == "" {
-		lessonMaterial.VoiceSynthesisConfig.Name = "ja-JP-Wavenet-A"
-	}
-
-	if err := domain.CreateLessonMaterial(ctx, lessonID, &lessonMaterial); err != nil {
-		return 0, err
-	}
-
-	lesson, err := domain.GetLessonByID(ctx, lessonID)
-	if err != nil {
-		return 0, err
-	}
-
-	lesson.MaterialID = lessonMaterial.ID
-
-	if err = domain.UpdateLesson(ctx, &lesson); err != nil {
-		return 0, err
-	}
-
-	return lessonMaterial.ID, nil
 }
 
 func UpdateLessonMaterial(request *http.Request, id int64, lessonID int64, params *map[string]interface{}) error {

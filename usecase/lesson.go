@@ -150,10 +150,24 @@ func CreateLesson(request *http.Request, newLesson *NewLessonParams, lesson *dom
 		return err
 	}
 
+	materialID, err := domain.CreateInitialLessonMaterial(ctx, currentUser.ID, lesson.ID)
+	if err != nil {
+		return err
+	}
+
+	lesson.MaterialID = materialID
+
+	if err := domain.UpdateLesson(ctx, lesson); err != nil {
+		return err
+	}
+
 	return nil
 }
 
-// CreateIntroductionLesson is create the new lesson and graphics for self-introduction.
+// CreateIntroductionLessonは自己紹介用の授業を作成します。自己紹介に必要なGraphicも、初期データから作成します。
+// 自己紹介授業は複数作成することはできないため、Lesson作成後にエラーが発生した場合はLessonの削除を試みます。
+// Graphicはユーザーによる削除が可能なので、重複制限を行わず、Graphic作成後にエラーが発生してもロールバックは試みません。
+// LessonMaterialも、Lesson削除後に残り続けても実害はないのでロールバックは試みません。
 func CreateIntroductionLesson(request *http.Request, lesson *domain.Lesson) error {
 	currentUser, err := domain.GetCurrentUser(request)
 	if err != nil {
@@ -166,6 +180,23 @@ func CreateIntroductionLesson(request *http.Request, lesson *domain.Lesson) erro
 	}
 
 	if err != domain.CreateIntroductionGraphics(ctx, currentUser.ID, lesson.ID) {
+		// エラー時はLessonを削除する。削除時のエラーは無視する。
+		domain.DeleteLesson(ctx, lesson.ID)
+		return err
+	}
+
+	materialID, err := domain.CreateInitialLessonMaterial(ctx, currentUser.ID, lesson.ID)
+	if err != nil {
+		// 同上
+		domain.DeleteLesson(ctx, lesson.ID)
+		return err
+	}
+
+	lesson.MaterialID = materialID
+
+	if err := domain.UpdateLesson(ctx, lesson); err != nil {
+		// 同上
+		domain.DeleteLesson(ctx, lesson.ID)
 		return err
 	}
 
