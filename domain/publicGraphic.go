@@ -12,7 +12,7 @@ type PublicGraphic struct {
 	ID              int64  `datastore:"-"`
 	FileType        string `datastore:",noindex"`
 	ForIntroduction bool
-	SortID          int64 `datastore:",noindex"`
+	SortID          int64
 }
 
 func GetPublicGraphicsForIntroduction(ctx context.Context) ([]PublicGraphic, error) {
@@ -23,7 +23,7 @@ func GetPublicGraphicsForIntroduction(ctx context.Context) ([]PublicGraphic, err
 		return nil, err
 	}
 
-	query := datastore.NewQuery("PublicGraphic").Filter("ForIntroduction =", true)
+	query := datastore.NewQuery("PublicGraphic").Filter("ForIntroduction =", true).Order("SortID")
 
 	keys, err := client.GetAll(ctx, query, &graphics)
 	if err != nil {

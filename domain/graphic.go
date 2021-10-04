@@ -162,10 +162,11 @@ func CreateIntroductionGraphics(ctx context.Context, userID int64, lessonID int6
 	graphics := make([]Graphic, len(publicGraphics))
 	parentKey := datastore.IDKey("User", userID, nil)
 
+	currentTime := time.Now()
 	for i, publicGraphic := range publicGraphics {
 		keys[i] = datastore.IncompleteKey("Graphic", parentKey)
 		graphic := Graphic{PublicGraphicID: publicGraphic.ID, LessonID: lessonID, FileType: publicGraphic.FileType}
-		graphic.Created = time.Now()
+		graphic.Created = currentTime.Add(time.Second * time.Duration(i))
 		graphics[i] = graphic
 	}
 
