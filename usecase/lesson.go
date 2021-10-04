@@ -150,7 +150,7 @@ func CreateLesson(request *http.Request, newLesson *NewLessonParams, lesson *dom
 		return err
 	}
 
-	materialID, err := domain.CreateInitialLessonMaterial(ctx, currentUser.ID, lesson.ID)
+	materialID, err := createInitialLessonMaterial(ctx, currentUser.ID, lesson.ID)
 	if err != nil {
 		return err
 	}
@@ -188,7 +188,7 @@ func CreateIntroductionLesson(request *http.Request, needsRecording bool, lesson
 		return err
 	}
 
-	materialID, err := domain.CreateInitialLessonMaterial(ctx, currentUser.ID, lesson.ID)
+	materialID, err := createInitialLessonMaterial(ctx, currentUser.ID, lesson.ID)
 	if err != nil {
 		// 同上
 		domain.DeleteLesson(ctx, lesson.ID)

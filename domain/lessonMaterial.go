@@ -116,7 +116,7 @@ func GetLessonMaterial(ctx context.Context, id int64, lessonID int64, lessonMate
 	return nil
 }
 
-func CreateInitialLessonMaterial(ctx context.Context, userID int64, lessonID int64) (int64, error) {
+func CreateInitialLessonMaterial(ctx context.Context, userID int64, avatarID int64, backgroundImageID int64, lessonID int64) (int64, error) {
 	var id int64
 
 	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
@@ -126,6 +126,9 @@ func CreateInitialLessonMaterial(ctx context.Context, userID int64, lessonID int
 
 	var lessonMaterial LessonMaterial
 	lessonMaterial.UserID = userID
+	lessonMaterial.AvatarID = avatarID
+	lessonMaterial.AvatarLightColor = "255,255,255,0.5"
+	lessonMaterial.BackgroundImageID = backgroundImageID
 	lessonMaterial.VoiceSynthesisConfig.LanguageCode = "ja-JP"
 	lessonMaterial.VoiceSynthesisConfig.Name = "ja-JP-Wavenet-A"
 

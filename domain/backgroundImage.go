@@ -16,7 +16,22 @@ type BackgroundImage struct {
 	SortID int64  `json:"-"`
 }
 
-// GetAllBackgroundImages is return all sorted images.
+type BackgroundImageErrorCode uint
+
+const (
+	BackgroundImageNotFound BackgroundImageErrorCode = 1
+)
+
+func (e BackgroundImageErrorCode) Error() string {
+	switch e {
+	case BackgroundImageNotFound:
+		return "background image not found"
+	default:
+		return "unknown background image error"
+	}
+}
+
+// GetAllBackgroundImagesはSortIDの照準でソートした全てのBackgroundImageを返します
 func GetAllBackgroundImages(ctx context.Context) ([]BackgroundImage, error) {
 	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
 	if err != nil {
@@ -36,4 +51,30 @@ func GetAllBackgroundImages(ctx context.Context) ([]BackgroundImage, error) {
 	}
 
 	return images, nil
+}
+
+// GetBackgroundImageは、ソートを行わずに一つだけBackGroundImageを返します
+func GetBackgroundImage(ctx context.Context) (BackgroundImage, error) {
+	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
+
+	var backgroundImage BackgroundImage
+	if err != nil {
+		return backgroundImage, err
+	}
+
+	var images []BackgroundImage
+	query := datastore.NewQuery("BackgroundImage").Limit(1)
+	keys, err := client.GetAll(ctx, query, &images)
+	if err != nil {
+		return backgroundImage, err
+	}
+
+	if len(keys) == 0 {
+		return backgroundImage, BackgroundImageNotFound
+	}
+
+	backgroundImage = images[0]
+	backgroundImage.ID = keys[0].ID
+
+	return backgroundImage, nil
 }

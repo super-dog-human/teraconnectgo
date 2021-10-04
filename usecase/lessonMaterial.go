@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"context"
 	"errors"
 	"net/http"
 
@@ -107,4 +108,26 @@ func UpdateLessonMaterial(request *http.Request, id int64, lessonID int64, param
 	}
 
 	return nil
+}
+
+func createInitialLessonMaterial(ctx context.Context, userID int64, lessonID int64) (int64, error) {
+	var materialID int64
+
+	avatars, err := domain.GetPublicAvatars(ctx) // 数が少ないので全件取得して1件使用する
+	if err != nil {
+		return materialID, err
+	}
+	avatarID := avatars[0].ID
+
+	backgroundImage, err := domain.GetBackgroundImage(ctx)
+	if err != nil {
+		return materialID, err
+	}
+
+	materialID, err = domain.CreateInitialLessonMaterial(ctx, userID, avatarID, backgroundImage.ID, lessonID)
+	if err != nil {
+		return materialID, err
+	}
+
+	return materialID, nil
 }
