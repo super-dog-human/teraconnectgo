@@ -38,6 +38,7 @@ func Main(appEnv string) {
 	e.GET("/lessons/:id", getLesson)
 	e.GET("/lessons/:id/graphics", getLessonGraphics)
 	e.GET("/users/:id", getUser)
+	e.GET("/users/:id/lessons", getUserLessons)
 
 	auth := e.Group("", Authentication())
 	auth.GET("/users/me", getUserMe)

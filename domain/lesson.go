@@ -44,7 +44,7 @@ type Lesson struct {
 	ViewCount            int64             `json:"viewCount" datastore:",noindex"`
 	ViewKey              string            `json:"viewKey" datastore:",noindex"`
 	Version              int32             `json:"version" datastore:",noindex"`
-	Created              time.Time         `json:"created" datastore:",noindex"`
+	Created              time.Time         `json:"created"`
 	Updated              time.Time         `json:"updated" datastore:",noindex"`
 	Published            time.Time         `json:"published"` // 公開処理完了時にLessonMaterialのUpdatedの値で更新される
 }
@@ -106,6 +106,30 @@ func GetLessonByID(ctx context.Context, id int64) (Lesson, error) {
 	return *lesson, nil
 }
 
+func GetPublicLessonsByUserID(ctx context.Context, userID int64) ([]Lesson, error) {
+	var lessons []Lesson
+
+	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
+	if err != nil {
+		return nil, err
+	}
+
+	query := datastore.NewQuery("Lesson").Filter("UserID =", userID).Filter("Status = ", int32(LessonStatusPublic)).Filter("IsIntroduction =", false).Order("-Created")
+	keys, err := client.GetAll(ctx, query, &lessons)
+	if err != nil {
+		return nil, err
+	}
+
+	for i, key := range keys {
+		lessons[i].ID = key.ID
+		if err := SetLessonThumbnailURL(ctx, &lessons[i]); err != nil {
+			return nil, err
+		}
+	}
+
+	return lessons, nil
+}
+
 func GetLessonsByUserID(ctx context.Context, userID int64) ([]Lesson, error) {
 	var lessons []Lesson
 
@@ -114,7 +138,7 @@ func GetLessonsByUserID(ctx context.Context, userID int64) ([]Lesson, error) {
 		return nil, err
 	}
 
-	query := datastore.NewQuery("Lesson").Filter("UserID =", userID).Order("-Created")
+	query := datastore.NewQuery("Lesson").Filter("UserID =", userID).Filter("IsIntroduction =", false).Order("-Created")
 	keys, err := client.GetAll(ctx, query, &lessons)
 	if err != nil {
 		return nil, err

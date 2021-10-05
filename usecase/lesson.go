@@ -117,6 +117,17 @@ func GetPrivateLesson(request *http.Request, id int64) (domain.Lesson, error) {
 	return lesson, nil
 }
 
+func GetPublicLessonsByUser(request *http.Request, userID int64) ([]domain.Lesson, error) {
+	ctx := request.Context()
+
+	lessons, err := domain.GetPublicLessonsByUserID(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	return lessons, nil
+}
+
 func GetCurrentUserLessons(request *http.Request) ([]domain.Lesson, error) {
 	ctx := request.Context()
 

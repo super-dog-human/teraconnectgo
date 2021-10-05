@@ -86,6 +86,27 @@ func getLesson(c echo.Context) error {
 	return c.JSON(http.StatusOK, lesson)
 }
 
+func getUserLessons(c echo.Context) error {
+	userID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		fatalLog(err)
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+
+	lessons, err := usecase.GetPublicLessonsByUser(c.Request(), userID)
+
+	if err != nil {
+		fatalLog(err)
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+
+	if len(lessons) == 0 {
+		return c.JSON(http.StatusNotFound, "lesson doesn't exist")
+	}
+
+	return c.JSON(http.StatusOK, lessons)
+}
+
 func getCurrentUserLessons(c echo.Context) error {
 	lessons, err := usecase.GetCurrentUserLessons(c.Request())
 
