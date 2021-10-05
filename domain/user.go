@@ -120,7 +120,9 @@ func ReserveUserProviderIDInTransaction(tx *datastore.Transaction, providerID st
 func CreateUserInTransaction(tx *datastore.Transaction, user *User) (*datastore.PendingKey, error) {
 	key := datastore.IncompleteKey("User", nil)
 
-	user.Created = time.Now()
+	currentTime := time.Now()
+	user.Created = currentTime
+	user.Updated = currentTime
 
 	pendingKey, err := tx.Put(key, user)
 	if err != nil {
