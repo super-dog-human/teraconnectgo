@@ -76,7 +76,7 @@ func GetCurrentUser(request *http.Request) (User, error) {
 	return *user, nil
 }
 
-// GetUserはidからユーザーを取得して返します。Emailは必ず空文字列になり、json出力時はフィールドごとなくなります。
+// GetUserByIDはidからユーザーを取得して返します。Emailは必ず空文字列になり、json出力時はフィールドごとなくなります。
 func GetUserByID(ctx context.Context, id int64) (User, error) {
 	user := new(User)
 

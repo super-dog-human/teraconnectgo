@@ -59,7 +59,7 @@ func GetUser(request *http.Request, id int64) (domain.User, error) {
 	return user, nil
 }
 
-// CreateUser creates new user with exclusion control.
+// CreateUserは新規ユーザーを作成します。
 func CreateUser(request *http.Request, newUser *NewUserParams) error {
 	ctx := request.Context()
 

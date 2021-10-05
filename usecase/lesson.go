@@ -164,10 +164,10 @@ func CreateLesson(request *http.Request, newLesson *NewLessonParams, lesson *dom
 	return nil
 }
 
-// CreateIntroductionLessonは自己紹介用の授業を作成します。自己紹介に必要なGraphicも、初期データから作成します。
-// 自己紹介授業は複数作成することはできないため、Lesson作成後にエラーが発生した場合はLessonの削除を試みます。
+// CreateIntroductionLessonは、自己紹介用のLessonを作成します。自己紹介に必要なGraphicも、既存のPublicGraphicから作成します。
+// 自己紹介授業を複数作成することはできないため、Lesson作成後にエラーが発生した場合はLessonの削除を試みます。
 // Graphicはユーザーによる削除が可能なので、重複制限を行わず、Graphic作成後にエラーが発生してもロールバックは試みません。
-// LessonMaterialも、Lesson削除後に残り続けても実害はないのでロールバックは試みません。
+// LessonMaterialも、Lessonの削除後に残り続けても実害はないのでロールバックは試みません。
 func CreateIntroductionLesson(request *http.Request, needsRecording bool, lesson *domain.Lesson) error {
 	currentUser, err := domain.GetCurrentUser(request)
 	if err != nil {
