@@ -22,7 +22,7 @@ type User struct {
 	BackgroundImageURL string    `json:"backgroundImageURL" datastore:"-"`
 	Name               string    `json:"name" datastore:",noindex"`
 	Profile            string    `json:"profile" datastore:",noindex"`
-	Email              string    `json:"-" datastore:",noindex"`
+	Email              string    `json:"email,omitempty" datastore:",noindex"`
 	Created            time.Time `json:"-" datastore:",noindex"`
 	Updated            time.Time `json:"-" datastore:",noindex"`
 }
@@ -76,7 +76,7 @@ func GetCurrentUser(request *http.Request) (User, error) {
 	return *user, nil
 }
 
-// GetUserByID is return user has ID.
+// GetUserはidからユーザーを取得して返します。Emailは必ず空文字列になり、json出力時はフィールドごとなくなります。
 func GetUserByID(ctx context.Context, id int64) (User, error) {
 	user := new(User)
 
@@ -94,6 +94,7 @@ func GetUserByID(ctx context.Context, id int64) (User, error) {
 	}
 	user.ID = id
 	user.BackgroundImageURL = infrastructure.GetPublicBackgroundImageURL(strconv.FormatInt(user.BackgroundImageID, 10))
+	user.Email = "" // メールアドレスは返さない
 
 	return *user, nil
 }

@@ -46,7 +46,7 @@ func GetCurrentUser(request *http.Request) (domain.User, error) {
 	return currentUser, nil
 }
 
-// GetUser for fetch user account by id.
+// GetUserはidからユーザーを取得して返します。
 func GetUser(request *http.Request, id int64) (domain.User, error) {
 	ctx := request.Context()
 	var user domain.User
@@ -55,8 +55,6 @@ func GetUser(request *http.Request, id int64) (domain.User, error) {
 	if err != nil {
 		return user, err
 	}
-
-	user.ID = id
 
 	return user, nil
 }
