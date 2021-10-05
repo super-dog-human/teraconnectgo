@@ -49,7 +49,7 @@ func getUser(c echo.Context) error {
 }
 
 func postUser(c echo.Context) error {
-	user := new(domain.User)
+	user := new(usecase.NewUserParams)
 
 	if err := c.Bind(user); err != nil {
 		return c.JSON(http.StatusBadRequest, err.Error())

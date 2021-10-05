@@ -3,6 +3,7 @@ package domain
 import (
 	"context"
 	"net/http"
+	"strconv"
 	"time"
 
 	"cloud.google.com/go/datastore"
@@ -15,13 +16,15 @@ type UserProviderID struct {
 
 // User is application registrated user
 type User struct {
-	ID         int64     `json:"id" datastore:"-"`
-	ProviderID string    `json:"-"`
-	Name       string    `json:"name" datastore:",noindex"`
-	Profile    string    `json:"profile" datastore:",noindex"`
-	Email      string    `json:"email" datastore:",noindex"`
-	Created    time.Time `json:"-" datastore:",noindex"`
-	Updated    time.Time `json:"-" datastore:",noindex"`
+	ID                 int64     `json:"id" datastore:"-"`
+	ProviderID         string    `json:"-"`
+	BackgroundImageID  int64     `json:"-" datastore:",noindex"`
+	BackgroundImageURL string    `json:"backgroundImageURL" datastore:"-"`
+	Name               string    `json:"name" datastore:",noindex"`
+	Profile            string    `json:"profile" datastore:",noindex"`
+	Email              string    `json:"-" datastore:",noindex"`
+	Created            time.Time `json:"-" datastore:",noindex"`
+	Updated            time.Time `json:"-" datastore:",noindex"`
 }
 
 // UserErrorCode is user error code.
@@ -90,6 +93,7 @@ func GetUserByID(ctx context.Context, id int64) (User, error) {
 		return *user, err
 	}
 	user.ID = id
+	user.BackgroundImageURL = infrastructure.GetPublicBackgroundImageURL(strconv.FormatInt(user.BackgroundImageID, 10))
 
 	return *user, nil
 }

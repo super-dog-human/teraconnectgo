@@ -2,8 +2,10 @@ package usecase
 
 import (
 	"net/http"
+	"time"
 
 	"cloud.google.com/go/datastore"
+	"github.com/jinzhu/copier"
 	"github.com/super-dog-human/teraconnectgo/domain"
 	"github.com/super-dog-human/teraconnectgo/infrastructure"
 )
@@ -24,6 +26,13 @@ func (e UserErrorCode) Error() string {
 	default:
 		return "unknown error"
 	}
+}
+
+// NewUserParamsは、Userの新規作成時、リクエストボディをbindするために使用されます。
+type NewUserParams struct {
+	Name    string `json:"name" datastore:",noindex"`
+	Profile string `json:"profile" datastore:",noindex"`
+	Email   string `json:"email" datastore:",noindex"`
 }
 
 // GetCurrentUser for fetch current user account
@@ -53,8 +62,11 @@ func GetUser(request *http.Request, id int64) (domain.User, error) {
 }
 
 // CreateUser creates new user with exclusion control.
-func CreateUser(request *http.Request, user *domain.User) error {
+func CreateUser(request *http.Request, newUser *NewUserParams) error {
 	ctx := request.Context()
+
+	var user domain.User
+	copier.Copy(&user, &newUser)
 
 	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
 	if err != nil {
@@ -65,8 +77,24 @@ func CreateUser(request *http.Request, user *domain.User) error {
 	if err != nil {
 		return err
 	}
-
 	user.ProviderID = providerID
+
+	backgroundImages, err := domain.GetAllBackgroundImages(ctx)
+	if err != nil {
+		return err
+	}
+
+	imageIndex := time.Now().UnixNano() % int64(len(backgroundImages))
+	backgroundImage := backgroundImages[imageIndex]
+	if backgroundImage.Name == "学習机" { // この画像はヘッダー画像に向かないので使用しない
+		if imageIndex == 0 {
+			imageIndex += 1
+		} else {
+			imageIndex -= 1
+		}
+		backgroundImage = backgroundImages[imageIndex]
+	}
+	user.BackgroundImageID = backgroundImage.ID
 
 	_, err = client.RunInTransaction(ctx, func(tx *datastore.Transaction) error {
 		err = domain.ReserveUserProviderIDInTransaction(tx, providerID)
@@ -77,7 +105,7 @@ func CreateUser(request *http.Request, user *domain.User) error {
 			return err
 		}
 
-		if _, err = domain.CreateUserInTransaction(tx, user); err != nil {
+		if _, err = domain.CreateUserInTransaction(tx, &user); err != nil {
 			return err
 		}
 
