@@ -126,7 +126,7 @@ func UpdateUser(request *http.Request, params *map[string]interface{}) (domain.U
 	}
 
 	targetFields := []string{"Name", "Profile", "Email"}
-	if err = domain.UpdateUser(ctx, &user, params, &targetFields); err != nil {
+	if err = domain.UpdateUserByJson(ctx, &user, params, &targetFields); err != nil {
 		return user, err
 	}
 

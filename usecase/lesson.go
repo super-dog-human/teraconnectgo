@@ -203,6 +203,13 @@ func CreateIntroductionLesson(request *http.Request, needsRecording bool, lesson
 		return err
 	}
 
+	currentUser.IntroductionID = lesson.ID
+	if err := domain.UpdateUser(ctx, &currentUser); err != nil {
+		// 同上
+		domain.DeleteLesson(ctx, lesson.ID)
+		return err
+	}
+
 	return nil
 }
 
@@ -228,7 +235,7 @@ func UpdateLessonWithMaterial(id int64, request *http.Request, needsCopyThumbnai
 
 	lessonFields := []string{"PrevLessonID", "NextLessonID", "SubjectID", "JapaneseCategoryID", "Status", "HasThumbnail", "Title", "Description", "References"}
 	lessonMaterialFields := []string{"BackgroundImageID", "AvatarID", "AvatarLightColor", "VoiceSynthesisConfig"}
-	if err := domain.UpdateLessonAndMaterial(ctx, &lesson, needsCopyThumbnail, requestID, params, &lessonFields, &lessonMaterialFields); err != nil {
+	if err := domain.UpdateLessonAndMaterial(ctx, &currentUser, &lesson, needsCopyThumbnail, requestID, params, &lessonFields, &lessonMaterialFields); err != nil {
 		return err
 	}
 

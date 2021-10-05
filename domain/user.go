@@ -16,15 +16,17 @@ type UserProviderID struct {
 
 // User is application registrated user
 type User struct {
-	ID                 int64     `json:"id" datastore:"-"`
-	ProviderID         string    `json:"-"`
-	BackgroundImageID  int64     `json:"-" datastore:",noindex"`
-	BackgroundImageURL string    `json:"backgroundImageURL" datastore:"-"`
-	Name               string    `json:"name" datastore:",noindex"`
-	Profile            string    `json:"profile" datastore:",noindex"`
-	Email              string    `json:"email,omitempty" datastore:",noindex"`
-	Created            time.Time `json:"-" datastore:",noindex"`
-	Updated            time.Time `json:"-" datastore:",noindex"`
+	ID                      int64     `json:"id" datastore:"-"`
+	ProviderID              string    `json:"-"`
+	BackgroundImageID       int64     `json:"-" datastore:",noindex"`
+	BackgroundImageURL      string    `json:"backgroundImageURL" datastore:"-"`
+	IntroductionID          int64     `json:"introductionID" datastore:",noindex"`
+	IsPublishedIntroduction bool      `json:"isPublishedIntroduction" datastore:",noindex"`
+	Name                    string    `json:"name" datastore:",noindex"`
+	Profile                 string    `json:"profile" datastore:",noindex"`
+	Email                   string    `json:"email,omitempty" datastore:",noindex"`
+	Created                 time.Time `json:"-" datastore:",noindex"`
+	Updated                 time.Time `json:"-" datastore:",noindex"`
 }
 
 // UserErrorCode is user error code.
@@ -133,10 +135,18 @@ func CreateUserInTransaction(tx *datastore.Transaction, user *User) (*datastore.
 	return pendingKey, nil
 }
 
-// UpdateUser updates user.
-func UpdateUser(ctx context.Context, user *User, jsonBody *map[string]interface{}, targetFields *[]string) error {
+// UpdateUserByJsonは、json構造のinterfaceを受け取り、Userを更新します。
+func UpdateUserByJson(ctx context.Context, user *User, jsonBody *map[string]interface{}, targetFields *[]string) error {
 	MergeJsonToStruct(jsonBody, user, targetFields)
 
+	if err := UpdateUser(ctx, user); err != nil {
+		return err
+	}
+	return nil
+}
+
+// UpdateUserは、受け取ったUserでエンティティを更新します。
+func UpdateUser(ctx context.Context, user *User) error {
 	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
 	if err != nil {
 		return err

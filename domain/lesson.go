@@ -249,7 +249,7 @@ func UpdateLesson(ctx context.Context, lesson *Lesson) error {
 
 // UpdateLessonAndMaterialは、jsonのフィールドを既存のLesson/LessonMaterialへマージし、トランザクション中で二つのエンティティを更新します。
 // jsonのフィールド名がlessonFieldsまたはlessonMaterialFieldsに含まれない場合、そのフィールドは無視されます。
-func UpdateLessonAndMaterial(ctx context.Context, lesson *Lesson, needsCopyThumbnail bool, requestID string, jsonBody *map[string]interface{}, lessonFields *[]string, lessonMaterialFields *[]string) error {
+func UpdateLessonAndMaterial(ctx context.Context, user *User, lesson *Lesson, needsCopyThumbnail bool, requestID string, jsonBody *map[string]interface{}, lessonFields *[]string, lessonMaterialFields *[]string) error {
 	currentStatus := lesson.Status
 	currentSubjectID := lesson.SubjectID
 	currentJapaneseCategoryID := lesson.JapaneseCategoryID
@@ -314,11 +314,19 @@ func UpdateLessonAndMaterial(ctx context.Context, lesson *Lesson, needsCopyThumb
 	}
 
 	if currentStatus == LessonStatusPublic && lesson.Status != LessonStatusPublic {
-		// 公開を取りやめる際は検索インデックスから登録を削除
-		client := search.NewClient(os.Getenv("ALGOLIA_APPLICATION_ID"), os.Getenv("ALGOLIA_ADMIN_API_KEY"))
-		index := client.InitIndex(os.Getenv("ALGOLIA_INDEX_NAME"))
-		if _, err := index.DeleteObject(strconv.FormatInt(lesson.ID, 10)); err != nil {
-			return err
+		if !lesson.IsIntroduction {
+			// 自己紹介の公開を取りやめる際はUserを更新
+			user.IsPublishedIntroduction = false
+			if err := UpdateUser(ctx, user); err != nil {
+				return err
+			}
+		} else {
+			// 授業の公開を取りやめる際は検索インデックスから登録を削除
+			client := search.NewClient(os.Getenv("ALGOLIA_APPLICATION_ID"), os.Getenv("ALGOLIA_ADMIN_API_KEY"))
+			index := client.InitIndex(os.Getenv("ALGOLIA_INDEX_NAME"))
+			if _, err := index.DeleteObject(strconv.FormatInt(lesson.ID, 10)); err != nil {
+				return err
+			}
 		}
 	}
 
