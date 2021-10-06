@@ -6,9 +6,15 @@ import (
 	"strconv"
 
 	"github.com/labstack/echo/v4"
+	"github.com/pkg/errors"
 	"github.com/super-dog-human/teraconnectgo/domain"
 	"github.com/super-dog-human/teraconnectgo/usecase"
 )
+
+type getUserShortResponse struct {
+	NextCursor string        `json:"nextCursor"`
+	Users      []domain.User `json:"users"`
+}
 
 func getUserMe(c echo.Context) error {
 	user, err := usecase.GetCurrentUser(c.Request())
@@ -46,6 +52,22 @@ func getUser(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, user)
+}
+
+func getUsers(c echo.Context) error {
+	cursorStr := c.QueryParam("next_cursor")
+	users, nextCursorStr, err := usecase.GetUsers(c.Request(), cursorStr)
+
+	if err != nil {
+		if ok := errors.Is(err, usecase.UserNotFound); ok {
+			return c.JSON(http.StatusNotFound, err.Error())
+		}
+		fatalLog(err)
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	response := getUserShortResponse{Users: users, NextCursor: nextCursorStr}
+	return c.JSON(http.StatusOK, response)
 }
 
 func postUser(c echo.Context) error {

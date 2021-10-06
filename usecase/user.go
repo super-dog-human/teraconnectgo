@@ -15,6 +15,7 @@ type UserErrorCode uint
 const (
 	UserNotAvailable  UserErrorCode = 1
 	AlreadyUserExists UserErrorCode = 2
+	UserNotFound      UserErrorCode = 3
 )
 
 func (e UserErrorCode) Error() string {
@@ -23,6 +24,8 @@ func (e UserErrorCode) Error() string {
 		return "user not available"
 	case AlreadyUserExists:
 		return "user is already created"
+	case UserNotFound:
+		return "user not found"
 	default:
 		return "unknown error"
 	}
@@ -57,6 +60,22 @@ func GetUser(request *http.Request, id int64) (domain.User, error) {
 	}
 
 	return user, nil
+}
+
+// GetUsersは複数のユーザーを取得して返します。cursorStrがあればページネーションに使用し、なければ1件目からユーザーを返します。
+func GetUsers(request *http.Request, cursorStr string) ([]domain.User, string, error) {
+	ctx := request.Context()
+
+	users, nextCursorStr, err := domain.GetUsers(ctx, cursorStr)
+	if err != nil {
+		return nil, "", err
+	}
+
+	if len(users) == 0 {
+		return nil, "", UserNotFound
+	}
+
+	return users, nextCursorStr, nil
 }
 
 // CreateUserは新規ユーザーを作成します。

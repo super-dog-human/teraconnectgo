@@ -8,6 +8,7 @@ import (
 
 	"cloud.google.com/go/datastore"
 	"github.com/super-dog-human/teraconnectgo/infrastructure"
+	"google.golang.org/api/iterator"
 )
 
 type UserProviderID struct {
@@ -25,7 +26,7 @@ type User struct {
 	Name                    string    `json:"name" datastore:",noindex"`
 	Profile                 string    `json:"profile" datastore:",noindex"`
 	Email                   string    `json:"email,omitempty" datastore:",noindex"`
-	Created                 time.Time `json:"-" datastore:",noindex"`
+	Created                 time.Time `json:"-"`
 	Updated                 time.Time `json:"-" datastore:",noindex"`
 }
 
@@ -99,6 +100,46 @@ func GetUserByID(ctx context.Context, id int64) (User, error) {
 	user.Email = "" // メールアドレスは返さない
 
 	return *user, nil
+}
+
+func GetUsers(ctx context.Context, cursorStr string) ([]User, string, error) {
+	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
+	if err != nil {
+		return nil, "", err
+	}
+
+	const userPageSize = 20
+	query := datastore.NewQuery("User").Order("-Created").Limit(userPageSize)
+
+	if cursorStr != "" {
+		cursor, err := datastore.DecodeCursor(cursorStr)
+		if err != nil {
+			return nil, "", err
+		}
+		query = query.Start(cursor)
+	}
+
+	var users []User
+	it := client.Run(ctx, query)
+	for {
+		var user User
+		key, err := it.Next(&user)
+		if err == iterator.Done {
+			break
+		} else if err != nil {
+			return nil, "", err
+		}
+		user.ID = key.ID
+		user.Email = "" // メールアドレスは返さない
+		users = append(users, user)
+	}
+
+	nextCursor, err := it.Cursor()
+	if err != nil {
+		return nil, "", err
+	}
+
+	return users, nextCursor.String(), nil
 }
 
 // ReserveUserProviderIDInTransaction creates user's ProviderID for exclusion control.
