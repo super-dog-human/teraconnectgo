@@ -18,7 +18,7 @@ type Lesson struct {
 	UserID               int64             `json:"userID"`
 	Author               User              `json:"author" datastore:"-"`
 	MaterialID           int64             `json:"materialID"`
-	AvatarID             int64             `json:"avatarID"`                              // 公開処理完了時にLessonMaterialの値で更新される
+	AvatarID             int64             `json:"avatarID" datastore:",noindex"`         // 公開処理完了時にLessonMaterialの値で更新される
 	AvatarLightColor     string            `json:"avatarLightColor" datastore:",noindex"` // 公開処理完了時にLessonMaterialの値で更新される
 	Avatar               Avatar            `json:"avatar,omitempty" datastore:"-"`
 	PrevLessonID         int64             `json:"prevLessonID" datastore:",noindex"`
