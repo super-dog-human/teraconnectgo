@@ -42,7 +42,6 @@ func getLessons(c echo.Context) error {
 	}
 
 	response := getLessonShortResponse{Lessons: lessons, NextCursor: nextCursorStr}
-
 	return c.JSON(http.StatusOK, response)
 }
 

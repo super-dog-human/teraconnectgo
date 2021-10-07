@@ -50,6 +50,11 @@ func GetLessonsByCategoryID(request *http.Request, categoryID int64, cursorStr s
 	if err != nil {
 		return nil, "", err
 	}
+
+	if len(lessons) == 0 {
+		return nil, "", LessonNotFound
+	}
+
 	return lessons, nextCursorStr, nil
 }
 
