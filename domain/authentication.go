@@ -66,17 +66,36 @@ func loadPublicKey() *rsa.PublicKey {
 // ValidTokenClaims returns claims in JWT.
 func ValidTokenClaims(r *http.Request) (map[string]interface{}, error) {
 	rawHeader := r.Header.Get("Authorization")
-	if rawHeader == "" {
+
+	cookie, err := r.Cookie("__Secure-next-auth.session-token")
+	var tokenString string
+	if err == nil {
+		tokenString = cookie.Value
+	}
+
+	if rawHeader == "" && tokenString == "" {
 		return nil, TokenNotFound
 	}
 
-	token, err := request.ParseFromRequest(r, request.AuthorizationHeaderExtractor, func(token *jwt.Token) (interface{}, error) {
-		_, ok := token.Method.(*jwt.SigningMethodRSA)
-		if !ok {
-			return nil, UnexpectedSigningMethod
-		}
-		return loadPublicKey(), nil
-	})
+	var token *jwt.Token
+	if rawHeader != "" {
+		token, err = request.ParseFromRequest(r, request.AuthorizationHeaderExtractor, func(token *jwt.Token) (interface{}, error) {
+			_, ok := token.Method.(*jwt.SigningMethodRSA)
+			if !ok {
+				return nil, UnexpectedSigningMethod
+			}
+			return loadPublicKey(), nil
+		})
+	} else {
+		token, err = jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+			_, ok := token.Method.(*jwt.SigningMethodRSA)
+			if !ok {
+				return nil, UnexpectedSigningMethod
+			}
+			return loadPublicKey(), nil
+		})
+	}
+
 	if err != nil {
 		return nil, err
 	}

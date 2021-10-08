@@ -24,7 +24,8 @@ func Main(appEnv string) {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{infrastructure.OriginURL()},
+		AllowCredentials: true,
+		AllowOrigins:     []string{infrastructure.OriginURL()},
 	}))
 	e.Use(middleware.GzipWithConfig(middleware.GzipConfig{
 		Level: 1,
