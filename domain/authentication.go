@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	"github.com/golang-jwt/jwt"
-	"github.com/golang-jwt/jwt/request"
 )
 
 type AuthErrorCode uint
@@ -65,36 +64,23 @@ func loadPublicKey() *rsa.PublicKey {
 
 // ValidTokenClaims returns claims in JWT.
 func ValidTokenClaims(r *http.Request) (map[string]interface{}, error) {
-	rawHeader := r.Header.Get("Authorization")
-
-	cookie, err := r.Cookie("__Secure-next-auth.session-token")
-	var tokenString string
-	if err == nil {
-		tokenString = cookie.Value
-	}
-
-	if rawHeader == "" && tokenString == "" {
+	cookie, err := r.Cookie("session-token")
+	if err != nil {
 		return nil, TokenNotFound
 	}
 
-	var token *jwt.Token
-	if rawHeader != "" {
-		token, err = request.ParseFromRequest(r, request.AuthorizationHeaderExtractor, func(token *jwt.Token) (interface{}, error) {
-			_, ok := token.Method.(*jwt.SigningMethodRSA)
-			if !ok {
-				return nil, UnexpectedSigningMethod
-			}
-			return loadPublicKey(), nil
-		})
-	} else {
-		token, err = jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			_, ok := token.Method.(*jwt.SigningMethodRSA)
-			if !ok {
-				return nil, UnexpectedSigningMethod
-			}
-			return loadPublicKey(), nil
-		})
+	tokenString := cookie.Value
+	if tokenString == "" {
+		return nil, TokenNotFound
 	}
+
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		_, ok := token.Method.(*jwt.SigningMethodRSA)
+		if !ok {
+			return nil, UnexpectedSigningMethod
+		}
+		return loadPublicKey(), nil
+	})
 
 	if err != nil {
 		return nil, err
