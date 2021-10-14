@@ -64,7 +64,7 @@ func loadPublicKey() *rsa.PublicKey {
 
 // ValidTokenClaims returns claims in JWT.
 func ValidTokenClaims(r *http.Request) (map[string]interface{}, error) {
-	cookie, err := r.Cookie("session-token")
+	cookie, err := r.Cookie("__Secure-session-token")
 	if err != nil {
 		return nil, TokenNotFound
 	}
