@@ -131,6 +131,7 @@ func CreateInitialLessonMaterial(ctx context.Context, userID int64, avatarID int
 	lessonMaterial.BackgroundImageID = backgroundImageID
 	lessonMaterial.VoiceSynthesisConfig.LanguageCode = "ja-JP"
 	lessonMaterial.VoiceSynthesisConfig.Name = "ja-JP-Wavenet-A"
+	lessonMaterial.VoiceSynthesisConfig.SpeakingRate = 1.2
 
 	currentTime := time.Now()
 	lessonMaterial.Created = currentTime
