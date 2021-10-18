@@ -42,9 +42,10 @@ func Main(appEnv string) {
 	e.GET("/users/:id/lessons", getUserLessons)
 	e.GET("/users", getUsers)
 
-	auth := e.Group("", Authentication())
+	e.Group("", Authentication()).POST("/users", postUser)
+
+	auth := e.Group("", Authentication(), CSRFTokenCookie(), CSRFTokenHeader())
 	auth.GET("/users/me", getUserMe)
-	auth.POST("/users", postUser)
 	auth.PATCH("/users/me", patchUser)
 	auth.POST("/users/me/thumbnail", postUserThumbnail)
 	auth.DELETE("/users", deleteUser)
