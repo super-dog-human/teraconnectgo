@@ -372,6 +372,16 @@ func DeleteLesson(ctx context.Context, id int64) error {
 	return nil
 }
 
+// DeleteLessonInTransactionは、トランザクションでidから同定したLessonを削除します。
+func DeleteLessonInTransaction(tx *datastore.Transaction, id int64) error {
+	key := datastore.IDKey("Lesson", id, nil)
+	if err := tx.Delete(key); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func setCategoryAndSubject(ctx context.Context, lesson *Lesson) error {
 	subject, err := GetSubject(ctx, lesson.SubjectID)
 	if err != nil {

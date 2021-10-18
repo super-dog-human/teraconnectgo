@@ -258,6 +258,50 @@ func UpdateLessonWithMaterial(id int64, request *http.Request, needsCopyThumbnai
 	return nil
 }
 
+func DeleteLessonAndResources(id int64, request *http.Request) error {
+	ctx := request.Context()
+
+	currentUser, err := domain.GetCurrentUser(request)
+	if err != nil {
+		return err
+	}
+
+	lesson, err := domain.GetLessonByID(ctx, id)
+	if err != nil {
+		if err == datastore.ErrNoSuchEntity {
+			return LessonNotFound
+		}
+		return err
+	}
+
+	if currentUser.ID != lesson.UserID {
+		return LessonNotAvailable
+	}
+
+	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
+	if err != nil {
+		return err
+	}
+
+	_, err = client.RunInTransaction(ctx, func(tx *datastore.Transaction) error {
+		if err := domain.DeleteLessonInTransaction(tx, id); err != nil {
+			return err
+		}
+
+		if err := domain.CreateDeleteLessonOrderInTransaction(tx, id); err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func setRelationLessonTitle(ctx context.Context, lesson *domain.Lesson) error {
 	if lesson.PrevLessonID != 0 {
 		prevLesson, err := domain.GetLessonByID(ctx, lesson.PrevLessonID)

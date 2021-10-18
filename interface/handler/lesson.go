@@ -188,3 +188,17 @@ func patchLesson(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, "succeeded")
 }
+
+func deleteLesson(c echo.Context) error {
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		errMessage := "Invalid lessonID error"
+		warnLog(errMessage)
+		return c.JSON(http.StatusBadRequest, errMessage)
+	}
+
+	if err := usecase.DeleteLessonAndResources(id, c.Request()); err != nil {
+
+	}
+	return c.JSON(http.StatusOK, "succeeded")
+}
