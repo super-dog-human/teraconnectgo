@@ -103,7 +103,7 @@ func CreateUser(request *http.Request, newUser *NewUserParams) error {
 
 	imageIndex := time.Now().UnixNano() / 1000 % int64(len(backgroundImages))
 	backgroundImage := backgroundImages[imageIndex]
-	if backgroundImage.Name == "学習机" { // この画像はヘッダー画像に向かないので使用しない
+	if backgroundImage.Name == "学習机" || backgroundImage.Name == "方眼パターン" { // この画像はヘッダー画像に向かないので使用しない
 		if imageIndex == 0 {
 			imageIndex += 1
 		} else {
