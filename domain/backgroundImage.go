@@ -63,7 +63,7 @@ func GetBackgroundImage(ctx context.Context) (BackgroundImage, error) {
 	}
 
 	var images []BackgroundImage
-	query := datastore.NewQuery("BackgroundImage").Limit(1)
+	query := datastore.NewQuery("BackgroundImage").Order("SortID").Limit(1)
 	keys, err := client.GetAll(ctx, query, &images)
 	if err != nil {
 		return backgroundImage, err
