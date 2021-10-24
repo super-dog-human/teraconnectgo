@@ -166,22 +166,6 @@ func GetGCSSignedURL(ctx context.Context, bucket string, key string, method stri
 	return url, nil
 }
 
-// DeleteObjectFromGCS deletes object in GCS.
-func DeleteObjectFromGCS(ctx context.Context, bucketName string, filePath string) error {
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		return err
-	}
-	defer client.Close()
-
-	o := client.Bucket(bucketName).Object(filePath)
-	if err := o.Delete(ctx); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 // GetPublicBackgroundImageURL returns public image file URL in GCS.
 func GetPublicBackgroundImageURL(id string) string {
 	return CloudStorageURL + PublicBucketName() + "/background/" + id + ".webp"
