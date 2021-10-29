@@ -26,6 +26,7 @@ type User struct {
 	Name                    string    `json:"name" datastore:",noindex"`
 	Profile                 string    `json:"profile" datastore:",noindex"`
 	Email                   string    `json:"email,omitempty" datastore:",noindex"`
+	TotalLessonViewCount    int64     `json:"totalLessonViewCount,omitempty" datastore:",noindex"`
 	Created                 time.Time `json:"-"`
 	Updated                 time.Time `json:"-" datastore:",noindex"`
 }
@@ -97,7 +98,8 @@ func GetUserByID(ctx context.Context, id int64) (User, error) {
 	}
 	user.ID = id
 	user.BackgroundImageURL = infrastructure.GetPublicBackgroundImageURL(strconv.FormatInt(user.BackgroundImageID, 10))
-	user.Email = "" // メールアドレスは返さない
+	user.Email = ""               // メールアドレスは返さない
+	user.TotalLessonViewCount = 0 // 授業の総閲覧回数は返さない
 
 	return *user, nil
 }
@@ -130,7 +132,8 @@ func GetUsers(ctx context.Context, cursorStr string) ([]User, string, error) {
 			return nil, "", err
 		}
 		user.ID = key.ID
-		user.Email = "" // メールアドレスは返さない
+		user.Email = ""               // メールアドレスは返さない
+		user.TotalLessonViewCount = 0 // 授業の総閲覧回数は返さない
 		users = append(users, user)
 	}
 

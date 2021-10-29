@@ -7,10 +7,11 @@ require (
 	cloud.google.com/go/datastore v1.5.0
 	cloud.google.com/go/storage v1.16.0
 	github.com/algolia/algoliasearch-client-go/v3 v3.21.0
+	github.com/go-redis/redis/v8 v8.11.4
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/google/uuid v1.1.2
-	github.com/gorilla/csrf v1.7.1 // indirect
+	github.com/gorilla/csrf v1.7.1
 	github.com/jinzhu/copier v0.3.2
 	github.com/joho/godotenv v1.3.0
 	github.com/labstack/echo/v4 v4.5.0

@@ -41,6 +41,7 @@ func Main(appEnv string) {
 	e.GET("/users/:id", getUser)
 	e.GET("/users/:id/lessons", getUserLessons)
 	e.GET("/users", getUsers)
+	e.PATCH("/lesson_view_count", patchLessonViewCount)
 
 	e.Group("", Authentication()).POST("/users", postUser)
 
