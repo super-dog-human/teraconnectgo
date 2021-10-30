@@ -131,12 +131,12 @@ func CreateGraphics(ctx context.Context, userID int64, graphics []*Graphic) erro
 		return err
 	}
 
-	parentKey := datastore.IDKey("User", userID, nil)
+	ancestor := datastore.IDKey("User", userID, nil)
 
 	keys := make([]*datastore.Key, len(graphics))
 	currentTime := time.Now()
 	for i, graphic := range graphics {
-		keys[i] = datastore.IncompleteKey("Graphic", parentKey)
+		keys[i] = datastore.IncompleteKey("Graphic", ancestor)
 		graphic.Created = currentTime
 	}
 
@@ -160,11 +160,11 @@ func CreateIntroductionGraphics(ctx context.Context, userID int64, lessonID int6
 
 	keys := make([]*datastore.Key, len(publicGraphics))
 	graphics := make([]Graphic, len(publicGraphics))
-	parentKey := datastore.IDKey("User", userID, nil)
+	ancestor := datastore.IDKey("User", userID, nil)
 
 	currentTime := time.Now()
 	for i, publicGraphic := range publicGraphics {
-		keys[i] = datastore.IncompleteKey("Graphic", parentKey)
+		keys[i] = datastore.IncompleteKey("Graphic", ancestor)
 		graphic := Graphic{PublicGraphicID: publicGraphic.ID, LessonID: lessonID, FileType: publicGraphic.FileType}
 		graphic.Created = currentTime.Add(time.Second * time.Duration(i))
 		graphics[i] = graphic

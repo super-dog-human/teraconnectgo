@@ -20,7 +20,7 @@ func lessonViewCountKey(lessonID int64, currentTime time.Time) string {
 }
 
 // IncrementLessonViewCountは、lessonIDのLessonのViewCountを1つ増分します。
-// 増分は即座に行われず、Redisに格納されます。その後、定時バッチでLesson.ViewCountに反映されます。
+// 増分は即座に行われず、Redisに格納されます。その後、定時バッチでLesson.ViewCountとUser.TotalLessonViewCountに反映されます。
 func IncrementLessonViewCount(ctx context.Context, lessonID int64) error {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     os.Getenv("REDIS_ENDPOINT"),
