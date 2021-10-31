@@ -322,6 +322,10 @@ func UpdateLessonAndMaterial(ctx context.Context, user *User, lesson *Lesson, ne
 		return nil
 	})
 
+	if err != nil {
+		return err
+	}
+
 	if lesson.Status != LessonStatusDraft {
 		taskName := infrastructure.LessonCompressingTaskName(lesson.ID, currentTime, requestID)
 		if err := createLessonMaterialForCompressing(ctx, taskName, &lessonMaterial); err != nil {
@@ -333,12 +337,8 @@ func UpdateLessonAndMaterial(ctx context.Context, user *User, lesson *Lesson, ne
 		}
 	}
 
-	if err != nil {
-		return err
-	}
-
 	if currentStatus == LessonStatusPublic && lesson.Status != LessonStatusPublic {
-		if !lesson.IsIntroduction {
+		if lesson.IsIntroduction {
 			// 自己紹介の公開を取りやめる際はUserを更新
 			user.IsPublishedIntroduction = false
 			if err := UpdateUser(ctx, user); err != nil {
