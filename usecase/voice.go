@@ -14,23 +14,6 @@ type CreateVoiceParam struct {
 	DurationSec float32 `json:"durationSec"`
 }
 
-func GetVoice(request *http.Request, lessonID int64, id int64) (domain.Voice, error) {
-	ctx := request.Context()
-
-	var voice domain.Voice
-	voice.ID = id
-
-	if _, err := currentUserAccessToLesson(ctx, request, lessonID); err != nil {
-		return voice, err
-	}
-
-	if err := domain.GetVoice(ctx, lessonID, &voice); err != nil {
-		return voice, err
-	}
-
-	return voice, nil
-}
-
 func GetVoices(request *http.Request, lessonID int64) ([]domain.Voice, error) {
 	ctx := request.Context()
 
@@ -59,10 +42,11 @@ func CreateVoiceAndBlankFile(request *http.Request, params *CreateVoiceParam) (d
 	}
 
 	voice.UserID = userID
+	voice.LessonID = params.LessonID
 	voice.ElapsedTime = params.ElapsedTime
 	voice.DurationSec = params.DurationSec
 
-	if err = domain.CreateVoice(ctx, params.LessonID, &voice); err != nil {
+	if err = domain.CreateVoice(ctx, &voice); err != nil {
 		return voice, "", err
 	}
 

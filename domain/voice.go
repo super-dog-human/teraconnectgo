@@ -27,33 +27,15 @@ func (e VoiceErrorCode) Error() string {
 type Voice struct {
 	ID          int64     `json:"id" datastore:"-"`
 	UserID      int64     `json:"userID" datastore:",noindex"`
+	LessonID    int64     `json:"lessonID"`
 	FileKey     string    `json:"fileKey" datastore:",noindex"`
-	ElapsedTime float32   `json:"elapsedTime" datastore:",noindex"`
+	ElapsedTime float32   `json:"elapsedTime"`
 	DurationSec float32   `json:"durationSec" datastore:",noindex"`
 	Text        string    `json:"text" datastore:",noindex"`
 	IsTexted    bool      `json:"isTexted" datastore:",noindex"`
-	IsSynthesis bool      `json:"-" datastore:",noindex"`
+	IsSynthesis bool      `json:"-"`
 	Created     time.Time `json:"created" datastore:",noindex"`
 	Updated     time.Time `json:"updated" datastore:",noindex"`
-}
-
-// GetVoice is get voice entities belongs to lesson.
-func GetVoice(ctx context.Context, lessonID int64, voice *Voice) error {
-	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
-	if err != nil {
-		return err
-	}
-
-	ancestor := datastore.IDKey("Lesson", lessonID, nil)
-	key := datastore.IDKey("Voice", voice.ID, ancestor)
-	if err := client.Get(ctx, key, voice); err != nil {
-		if err == datastore.ErrNoSuchEntity {
-			return VoiceNotFound
-		}
-		return err
-	}
-
-	return nil
 }
 
 // GetVoices is get voice entities belongs to lesson.
@@ -63,8 +45,7 @@ func GetVoices(ctx context.Context, lessonID int64, voices *[]Voice) error {
 		return err
 	}
 
-	ancestor := datastore.IDKey("Lesson", lessonID, nil)
-	query := datastore.NewQuery("Voice").Filter("IsSynthesis =", false).Ancestor(ancestor).Order("ElapsedTime")
+	query := datastore.NewQuery("Voice").Filter("LessonID = ", lessonID).Filter("IsSynthesis =", false).Order("ElapsedTime")
 
 	keys, err := client.GetAll(ctx, query, voices)
 	if err != nil {
@@ -85,7 +66,7 @@ func GetVoices(ctx context.Context, lessonID int64, voices *[]Voice) error {
 }
 
 // CreateVoice is creates new voice.
-func CreateVoice(ctx context.Context, lessonID int64, voice *Voice) error {
+func CreateVoice(ctx context.Context, voice *Voice) error {
 	client, err := datastore.NewClient(ctx, infrastructure.ProjectID())
 	if err != nil {
 		return err
@@ -99,8 +80,7 @@ func CreateVoice(ctx context.Context, lessonID int64, voice *Voice) error {
 	voice.FileKey = uuid
 	voice.Created = time.Now()
 
-	ancestor := datastore.IDKey("Lesson", lessonID, nil)
-	key := datastore.IncompleteKey("Voice", ancestor)
+	key := datastore.IncompleteKey("Voice", nil)
 	putKey, err := client.Put(ctx, key, voice)
 	if err != nil {
 		return err

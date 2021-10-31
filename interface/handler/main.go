@@ -59,7 +59,6 @@ func Main(appEnv string) {
 	auth.GET("/graphics", getGraphics)
 	auth.POST("/graphics", postGraphics)
 	auth.DELETE("/graphics/:id", deleteGraphic)
-	auth.GET("/voices/:id", getVoice)
 	auth.GET("/voices", getVoices)
 	auth.POST("/voice", postVoice)
 	auth.POST("/synthesis_voice", postSynthesisVoice)

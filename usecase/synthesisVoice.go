@@ -20,9 +20,10 @@ func CreateSynthesisVoice(request *http.Request, params *domain.CreateSynthesisV
 	}
 
 	voice.UserID = userID
+	voice.LessonID = params.LessonID
 
 	// ID採番のためだけにVoiceを作成する
-	if err = domain.CreateVoice(ctx, params.LessonID, &voice); err != nil {
+	if err = domain.CreateVoice(ctx, &voice); err != nil {
 		return voice, err
 	}
 

@@ -9,33 +9,6 @@ import (
 	"github.com/super-dog-human/teraconnectgo/usecase"
 )
 
-func getVoice(c echo.Context) error {
-	lessonID, err := strconv.ParseInt(c.QueryParam("lesson_id"), 10, 64)
-	if err != nil {
-		errMessage := "Invalid ID(s) error"
-		warnLog(errMessage)
-		return c.JSON(http.StatusBadRequest, errMessage)
-	}
-
-	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
-	if err != nil {
-		errMessage := "Invalid ID(s) error"
-		warnLog(errMessage)
-		return c.JSON(http.StatusBadRequest, errMessage)
-	}
-
-	voice, err := usecase.GetVoice(c.Request(), lessonID, id)
-	if err != nil {
-		voiceErr, ok := err.(domain.VoiceErrorCode)
-		if ok && voiceErr == domain.VoiceNotFound {
-			return c.JSON(http.StatusNotFound, err.Error())
-		}
-		return c.JSON(http.StatusBadRequest, err.Error())
-	}
-
-	return c.JSON(http.StatusOK, voice)
-}
-
 func getVoices(c echo.Context) error {
 	lessonID, err := strconv.ParseInt(c.QueryParam("lesson_id"), 10, 64)
 	if err != nil {
